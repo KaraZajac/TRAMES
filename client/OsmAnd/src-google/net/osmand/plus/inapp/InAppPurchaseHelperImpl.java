@@ -1,0 +1,810 @@
+package net.osmand.plus.inapp;
+
+import static net.osmand.plus.inapp.InAppPurchases.InAppPurchase.*;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.android.billingclient.api.AccountIdentifiers;
+import com.android.billingclient.api.BillingClient;
+import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.ProductDetails;
+import com.android.billingclient.api.ProductDetails.SubscriptionOfferDetails;
+import com.android.billingclient.api.ProductDetailsResponseListener;
+import com.android.billingclient.api.Purchase;
+import com.android.billingclient.api.QueryProductDetailsResult;
+
+import net.osmand.plus.OsmandApplication;
+import net.osmand.plus.R;
+import net.osmand.plus.inapp.InAppPurchases.InAppPurchase;
+import net.osmand.plus.inapp.InAppPurchases.InAppPurchase.PurchaseState;
+import net.osmand.plus.inapp.InAppPurchases.InAppSubscription;
+import net.osmand.plus.inapp.InAppPurchases.InAppSubscription.SubscriptionState;
+import net.osmand.plus.inapp.InAppPurchases.PurchaseInfo;
+import net.osmand.plus.inapp.InAppPurchasesImpl.InAppPurchaseLiveUpdatesOldSubscription;
+import net.osmand.plus.inapp.util.BillingManager;
+import net.osmand.plus.plugins.OsmandPlugin;
+import net.osmand.plus.plugins.PluginsHelper;
+import net.osmand.plus.plugins.srtm.SRTMPlugin;
+import net.osmand.plus.settings.backend.OsmandSettings;
+import net.osmand.plus.utils.AndroidUtils;
+import net.osmand.util.Algorithms;
+
+import java.lang.ref.WeakReference;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map.Entry;
+
+public class InAppPurchaseHelperImpl extends InAppPurchaseHelper {
+
+	// The helper object
+	private BillingManager billingManager;
+	private List<ProductDetails> productDetailsList;
+
+	private boolean purchasedLocalFullVersion = false;
+	private boolean purchasedLocalDepthContours = false;
+	private boolean subscribedToLocalLiveUpdates = false;
+	private boolean subscribedToLocalOsmAndPro = false;
+	private boolean subscribedToLocalMaps = false;
+
+	/* base64EncodedPublicKey should be YOUR APPLICATION'S PUBLIC KEY
+	 * (that you got from the Google Play developer console). This is not your
+	 * developer public key, it's the *app-specific* public key.
+	 *
+	 * Instead of just storing the entire literal string here embedded in the
+	 * program,  construct the key at runtime from pieces or
+	 * use bit manipulation (for example, XOR with some other string) to hide
+	 * the actual key.  The key itself is not secret information, but we don't
+	 * want to make it easy for an attacker to replace the public key with one
+	 * of their own and then fake messages from the server.
+	 */
+	private static final String BASE64_ENCODED_PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAgk8cEx" +
+			"UO4mfEwWFLkQnX1Tkzehr4SnXLXcm2Osxs5FTJPEgyTckTh0POKVMrxeGLn0KoTY2NTgp1U/inp" +
+			"wccWisPhVPEmw9bAVvWsOkzlyg1kv03fJdnAXRBSqDDPV6X8Z3MtkPVqZkupBsxyIllEILKHK06" +
+			"OCw49JLTsMR3oTRifGzma79I71X0spw0fM+cIRlkS2tsXN8GPbdkJwHofZKPOXS51pgC1zU8uWX" +
+			"I+ftJO46a1XkNh1dO2anUiQ8P/H4yOTqnMsXF7biyYuiwjXPOcy0OMhEHi54Dq6Mr3u5ZALOAkc" +
+			"YTjh1H/ZgqIHy5ZluahINuDE76qdLYMXrDMQIDAQAB";
+
+	public InAppPurchaseHelperImpl(OsmandApplication ctx) {
+		super(ctx);
+		purchases = new InAppPurchasesImpl(ctx);
+	}
+
+	@Override
+	public boolean isPurchasedLocalFullVersion() {
+		return purchasedLocalFullVersion;
+	}
+
+	@Override
+	public boolean isPurchasedLocalDeepContours() {
+		return purchasedLocalDepthContours;
+	}
+
+	@Override
+	public boolean isSubscribedToLocalLiveUpdates() {
+		return subscribedToLocalLiveUpdates;
+	}
+
+	@Override
+	public boolean isSubscribedToLocalOsmAndPro() {
+		return subscribedToLocalOsmAndPro;
+	}
+
+	@Override
+	public boolean isSubscribedToLocalMaps() {
+		return subscribedToLocalMaps;
+	}
+
+	@Override
+	public void isInAppPurchaseSupported(@NonNull final Activity activity, @Nullable final InAppPurchaseInitCallback callback) {
+		if (callback != null) {
+			callback.onSuccess();
+		}
+	}
+
+	@NonNull
+	@Override
+	public String getPlatform() {
+		return PLATFORM_GOOGLE;
+	}
+
+	private BillingManager getBillingManager() {
+		return billingManager;
+	}
+
+	@Override
+	protected void execImpl(@NonNull final InAppPurchaseTaskType taskType, @NonNull final InAppCommand runnable) {
+		billingManager = new BillingManager(ctx, BASE64_ENCODED_PUBLIC_KEY, new BillingManager.BillingUpdatesListener() {
+
+			@Override
+			public void onBillingClientSetupFinished() {
+				logDebug("Setup finished.");
+
+				BillingManager billingManager = getBillingManager();
+				// Have we been disposed of in the meantime? If so, quit.
+				if (billingManager == null) {
+					stop(true);
+					return;
+				}
+
+				if (!billingManager.isServiceConnected()) {
+					// Oh noes, there was a problem.
+					//complain("Problem setting up in-app billing: " + result);
+					notifyError(taskType, billingManager.getBillingClientResponseMessage());
+					stop(true);
+					return;
+				}
+
+				runnable.run(InAppPurchaseHelperImpl.this);
+			}
+
+			@Override
+			public void onConsumeFinished(String token, BillingResult billingResult) {
+			}
+
+			@Override
+			public void onPurchasesUpdated(List<Purchase> purchases) {
+				BillingManager billingManager = getBillingManager();
+				// Have we been disposed of in the meantime? If so, quit.
+				if (billingManager == null) {
+					stop(true);
+					return;
+				}
+
+				if (activeTask == InAppPurchaseTaskType.REQUEST_INVENTORY) {
+					List<String> skuInApps = new ArrayList<>();
+					for (InAppPurchase purchase : getInAppPurchases().getAllInAppPurchases(false)) {
+						skuInApps.add(purchase.getSku());
+					}
+					for (Purchase p : purchases) {
+						skuInApps.addAll(p.getProducts());
+					}
+					inAppStateMap.forEach((sku, holder) -> {
+						if (PLATFORM_GOOGLE.equals(holder.platform)) {
+							skuInApps.add(sku);
+						}
+					});
+					billingManager.queryProductDetailsAsync(BillingClient.ProductType.INAPP, skuInApps, (billingResult, queryProductDetailsResultInApps) -> {
+						// Is it a failure?
+						if (billingResult.getResponseCode() != BillingClient.BillingResponseCode.OK) {
+							logError("Failed to query inapps product details: " + billingResult.getResponseCode());
+							notifyError(InAppPurchaseTaskType.REQUEST_INVENTORY, billingResult.getDebugMessage());
+							stop(true);
+							return;
+						}
+
+						List<String> skuSubscriptions = new ArrayList<>();
+						for (InAppSubscription subscription : getInAppPurchases().getAllInAppSubscriptions()) {
+							skuSubscriptions.add(subscription.getSku());
+						}
+						for (Purchase p : purchases) {
+							skuSubscriptions.addAll(p.getProducts());
+						}
+						for (SubscriptionStateHolder holder : subscriptionStateMap.values()) {
+							if (holder.origin == PurchaseOrigin.GOOGLE) {
+								skuSubscriptions.add(holder.sku);
+							}
+						}
+
+						BillingManager manager = getBillingManager();
+						// Have we been disposed of in the meantime? If so, quit.
+						if (manager == null) {
+							stop(true);
+							return;
+						}
+						manager.queryProductDetailsAsync(BillingClient.ProductType.SUBS, skuSubscriptions,
+								(result, queryProductDetailsResult) -> {
+									// Is it a failure?
+									if (result.getResponseCode() != BillingClient.BillingResponseCode.OK) {
+										logError("Failed to query subscriptipons sku details: " + result.getResponseCode());
+										notifyError(InAppPurchaseTaskType.REQUEST_INVENTORY, result.getDebugMessage());
+										stop(true);
+										return;
+									}
+
+									List<ProductDetails> productDetailsList = new ArrayList<>(queryProductDetailsResultInApps.getProductDetailsList());
+									productDetailsList.addAll(queryProductDetailsResult.getProductDetailsList());
+									InAppPurchaseHelperImpl.this.productDetailsList = productDetailsList;
+									getProductDetailsResponseListener(runnable.userRequested()).onProductDetailsResponse(result, queryProductDetailsResult);
+									processIncompletePurchases(purchases);
+								});
+					});
+				} else {
+					processIncompletePurchases(purchases);
+				}
+			}
+
+			private void processIncompletePurchases(List<Purchase> purchases) {
+				for (Purchase purchase : purchases) {
+					List<String> skus = purchase.getProducts();
+					if (!Algorithms.isEmpty(skus)) {
+						InAppSubscription subscription = getSubscriptions().getSubscriptionBySku(skus.get(0));
+						if (!purchase.isAcknowledged() || (subscription != null && !subscription.isPurchased())) {
+							onPurchaseFinished(purchase);
+						}
+					}
+				}
+			}
+
+			@Override
+			public void onPurchaseCanceled() {
+				stop(true);
+			}
+
+			@Override
+			public void onError() {
+				stop(true);
+			}
+		});
+	}
+
+	@Override
+	public void purchaseFullVersion(@NonNull final Activity activity) {
+		notifyShowProgress(InAppPurchaseTaskType.PURCHASE_FULL_VERSION);
+		exec(InAppPurchaseTaskType.PURCHASE_FULL_VERSION, new InAppCommand() {
+			@Override
+			public void run(@NonNull InAppPurchaseHelper helper) {
+				try {
+					InAppPurchase fullVersion = getFullVersion();
+					ProductDetails productDetails = fullVersion != null ? getProductDetails(fullVersion.getSku()) : null;
+					if (productDetails == null) {
+						throw new IllegalArgumentException("Cannot find sku details");
+					}
+
+					BillingManager billingManager = getBillingManager();
+					if (billingManager != null) {
+						billingManager.initiatePurchaseFlow(activity, productDetails, getSelectedOneTimePurchaseOfferIndex(productDetails));
+					} else {
+						throw new IllegalStateException("BillingManager disposed");
+					}
+					commandDone();
+				} catch (Exception e) {
+					complain("Cannot launch full version purchase!");
+					logError("purchaseFullVersion Error", e);
+					stop(true);
+				}
+			}
+		});
+	}
+
+	@Override
+	public void purchaseDepthContours(@NonNull final Activity activity) {
+		notifyShowProgress(InAppPurchaseTaskType.PURCHASE_DEPTH_CONTOURS);
+		exec(InAppPurchaseTaskType.PURCHASE_DEPTH_CONTOURS, new InAppCommand() {
+			@Override
+			public void run(@NonNull InAppPurchaseHelper helper) {
+				try {
+					InAppPurchase depthContours = getDepthContours();
+					ProductDetails productDetails = depthContours != null ? getProductDetails(depthContours.getSku()) : null;
+					if (productDetails == null) {
+						throw new IllegalArgumentException("Cannot find sku details");
+					}
+					BillingManager billingManager = getBillingManager();
+					if (billingManager != null) {
+						billingManager.initiatePurchaseFlow(activity, productDetails, getSelectedOneTimePurchaseOfferIndex(productDetails));
+					} else {
+						throw new IllegalStateException("BillingManager disposed");
+					}
+					commandDone();
+				} catch (Exception e) {
+					complain("Cannot launch depth contours purchase!");
+					logError("purchaseDepthContours Error", e);
+					stop(true);
+				}
+			}
+		});
+	}
+
+	@Override
+	public void purchaseContourLines(@NonNull Activity activity) throws UnsupportedOperationException {
+		OsmandPlugin plugin = PluginsHelper.getPlugin(SRTMPlugin.class);
+		if (plugin == null || plugin.getInstallURL() == null) {
+			AndroidUtils.getApp(activity).showToastMessage(R.string.activate_srtm_plugin);
+		} else {
+			Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(plugin.getInstallURL()));
+			AndroidUtils.startActivityIfSafe(activity, intent);
+		}
+	}
+	@Override
+	public void manageSubscription(@NonNull Context ctx, @Nullable String sku, @Nullable PurchaseOrigin origin) {
+		String url;
+		if (PurchaseOrigin.FASTSPRING == origin) {
+			url = "https://osmand.onfastspring.com/account";
+		} else {
+			url = "https://play.google.com/store/account/subscriptions?package=" + ctx.getPackageName();
+			if (!Algorithms.isEmpty(sku)) {
+				url += "&sku=" + sku;
+			}
+		}
+
+		Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+		AndroidUtils.startActivityIfSafe(ctx, intent);
+	}
+
+	@Nullable
+	private ProductDetails getProductDetails(@NonNull String productId) {
+		List<ProductDetails> productDetailsList = this.productDetailsList;
+		if (productDetailsList != null) {
+			for (ProductDetails details : productDetailsList) {
+				if (details.getProductId().equals(productId)) {
+					return details;
+				}
+			}
+		}
+		return null;
+	}
+
+	private boolean hasDetails(@NonNull String productId) {
+		return getProductDetails(productId) != null;
+	}
+
+	@Nullable
+	private Purchase getPurchase(@NonNull String sku) {
+		BillingManager billingManager = getBillingManager();
+		if (billingManager != null) {
+			List<Purchase> purchases = billingManager.getPurchases();
+			if (purchases != null) {
+				for (Purchase p : purchases) {
+					if (p.getProducts().contains(sku)) {
+						return p;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	// Listener that's called when we finish querying the items and subscriptions we own
+	private ProductDetailsResponseListener getProductDetailsResponseListener(boolean userRequested) {
+		return new ProductDetailsResponseListener() {
+
+			@NonNull
+			private List<String> getAllOwnedSubscriptionProducts() {
+				List<String> result = new ArrayList<>();
+				BillingManager billingManager = getBillingManager();
+				if (billingManager != null) {
+					for (Purchase p : billingManager.getPurchases()) {
+						List<String> products = p.getProducts();
+						if (!Algorithms.isEmpty(products) && getInAppPurchases().getInAppSubscriptionBySku(products.get(0)) != null) {
+							result.add(products.get(0));
+						}
+					}
+				}
+				for (Entry<String, SubscriptionStateHolder> entry : subscriptionStateMap.entrySet()) {
+					SubscriptionState state = entry.getValue().state;
+					if (state == SubscriptionState.PAUSED || state == SubscriptionState.ON_HOLD) {
+						String sku = entry.getKey();
+						if (!result.contains(sku)) {
+							result.add(sku);
+						}
+					}
+				}
+				return result;
+			}
+
+			@Override
+			public void onProductDetailsResponse(@NonNull BillingResult billingResult, @NonNull QueryProductDetailsResult queryProductDetailsResult) {
+
+				logDebug("Query product details finished.");
+
+				// Have we been disposed of in the meantime? If so, quit.
+				if (getBillingManager() == null) {
+					stop(true);
+					return;
+				}
+
+				// Is it a failure?
+				if (billingResult.getResponseCode() != BillingClient.BillingResponseCode.OK) {
+					logError("Failed to query inventory: " + billingResult.getResponseCode());
+					notifyError(InAppPurchaseTaskType.REQUEST_INVENTORY, billingResult.getDebugMessage());
+					stop(true);
+					return;
+				}
+
+				logDebug("Query product details was successful.");
+
+				/*
+				 * Check for items we own. Notice that for each purchase, we check
+				 * the developer payload to see if it's correct! See
+				 * verifyDeveloperPayload().
+				 */
+
+				List<String> allOwnedSubscriptionProducts = getAllOwnedSubscriptionProducts();
+				for (InAppSubscription s : getSubscriptions().getAllSubscriptions()) {
+					if (hasDetails(s.getSku())) {
+						Purchase purchase = getPurchase(s.getSku());
+						ProductDetails productDetails = getProductDetails(s.getSku());
+						if (productDetails != null) {
+							fetchInAppPurchase(s, productDetails, purchase);
+						}
+						allOwnedSubscriptionProducts.remove(s.getSku());
+					}
+				}
+				for (String products : allOwnedSubscriptionProducts) {
+					Purchase purchase = getPurchase(products);
+					ProductDetails productDetails = getProductDetails(products);
+					if (productDetails != null) {
+						InAppSubscription s = getSubscriptions().upgradeSubscription(products);
+						if (s == null) {
+							s = new InAppPurchaseLiveUpdatesOldSubscription(productDetails);
+						}
+						fetchInAppPurchase(s, productDetails, purchase);
+					}
+				}
+
+				InAppPurchase fullVersion = getFullVersion();
+				if (fullVersion != null && hasDetails(fullVersion.getSku())) {
+					Purchase purchase = getPurchase(fullVersion.getSku());
+					ProductDetails fullPriceDetails = getProductDetails(fullVersion.getSku());
+					if (fullPriceDetails != null) {
+						fetchInAppPurchase(fullVersion, fullPriceDetails, purchase);
+					}
+				}
+
+				InAppPurchase depthContours = getDepthContours();
+				if (depthContours != null && hasDetails(depthContours.getSku())) {
+					Purchase purchase = getPurchase(depthContours.getSku());
+					ProductDetails depthContoursDetails = getProductDetails(depthContours.getSku());
+					if (depthContoursDetails != null) {
+						fetchInAppPurchase(depthContours, depthContoursDetails, purchase);
+					}
+				}
+
+				InAppPurchase contourLines = getContourLines();
+				if (contourLines != null && hasDetails(contourLines.getSku())) {
+					Purchase purchase = getPurchase(contourLines.getSku());
+					ProductDetails contourLinesDetails = getProductDetails(contourLines.getSku());
+					if (contourLinesDetails != null) {
+						fetchInAppPurchase(contourLines, contourLinesDetails, purchase);
+					}
+				}
+
+				List<Purchase> completePurchases = new ArrayList<>();
+				Purchase fullVersionPurchase = fullVersion != null ? getPurchase(fullVersion.getSku()) : null;
+				boolean fullVersionPurchased = fullVersionPurchase != null;
+				purchasedLocalFullVersion = fullVersionPurchased;
+				if (fullVersionPurchased) {
+					completePurchases.add(fullVersionPurchase);
+				}
+
+				Purchase depthContoursPurchase = depthContours != null ? getPurchase(depthContours.getSku()) : null;
+				purchasedLocalDepthContours = depthContoursPurchase != null;
+
+				boolean subscribedToLiveUpdates = false;
+				boolean subscribedToOsmAndPro = false;
+				boolean subscribedToMaps = false;
+				for (InAppSubscription s : getSubscriptions().getAllSubscriptions()) {
+					Purchase purchase = getPurchase(s.getSku());
+					if (purchase != null || s.getState().isActive()) {
+						if (purchase != null) {
+							completePurchases.add(purchase);
+						}
+						if (!subscribedToLiveUpdates && purchases.isLiveUpdates(s)) {
+							subscribedToLiveUpdates = true;
+						}
+						if (!subscribedToOsmAndPro && purchases.isOsmAndPro(s)) {
+							subscribedToOsmAndPro = true;
+						}
+						if (!subscribedToMaps && purchases.isMaps(s)) {
+							subscribedToMaps = true;
+						}
+					}
+				}
+				subscribedToLocalLiveUpdates = subscribedToLiveUpdates;
+				subscribedToLocalOsmAndPro = subscribedToOsmAndPro;
+				subscribedToLocalMaps = subscribedToMaps;
+
+				applyPurchases();
+
+				lastValidationCheckTime = System.currentTimeMillis();
+
+				OsmandSettings settings = ctx.getSettings();
+				settings.INAPPS_READ.set(true);
+
+				List<Purchase> tokensToSend = new ArrayList<>();
+				if (!completePurchases.isEmpty()) {
+					List<String> tokensSent = Arrays.asList(settings.BILLING_PURCHASE_TOKENS_SENT.get().split(";"));
+					for (Purchase purchase : completePurchases) {
+						if (needRestoreUserInfo()) {
+							restoreUserInfo(purchase);
+						}
+						List<String> skus = purchase.getProducts();
+						if (!Algorithms.isEmpty(skus) && !tokensSent.contains(skus.get(0))) {
+							tokensToSend.add(purchase);
+						}
+					}
+				}
+				List<PurchaseInfo> purchaseInfoList = new ArrayList<>();
+				for (Purchase purchase : tokensToSend) {
+					purchaseInfoList.add(getPurchaseInfo(purchase));
+				}
+				onProductDetailsResponseDone(purchaseInfoList, userRequested);
+			}
+		};
+	}
+
+	private void restoreUserInfo(Purchase purchase) {
+		boolean restored = restoreUserInfoFromString(purchase.getDeveloperPayload());
+		if (!restored) {
+			AccountIdentifiers accountIdentifiers = purchase.getAccountIdentifiers();
+			if (accountIdentifiers != null) {
+				restoreUserInfoFromString(accountIdentifiers.getObfuscatedAccountId());
+			}
+		}
+	}
+
+	private boolean restoreUserInfoFromString(String userInfo) {
+		if (Algorithms.isEmpty(userInfo)) {
+			return false;
+		}
+		OsmandSettings settings = ctx.getSettings();
+		String[] arr = userInfo.split(" ");
+		if (arr.length > 0) {
+			settings.BILLING_USER_ID.set(arr[0]);
+		}
+		if (arr.length > 1) {
+			token = arr[1];
+			settings.BILLING_USER_TOKEN.set(token);
+		}
+		return needRestoreUserInfo();
+	}
+
+	private boolean needRestoreUserInfo() {
+		OsmandSettings settings = ctx.getSettings();
+		return Algorithms.isEmpty(settings.BILLING_USER_ID.get()) || Algorithms.isEmpty(settings.BILLING_USER_TOKEN.get());
+	}
+
+	private PurchaseInfo getPurchaseInfo(Purchase purchase) {
+		return new PurchaseInfo(purchase.getProducts(), purchase.getOrderId(), purchase.getPurchaseToken(),
+				purchase.getPurchaseTime(), purchase.getPurchaseState(), purchase.isAcknowledged(), purchase.isAutoRenewing());
+	}
+
+	private void fetchInAppPurchase(@NonNull InAppPurchase inAppPurchase, @NonNull ProductDetails productDetails, @Nullable Purchase purchase) {
+		if (purchase != null) {
+			inAppPurchase.setPurchaseState(PurchaseState.PURCHASED);
+			inAppPurchase.setPurchaseInfo(ctx, getPurchaseInfo(purchase));
+		} else {
+			inAppPurchase.setPurchaseState(PurchaseState.NOT_PURCHASED);
+			inAppPurchase.restorePurchaseInfo(ctx);
+		}
+		if (BillingClient.ProductType.SUBS.equals(productDetails.getProductType())) {
+			List<SubscriptionOfferDetails> basePlans = getBasePlans(productDetails);
+			if (!Algorithms.isEmpty(basePlans)) {
+				SubscriptionOfferDetails basePlan = basePlans.get(0);
+				List<SubscriptionOfferDetails> basePlanOffers = getBasePlanOffers(productDetails, basePlan.getBasePlanId());
+				SubscriptionOfferDetails offer = Algorithms.isEmpty(basePlanOffers) ? basePlan : basePlanOffers.get(0);
+				List<ProductDetails.PricingPhase> offerPricingPhases = offer.getPricingPhases().getPricingPhaseList();
+				List<ProductDetails.PricingPhase> basePlanPricingPhases = basePlan.getPricingPhases().getPricingPhaseList();
+				ProductDetails.PricingPhase pricingPhrase = basePlanPricingPhases.get(basePlanPricingPhases.size() - 1);
+				if (pricingPhrase != null) {
+					inAppPurchase.setPrice(pricingPhrase.getFormattedPrice());
+					inAppPurchase.setOriginalPrice(pricingPhrase.getFormattedPrice());
+					inAppPurchase.setPriceCurrencyCode(pricingPhrase.getPriceCurrencyCode());
+					if (pricingPhrase.getPriceAmountMicros() > 0) {
+						inAppPurchase.setPriceValue(pricingPhrase.getPriceAmountMicros() / 1000000d);
+						inAppPurchase.setOriginalPriceValue(pricingPhrase.getPriceAmountMicros() / 1000000d);
+					}
+					String subscriptionPeriod = pricingPhrase.getBillingPeriod();
+					if (!Algorithms.isEmpty(subscriptionPeriod)) {
+						if (inAppPurchase instanceof InAppSubscription) {
+							try {
+								((InAppSubscription) inAppPurchase).setSubscriptionPeriodString(subscriptionPeriod);
+							} catch (ParseException e) {
+								LOG.error(e);
+							}
+						}
+					}
+					if (inAppPurchase instanceof InAppSubscription s) {
+						s.restoreState(ctx);
+						s.restoreExpireTime(ctx);
+						SubscriptionStateHolder stateHolder = subscriptionStateMap.get(s.getSku());
+						if (stateHolder != null) {
+							s.setState(ctx, stateHolder.state);
+							s.setExpireTime(ctx, stateHolder.expireTime);
+						}
+						if (s.getState().isGone() && s.hasStateChanged()) {
+							ctx.getSettings().LIVE_UPDATES_EXPIRED_FIRST_DLG_SHOWN_TIME.set(0L);
+							ctx.getSettings().LIVE_UPDATES_EXPIRED_SECOND_DLG_SHOWN_TIME.set(0L);
+						}
+						s.setIntroductoryInfo(null);
+						if (!Algorithms.isEmpty(basePlanOffers)) {
+							ProductDetails.PricingPhase introPricingPhase = offerPricingPhases.get(0);
+							if (introPricingPhase != null) {
+								String introductoryPrice = introPricingPhase.getFormattedPrice();
+								String introductoryPricePeriod = introPricingPhase.getBillingPeriod();
+								int introductoryPriceCycles = introPricingPhase.getBillingCycleCount();
+								long introductoryPriceAmountMicros = introPricingPhase.getPriceAmountMicros();
+								if (!Algorithms.isEmpty(introductoryPrice)) {
+									try {
+										s.setIntroductoryInfo(new InAppPurchases.InAppSubscriptionIntroductoryInfo(s, introductoryPrice,
+												introductoryPriceAmountMicros, introductoryPricePeriod, introductoryPriceCycles));
+									} catch (ParseException e) {
+										LOG.error(e);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		} else {
+			ProductDetails.OneTimePurchaseOfferDetails purchaseOfferDetails = getSelectedOneTimePurchaseOffer(productDetails);
+			if (purchaseOfferDetails != null) {
+				String currencyCode = purchaseOfferDetails.getPriceCurrencyCode();
+				double priceValue = purchaseOfferDetails.getPriceAmountMicros() / 1000000d;
+				Long fullPriceMicros = purchaseOfferDetails.getFullPriceMicros();
+				double originalPriceValue = fullPriceMicros != null ? fullPriceMicros / 1000000d : priceValue;
+				inAppPurchase.setPrice(purchaseOfferDetails.getFormattedPrice());
+				inAppPurchase.setOriginalPrice(inAppPurchase.getFormattedPrice(ctx, originalPriceValue, currencyCode));
+				inAppPurchase.setPriceCurrencyCode(currencyCode);
+				inAppPurchase.setPriceValue(priceValue);
+				inAppPurchase.setOriginalPriceValue(originalPriceValue);
+			}
+		}
+	}
+
+	@Nullable
+	private ProductDetails.OneTimePurchaseOfferDetails getSelectedOneTimePurchaseOffer(@NonNull ProductDetails productDetails) {
+		List<ProductDetails.OneTimePurchaseOfferDetails> offerDetails = productDetails.getOneTimePurchaseOfferDetailsList();
+		if (Algorithms.isEmpty(offerDetails)) {
+			return productDetails.getOneTimePurchaseOfferDetails();
+		}
+		return offerDetails.get(getSelectedOneTimePurchaseOfferIndex(productDetails));
+	}
+
+	private int getSelectedOneTimePurchaseOfferIndex(@NonNull ProductDetails productDetails) {
+		List<ProductDetails.OneTimePurchaseOfferDetails> offerDetails = productDetails.getOneTimePurchaseOfferDetailsList();
+		if (Algorithms.isEmpty(offerDetails)) {
+			return 0;
+		}
+		int selectedOfferIndex = 0;
+		long selectedPriceMicros = offerDetails.get(0).getPriceAmountMicros();
+		for (int i = 0; i < offerDetails.size(); i++) {
+			ProductDetails.OneTimePurchaseOfferDetails offer = offerDetails.get(i);
+			Long fullPriceMicros = offer.getFullPriceMicros();
+			long priceMicros = offer.getPriceAmountMicros();
+			if (fullPriceMicros != null && fullPriceMicros > priceMicros && priceMicros < selectedPriceMicros) {
+				selectedOfferIndex = i;
+				selectedPriceMicros = priceMicros;
+			}
+		}
+		return selectedOfferIndex;
+	}
+
+	@Nullable
+	private List<SubscriptionOfferDetails> getBasePlans(@NonNull ProductDetails productDetails) {
+		List<SubscriptionOfferDetails> offerDetails = productDetails.getSubscriptionOfferDetails();
+		if (Algorithms.isEmpty(offerDetails)) {
+			return null;
+		}
+		ArrayList<SubscriptionOfferDetails> basePlans = new ArrayList<>();
+		for (SubscriptionOfferDetails offer : offerDetails) {
+			if (offer.getOfferId() == null) {
+				basePlans.add(offer);
+			}
+		}
+		return basePlans;
+	}
+
+	@Nullable
+	private List<SubscriptionOfferDetails> getBasePlanOffers(@NonNull ProductDetails productDetails, @NonNull String basePlanId) {
+		List<SubscriptionOfferDetails> offerDetails = productDetails.getSubscriptionOfferDetails();
+		if (Algorithms.isEmpty(offerDetails)) {
+			return null;
+		}
+		ArrayList<SubscriptionOfferDetails> offers = new ArrayList<>();
+		for (SubscriptionOfferDetails offer : offerDetails) {
+			if (basePlanId.equals(offer.getBasePlanId()) && offer.getOfferId() != null) {
+				offers.add(offer);
+			}
+		}
+		return offers;
+	}
+
+	private int getSelectedSubscriptionOfferIndex(@NonNull ProductDetails productDetails) {
+		List<SubscriptionOfferDetails> offerDetails = productDetails.getSubscriptionOfferDetails();
+		if (Algorithms.isEmpty(offerDetails)) {
+			return 0;
+		}
+		List<SubscriptionOfferDetails> basePlans = getBasePlans(productDetails);
+		if (Algorithms.isEmpty(basePlans)) {
+			return 0;
+		}
+		SubscriptionOfferDetails basePlan = basePlans.get(0);
+		List<SubscriptionOfferDetails> basePlanOffers = getBasePlanOffers(productDetails, basePlan.getBasePlanId());
+		SubscriptionOfferDetails selectedOffer = Algorithms.isEmpty(basePlanOffers) ? basePlan : basePlanOffers.get(0);
+		int selectedOfferIndex = offerDetails.indexOf(selectedOffer);
+		return selectedOfferIndex >= 0 ? selectedOfferIndex : 0;
+	}
+
+	@Override
+	protected InAppCommand getPurchaseSubscriptionCommand(final WeakReference<Activity> activity, final String sku, final String userInfo) {
+		return new InAppCommand() {
+			@Override
+			public void run(@NonNull InAppPurchaseHelper helper) {
+				try {
+					Activity a = activity.get();
+					ProductDetails productDetails = getProductDetails(sku);
+					if (AndroidUtils.isActivityNotDestroyed(a) && productDetails != null) {
+						BillingManager billingManager = getBillingManager();
+						if (billingManager != null) {
+							billingManager.setObfuscatedAccountId(userInfo);
+							billingManager.initiatePurchaseFlow(a, productDetails, getSelectedSubscriptionOfferIndex(productDetails));
+						} else {
+							throw new IllegalStateException("BillingManager disposed");
+						}
+						commandDone();
+					} else {
+						stop(true);
+					}
+				} catch (Exception e) {
+					logError("launchPurchaseFlow Error", e);
+					stop(true);
+				}
+			}
+		};
+	}
+
+	@Override
+	protected InAppCommand getRequestInventoryCommand(boolean userRequested) {
+		return new InAppCommand() {
+
+			@Override
+			protected boolean userRequested() {
+				return userRequested;
+			}
+
+			@Override
+			public void run(@NonNull InAppPurchaseHelper helper) {
+				logDebug("Setup successful. Querying inventory.");
+				try {
+					BillingManager billingManager = getBillingManager();
+					if (billingManager != null) {
+						billingManager.queryPurchases(this::commandDone);
+					} else {
+						commandDone();
+						throw new IllegalStateException("BillingManager disposed");
+					}
+				} catch (Exception e) {
+					logError("queryInventoryAsync Error", e);
+					notifyDismissProgress(InAppPurchaseTaskType.REQUEST_INVENTORY);
+					stop(true);
+				}
+			}
+		};
+	}
+
+	// Call when a purchase is finished
+	private void onPurchaseFinished(Purchase purchase) {
+		logDebug("Purchase finished: " + purchase);
+
+		// if we were disposed of in the meantime, quit.
+		if (getBillingManager() == null) {
+			stop(true);
+			return;
+		}
+
+		onPurchaseDone(getPurchaseInfo(purchase));
+	}
+
+	@Override
+	protected boolean isBillingManagerExists() {
+		return getBillingManager() != null;
+	}
+
+	@Override
+	protected void destroyBillingManager() {
+		BillingManager billingManager = getBillingManager();
+		if (billingManager != null) {
+			billingManager.destroy();
+			this.billingManager = null;
+		}
+	}
+}

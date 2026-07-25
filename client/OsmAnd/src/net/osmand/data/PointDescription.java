@@ -1,0 +1,488 @@
+package net.osmand.data;
+
+import android.content.Context;
+import android.graphics.drawable.Drawable;
+
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import net.osmand.LocationConvert;
+import net.osmand.PlatformUtil;
+import net.osmand.plus.OsmandApplication;
+import net.osmand.plus.R;
+import net.osmand.plus.activities.MapActivity;
+import net.osmand.plus.plugins.PluginsHelper;
+import net.osmand.plus.plugins.osmedit.OsmEditingPlugin;
+import net.osmand.plus.settings.coordinates.CoordinateFormatFormatter;
+import net.osmand.plus.settings.coordinates.FormattedCoordinate;
+import net.osmand.plus.utils.AndroidUtils;
+import net.osmand.plus.utils.OsmAndFormatter;
+import net.osmand.util.Algorithms;
+
+import org.apache.commons.logging.Log;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class PointDescription {
+
+	private static final Log log = PlatformUtil.getLog(PointDescription.class);
+
+	private String type = "";
+	private String name = "";
+	private String typeName;
+	private String iconName;
+	private Drawable iconDrawable;
+
+	private double lat;
+	private double lon;
+
+	public static final String POINT_TYPE_NEARBY_PLACE = "nearby_place";
+	public static final String POINT_TYPE_FAVORITE = "favorite";
+	public static final String POINT_TYPE_WPT = "wpt";
+	public static final String POINT_TYPE_GPX = "gpx";
+	public static final String POINT_TYPE_ROUTE = "route";
+	public static final String POINT_TYPE_POI = "poi";
+	public static final String POINT_TYPE_ADDRESS = "address";
+	public static final String POINT_TYPE_OSM_NOTE = "osm_note";
+	public static final String POINT_TYPE_MARKER = "marker";
+	public static final String POINT_TYPE_PARKING_MARKER = "parking_marker";
+	public static final String POINT_TYPE_AUDIO_NOTE = "audionote";
+	public static final String POINT_TYPE_VIDEO_NOTE = "videonote";
+	public static final String POINT_TYPE_PHOTO_NOTE = "photonote";
+	public static final String POINT_TYPE_LOCATION = "location";
+	public static final String POINT_TYPE_MY_LOCATION = "my_location";
+	public static final String POINT_TYPE_ALARM = "alarm";
+	public static final String POINT_TYPE_TARGET = "destination";
+	public static final String POINT_TYPE_MAP_MARKER = "map_marker";
+	public static final String POINT_TYPE_OSM_BUG = "bug";
+	public static final String POINT_TYPE_WORLD_REGION = "world_region";
+	public static final String POINT_TYPE_GPX_FILE = "gpx_file";
+	public static final String POINT_TYPE_WORLD_REGION_SHOW_ON_MAP = "world_region_show_on_map";
+	public static final String POINT_TYPE_BLOCKED_ROAD = "blocked_road";
+	public static final String POINT_TYPE_TRANSPORT_ROUTE = "transport_route";
+	public static final String POINT_TYPE_TRANSPORT_STOP = "transport_stop";
+	public static final String POINT_TYPE_MAPILLARY_IMAGE = "mapillary_image";
+	public static final String POINT_TYPE_POI_TYPE = "poi_type";
+	public static final String POINT_TYPE_CUSTOM_POI_FILTER = "custom_poi_filter";
+
+	public static final PointDescription LOCATION_POINT = new PointDescription(POINT_TYPE_LOCATION, "");
+
+	public PointDescription(double lat, double lon) {
+		this(POINT_TYPE_LOCATION, "");
+		this.lat = lat;
+		this.lon = lon;
+	}
+
+	public PointDescription(String type, String name) {
+		this.type = type;
+		this.name = name;
+		if (this.name == null) {
+			this.name = "";
+		}
+	}
+
+	public PointDescription(String type, String typeName, String name) {
+		this.type = type;
+		this.name = name;
+		this.typeName = typeName;
+		if (this.name == null) {
+			this.name = "";
+		}
+	}
+
+	public void setTypeName(String typeName) {
+		this.typeName = typeName;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+		if (this.name == null) {
+			this.name = "";
+		}
+	}
+
+	public String getTypeName() {
+		return typeName;
+	}
+
+	@Nullable
+	public String getType() {
+		return type;
+	}
+
+	@Nullable
+	public String getIconName() {
+		return iconName;
+	}
+
+	public void setIconName(String iconName) {
+		this.iconName = iconName;
+	}
+
+	@NonNull
+	public String getName() {
+		return name;
+	}
+
+	@NonNull
+	public String getSimpleName(Context ctx, boolean addTypeName) {
+		if (isLocation()) {
+			if (!Algorithms.isEmpty(name) && !name.equals(ctx.getString(R.string.no_address_found))) {
+				return name;
+			} else {
+				return getLocationName(ctx, lat, lon, true).replace('\n', ' ');
+			}
+		}
+		if (!Algorithms.isEmpty(typeName)) {
+			if (Algorithms.isEmpty(name)) {
+				return typeName;
+			} else if (addTypeName) {
+				return typeName.trim() + ": " + name;
+			}
+		}
+		return name;
+	}
+
+	public String getFullPlainName(Context ctx) {
+		if (isLocation()) {
+			return getLocationName(ctx, lat, lon, false);
+		} else {
+			String typeName = this.typeName;
+			if (isFavorite()) {
+				typeName = ctx.getString(R.string.favorite);
+			} else if (isPoi()) {
+				typeName = ctx.getString(R.string.poi);
+			} else if (isWpt()) {
+				return ctx.getString(R.string.shared_string_waypoint);
+			}
+			if (!Algorithms.isEmpty(typeName)) {
+				if (Algorithms.isEmpty(name)) {
+					return typeName;
+				} else {
+					return typeName.trim() + ": " + name;
+				}
+			}
+			return name;
+		}
+	}
+
+	public static String getLocationName(Context ctx, double lat, double lon, boolean sh) {
+		OsmandApplication app = AndroidUtils.getApp(ctx);
+		return CoordinateFormatFormatter.formatPrimary(app, lat, lon);
+	}
+
+	public static List<FormattedCoordinate> getPreferredLocationData(MapActivity ctx, double lat, double lon) {
+		OsmandApplication app = (OsmandApplication) ctx.getApplicationContext();
+		return CoordinateFormatFormatter.formatPreferred(app, lat, lon);
+	}
+
+	@NonNull
+	public static List<FormattedCoordinate> getCollapsedLocationData(@NonNull MapActivity ctx, double lat, double lon,
+	                                                                  @NonNull List<FormattedCoordinate> preferred) {
+		List<FormattedCoordinate> rows = new ArrayList<>();
+
+		String shortCoordinates = getShortCoordinates(lat, lon);
+		if (!Algorithms.isEmpty(shortCoordinates)) {
+			rows.add(FormattedCoordinate.plain(shortCoordinates));
+		}
+		for (int i = 1; i < preferred.size(); i++) {
+			rows.add(preferred.get(i));
+		}
+		String osmAndUrl = getLocationUrl(ctx, lat, lon);
+		if (!Algorithms.isEmpty(osmAndUrl)) {
+			rows.add(FormattedCoordinate.plain(osmAndUrl));
+		}
+		String osmUrl = getOsmEditingUrl(ctx, lat, lon);
+		if (!Algorithms.isEmpty(osmUrl)) {
+			rows.add(FormattedCoordinate.plain(osmUrl));
+		}
+		return rows;
+	}
+
+	@Nullable
+	public static String getShortCoordinates(double lat, double lon) {
+		try {
+			return OsmAndFormatter.getFormattedCoordinates(lat, lon, OsmAndFormatter.FORMAT_DEGREES_SHORT);
+		} catch (RuntimeException e) {
+			return null;
+		}
+	}
+
+	@Nullable
+	public static String getLocationUrl(@NonNull MapActivity ctx, double lat, double lon) {
+		String[] parts = getShareUrlParts(ctx, lat, lon);
+		if (parts == null) {
+			return null;
+		}
+		String zoom = parts[0], lat0 = parts[1], lon0 = parts[2];
+		return "https://osmand.net/map?pin=" + lat0 + "," + lon0 + "#" + zoom + "/" + lat0 + "/" + lon0;
+	}
+
+	@Nullable
+	public static String getOsmEditingUrl(@NonNull MapActivity ctx, double lat, double lon) {
+		if (!PluginsHelper.isEnabled(OsmEditingPlugin.class)) {
+			return null;
+		}
+		String[] parts = getShareUrlParts(ctx, lat, lon);
+		if (parts == null) {
+			return null;
+		}
+		String zoom = parts[0], lat0 = parts[1], lon0 = parts[2];
+		return "https://www.openstreetmap.org/?mlat=" + lat0 + "&mlon=" + lon0 + "#map=" + zoom + "/" + lat0 + "/" + lon0;
+	}
+
+	@Nullable
+	private static String[] getShareUrlParts(@NonNull MapActivity ctx, double lat, double lon) {
+		try {
+			int zoom = ctx.getMapView().getZoom();
+			String latUrl = LocationConvert.convertLatitude(lat, LocationConvert.FORMAT_DEGREES, false);
+			String lonUrl = LocationConvert.convertLongitude(lon, LocationConvert.FORMAT_DEGREES, false);
+			latUrl = latUrl.substring(0, latUrl.length() - 1);
+			lonUrl = lonUrl.substring(0, lonUrl.length() - 1);
+			return new String[] {String.valueOf(zoom), latUrl, lonUrl};
+		} catch (RuntimeException e) {
+			log.error("Failed to convert coordinates", e);
+			return null;
+		}
+	}
+
+	public static String getLocationNamePlain(@NonNull Context ctx, double lat, double lon) {
+		OsmandApplication app = AndroidUtils.getApp(ctx);
+		return CoordinateFormatFormatter.formatPrimary(app, lat, lon);
+	}
+
+	public boolean contextMenuDisabled() {
+		return POINT_TYPE_WORLD_REGION_SHOW_ON_MAP.equals(type);
+	}
+
+	public boolean isLocation() {
+		return POINT_TYPE_LOCATION.equals(type);
+	}
+
+	public boolean isAddress() {
+		return POINT_TYPE_ADDRESS.equals(type);
+	}
+
+	public boolean isAddressTypeCity() {
+		return POINT_TYPE_ADDRESS.equals(type) &&
+				("City".equals(typeName) || "Town".equals(typeName) || "Village".equals(typeName));
+	}
+
+	public boolean isWpt() {
+		return POINT_TYPE_WPT.equals(type);
+	}
+
+	public boolean isPoi() {
+		return POINT_TYPE_POI.equals(type);
+	}
+
+	public boolean isFavorite() {
+		return POINT_TYPE_FAVORITE.equals(type);
+	}
+
+	public boolean isAudioNote() {
+		return POINT_TYPE_AUDIO_NOTE.equals(type);
+	}
+
+	public boolean isVideoNote() {
+		return POINT_TYPE_VIDEO_NOTE.equals(type);
+	}
+
+	public boolean isPhotoNote() {
+		return POINT_TYPE_PHOTO_NOTE.equals(type);
+	}
+
+	public boolean isDestination() {
+		return POINT_TYPE_TARGET.equals(type);
+	}
+
+	public boolean isMapMarker() {
+		return POINT_TYPE_MAP_MARKER.equals(type);
+	}
+
+	public boolean isParking() {
+		return POINT_TYPE_PARKING_MARKER.equals(type);
+	}
+
+	public boolean isMyLocation() {
+		return POINT_TYPE_MY_LOCATION.equals(type);
+	}
+
+	public boolean isPoiType() {
+		return POINT_TYPE_POI_TYPE.equals(type);
+	}
+
+	public boolean isCustomPoiFilter() {
+		return POINT_TYPE_CUSTOM_POI_FILTER.equals(type);
+	}
+
+	public boolean isGpxPoint() {
+		return POINT_TYPE_GPX.equals(type);
+	}
+
+	public boolean isRoutePoint() {
+		return POINT_TYPE_ROUTE.equals(type);
+	}
+
+	public boolean isGpxFile() {
+		return POINT_TYPE_GPX_FILE.equals(type);
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		result = prime * result + ((typeName == null) ? 0 : typeName.hashCode());
+		result = prime * result + ((lat == 0) ? 0 : Double.valueOf(lat).hashCode());
+		result = prime * result + ((lon == 0) ? 0 : Double.valueOf(lon).hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null || getClass() != obj.getClass())
+			return false;
+		PointDescription other = (PointDescription) obj;
+		return Algorithms.objectEquals(other.name, name)
+				&& Algorithms.objectEquals(other.type, type)
+				&& Algorithms.objectEquals(other.lat, lat)
+				&& Algorithms.objectEquals(other.lon, lon)
+				&& Algorithms.objectEquals(other.typeName, typeName);
+	}
+
+
+	public static String getSimpleName(LocationPoint o, Context ctx) {
+		PointDescription pd = o.getPointDescription(ctx);
+		return pd.getSimpleName(ctx, true);
+	}
+
+	public boolean isSearchingAddress(Context ctx) {
+		return !Algorithms.isEmpty(name) && isLocation() && name.equals(getSearchAddressStr(ctx));
+	}
+
+	public static String getSearchAddressStr(Context ctx) {
+		return ctx.getString(R.string.looking_up_address) + ctx.getString(R.string.shared_string_ellipsis);
+	}
+
+	public static String getAddressNotFoundStr(Context ctx) {
+		return ctx.getString(R.string.no_address_found);
+	}
+
+	public static String serializeToString(PointDescription p) {
+		if (p == null) {
+			return "";
+		}
+		String tp = p.type;
+		if (!Algorithms.isEmpty(p.typeName)) {
+			tp = tp + '.' + p.typeName;
+		}
+		String res = tp + "#" + p.name;
+		if (!Algorithms.isEmpty(p.iconName)) {
+			res += "#" + p.iconName;
+		}
+		return res;
+	}
+
+	public static PointDescription deserializeFromString(String s, LatLon l) {
+		PointDescription pd = null;
+		if (s != null && s.length() > 0) {
+			int in = s.indexOf('#');
+			if (in >= 0) {
+				int ii = s.indexOf('#', in + 1);
+				String name;
+				String icon = null;
+				if (ii > 0) {
+					name = s.substring(in + 1, ii).trim();
+					icon = s.substring(ii + 1).trim();
+				} else {
+					name = s.substring(in + 1).trim();
+				}
+				String tp = s.substring(0, in);
+				if (tp.contains(".")) {
+					pd = new PointDescription(tp.substring(0, tp.indexOf('.')), tp.substring(tp.indexOf('.') + 1), name);
+				} else {
+					pd = new PointDescription(tp, name);
+				}
+				if (!Algorithms.isEmpty(icon)) {
+					pd.setIconName(icon);
+				}
+			}
+		}
+		if (pd == null) {
+			pd = new PointDescription(POINT_TYPE_LOCATION, "");
+		}
+		if (pd.isLocation() && l != null) {
+			pd.lat = l.getLatitude();
+			pd.lon = l.getLongitude();
+		}
+		return pd;
+	}
+
+	public static final int FORMAT_DEGREES = LocationConvert.FORMAT_DEGREES;
+	public static final int FORMAT_MINUTES = LocationConvert.FORMAT_MINUTES;
+	public static final int FORMAT_SECONDS = LocationConvert.FORMAT_SECONDS;
+	public static final int UTM_FORMAT = LocationConvert.UTM_FORMAT;
+	public static final int OLC_FORMAT = LocationConvert.OLC_FORMAT;
+	public static final int MGRS_FORMAT = LocationConvert.MGRS_FORMAT;
+	public static final int SWISS_GRID_FORMAT = LocationConvert.SWISS_GRID_FORMAT;
+	public static final int SWISS_GRID_PLUS_FORMAT = LocationConvert.SWISS_GRID_PLUS_FORMAT;
+	public static final int MAIDENHEAD_FORMAT = LocationConvert.MAIDENHEAD_FORMAT;
+
+	public static String formatToHumanString(Context ctx, int format) {
+		return switch (format) {
+			case LocationConvert.FORMAT_DEGREES -> ctx.getString(R.string.navigate_point_format_D);
+			case LocationConvert.FORMAT_MINUTES -> ctx.getString(R.string.navigate_point_format_DM);
+			case LocationConvert.FORMAT_SECONDS ->
+					ctx.getString(R.string.navigate_point_format_DMS);
+			case LocationConvert.UTM_FORMAT -> "UTM";
+			case LocationConvert.OLC_FORMAT -> "OLC";
+			case LocationConvert.MGRS_FORMAT -> "MGRS";
+			case LocationConvert.SWISS_GRID_FORMAT ->
+					ctx.getString(R.string.navigate_point_format_swiss_grid);
+			case LocationConvert.SWISS_GRID_PLUS_FORMAT ->
+					ctx.getString(R.string.navigate_point_format_swiss_grid_plus);
+			case LocationConvert.MAIDENHEAD_FORMAT ->
+					ctx.getString(R.string.navigate_point_format_maidenhead);
+			default -> "Unknown format";
+		};
+	}
+
+	@DrawableRes
+	public int getItemIcon() {
+		if (isAddress()) {
+			return R.drawable.ic_action_street_name;
+		} else if (isFavorite()) {
+			return R.drawable.ic_action_favorite;
+		} else if (isLocation()) {
+			return R.drawable.ic_action_marker_dark;
+		} else if (isPoi()) {
+			return R.drawable.ic_action_info_dark;
+		} else if (isGpxFile() || isGpxPoint()) {
+			return R.drawable.ic_action_polygom_dark;
+		} else if (isWpt()) {
+			return R.drawable.ic_action_flag_stroke;
+		} else if (isAudioNote()) {
+			return R.drawable.ic_type_audio;
+		} else if (isVideoNote()) {
+			return R.drawable.ic_type_video;
+		} else if (isPhotoNote()) {
+			return R.drawable.ic_type_img;
+		} else {
+			return R.drawable.ic_action_street_name;
+		}
+	}
+
+	public Drawable getIconDrawable() {
+		return iconDrawable;
+	}
+
+	public void setIconDrawable(Drawable iconDrawable) {
+		this.iconDrawable = iconDrawable;
+	}
+}

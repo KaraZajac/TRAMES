@@ -1,0 +1,54 @@
+package net.osmand.plus.base;
+
+import static net.osmand.plus.settings.enums.ThemeUsageContext.APP;
+
+import android.app.Activity;
+
+import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.view.WindowInsetsCompat;
+
+import net.osmand.plus.OsmandApplication;
+import net.osmand.plus.R;
+import net.osmand.plus.utils.InsetTarget;
+import net.osmand.plus.utils.InsetTargetsCollection;
+import net.osmand.plus.utils.InsetsUtils;
+
+public interface ISupportInsets {
+
+	default InsetTargetsCollection getInsetTargets() {
+		InsetTargetsCollection collection = new InsetTargetsCollection();
+		collection.add(InsetTarget.createBottomContainer(R.id.bottom_buttons_container));
+
+		return collection;
+	}
+
+	void onApplyInsets(@NonNull WindowInsetsCompat insets);
+
+	@NonNull
+	Activity requireActivity();
+
+	@Nullable
+	WindowInsetsCompat getLastRootInsets();
+
+	void setLastRootInsets(@NonNull WindowInsetsCompat rootInsets);
+
+	@Nullable
+	@ColorInt
+	default Integer getNavigationBarColor() {
+		return null;
+	}
+
+	default boolean isNavigationBarContentLight() {
+		return !isNightMode();
+	}
+
+	default void updateNavigationBarColor() {
+		InsetsUtils.processNavigationBarColor(this);
+	}
+
+	default boolean isNightMode() {
+		return ((OsmandApplication) requireActivity().getApplication()).getDaynightHelper().isNightMode(APP);
+	}
+}

@@ -1,0 +1,156 @@
+package net.osmand.plus.myplaces.favorites.dialogs;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import net.osmand.data.LatLon;
+import net.osmand.plus.OsmandApplication;
+import net.osmand.plus.myplaces.favorites.FavoriteFolderPath;
+import net.osmand.plus.myplaces.favorites.FavoriteGroup;
+import net.osmand.plus.settings.backend.OsmandSettings;
+import net.osmand.plus.settings.backend.preferences.ListStringPreference;
+import net.osmand.plus.settings.enums.FavoriteListSortMode;
+import net.osmand.shared.gpx.data.OrganizedTracksGroup;
+import net.osmand.util.Algorithms;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class FavoriteSortModesHelper {
+
+	private final OsmandApplication app;
+	private static final String SEPARATOR = ",,";
+
+	private final Map<String, FavoriteListSortMode> cachedSortModes = new ConcurrentHashMap<>();
+	private final ListStringPreference preference;
+
+	public FavoriteSortModesHelper(@NonNull OsmandApplication app) {
+		this.app = app;
+		OsmandSettings settings = app.getSettings();
+		preference = settings.FAVORITE_SORT_MODES;
+		loadFromPreference();
+	}
+
+	@NonNull
+	public FavoriteListSortMode requireSortMode(@Nullable String id) {
+		FavoriteListSortMode sortMode = id != null ? getSortMode(id) : null;
+		return sortMode != null ? sortMode : FavoriteListSortMode.getDefaultSortMode();
+	}
+
+	@Nullable
+	public FavoriteListSortMode getSortMode(@NonNull String id) {
+		FavoriteListSortMode sortMode = cachedSortModes.get(getInternalId(id));
+		return sortMode != null ? sortMode : FavoriteListSortMode.getDefaultSortMode();
+	}
+
+	public void setSortMode(@NonNull String id,
+	                        @Nullable FavoriteListSortMode sortMode) {
+		String internalId = getInternalId(id);
+		if (sortMode != null) {
+			cachedSortModes.put(internalId, sortMode);
+		} else {
+			cachedSortModes.remove(internalId);
+		}
+	}
+
+	public void onFavoriteFolderDeleted(@NonNull FavoriteGroup favoriteGroup) {
+		String folderId = favoriteGroup.getName();
+		clearRelatedKeys(folderId);
+
+		String displayName = favoriteGroup.getDisplayName(app);
+		if (!Algorithms.stringsEqual(displayName, folderId)) {
+			clearRelatedKeys(displayName);
+		}
+
+		syncSettings();
+	}
+
+	public void clearRelatedKeys(@NonNull String folderId) {
+		String internalId = getInternalId(folderId);
+		List<String> prefixesToRemove = getRelatedKeyPrefixes(internalId);
+		if (prefixesToRemove.isEmpty()) return;
+
+		cachedSortModes.keySet().removeIf(key -> {
+			if (Algorithms.stringsEqual(key, internalId)) {
+				return true;
+			}
+			for (String prefix : prefixesToRemove) {
+				if (key.startsWith(prefix)) {
+					return true;
+				}
+			}
+			return false;
+		});
+	}
+
+	@NonNull
+	private List<String> getRelatedKeyPrefixes(@NonNull String internalId) {
+		List<String> prefixes = new ArrayList<>();
+		if (!Algorithms.isEmpty(internalId)) {
+			prefixes.add(internalId + FavoriteFolderPath.DELIMITER);
+		}
+		prefixes.add(OrganizedTracksGroup.Companion.getBaseId(internalId));
+		return prefixes;
+	}
+
+	public void syncSettings() {
+		saveToPreference();
+	}
+
+	@NonNull
+	public static LatLon getReferenceLocation(@NonNull OsmandApplication app,
+	                                           @NonNull FavoriteListSortMode sortMode) {
+		return sortMode == FavoriteListSortMode.NEAREST_TO_MAP_CENTER
+				? app.getMapViewTrackingUtilities().getMapLocation()
+				: app.getMapViewTrackingUtilities().getDefaultLocation();
+	}
+
+	@Nullable
+	public static LatLon getDisplayReferenceLocation(@NonNull OsmandApplication app,
+	                                                  @NonNull FavoriteListSortMode sortMode) {
+		return sortMode == FavoriteListSortMode.NEAREST_TO_MAP_CENTER
+				? getReferenceLocation(app, sortMode)
+				: null;
+	}
+
+	private void loadFromPreference() {
+		List<String> tokens = preference.getStringsList();
+		if (!Algorithms.isEmpty(tokens)) {
+			for (String token : tokens) {
+				String[] tokenParts = token.split(SEPARATOR);
+				if (tokenParts.length == 2) {
+					String internalId = removeExtraFileSeparator(tokenParts[0]);
+					cachedSortModes.put(internalId, FavoriteListSortMode.getByValue(tokenParts[1]));
+				}
+			}
+		}
+	}
+
+	private void saveToPreference() {
+		List<String> tokens = new ArrayList<>();
+		for (Entry<String, FavoriteListSortMode> entry : cachedSortModes.entrySet()) {
+			FavoriteListSortMode value = entry.getValue();
+			tokens.add(entry.getKey() + SEPARATOR + value.name());
+		}
+		preference.setStringsList(tokens);
+	}
+
+	@NonNull
+	public static String getInternalId(@NonNull String folderId) {
+		return removeExtraFileSeparator(folderId);
+	}
+
+	@NonNull
+	private static String removeExtraFileSeparator(@NonNull String id) {
+		// Ensure consistency by removing trailing File.separator from relative paths
+		// before querying or saving to settings to avoid key mismatches.
+		if (id.endsWith(File.separator)) {
+			return id.substring(0, id.length() - 1);
+		}
+		return id;
+	}
+}

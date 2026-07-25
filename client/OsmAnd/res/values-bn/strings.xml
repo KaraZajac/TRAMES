@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="regions">অঞ্চল</string>
+    <string name="region_maps">অঞ্চলভিত্তিক মানচিত্র</string>
+    <string name="world_maps">বিশ্ব মানচিত্র</string>
+    <string name="favorite_category_add_new">নতুন সংযোজন</string>
+    <string name="shared_string_markers">চিহ্নসমুহ</string>
+    <string name="coordinates_format">অক্ষাংশ-দ্রাঘিমাংশ বিন্যাস</string>
+    <string name="routing_attr_avoid_ice_roads_fords_name">বরফাবৃত, জলমগ্ন রাস্তা পরিত্যক্ত করুন</string>
+    <string name="routing_attr_avoid_ice_roads_fords_description">বরফাবৃত এবং জলমগ্ন রাস্তা পরিত্যক্ত করুন</string>
+    <string name="my_location">আমার অবস্থান</string>
+    <string name="shared_string_finish">সম্পূর্ণ</string>
+    <string name="plan_route">রাস্তা পরিকল্পনা</string>
+    <string name="shared_string_sort">সাজানো</string>
+    <string name="shared_string_angle">কোন</string>
+    <string name="recalc_angle_dialog_descr">আমার নিজের অবস্থান এবং গন্তব্য এর হিসাব করা অতিরিক্ত সরলরেখাংশ গুলো দেখানো হবে, যতক্ষণ না গন্তব্যে পৌছানোর রাস্তাটি আবার খুঁজে পাওয়া যাচ্ছে</string>
+    <string name="recalc_angle_dialog_title">আমার অবস্থান ও গন্তব্য এর মধ্যকার সর্বনিম্ন কোন</string>
+    <string name="shared_string_preparing">তৈরী করা হচ্ছে</string>
+    <string name="shared_string_nothing_selected">কিছু নির্বাচন করা হয়নি</string>
+    <string name="av_locations">অবস্থানগুলো</string>
+    <string name="shared_string_navigation">দিক নির্ণয়</string>
+    <string name="m_s">মি/সে</string>
+    <string name="nm">নটিকাল মাইল</string>
+    <string name="three_years_subscription">তিন বছরের জন্য চাঁদা</string>
+    <string name="osmand_pro_tagline">সবরকমের বেশিষ্ট নিন</string>
+    <string name="quick_action_weather_layers">মানচিত্রে আবহাওয়ার স্তরগুলি দেখানো বা লুকানোর জন্য একটি টগল বাটন।</string>
+    <string name="download_depth_countours">নৌ গভীরতার রূপরেখা</string>
+    <string name="quick_action_wind_animation_layer">মানচিত্রে বায়ু প্রবাহের অ্যানিমেশন স্তর দেখানো বা লুকানোর জন্য একটি টগল।</string>
+    <string name="weather_layers">আবহাওয়ার স্তর সমূহ</string>
+    <string name="requires_internet_connection">ইন্টারনেট সংযোগ প্রয়োজন</string>
+    <string name="save_and_access_articles_offline">তথ্য সংরক্ষণ করুন এবং নিবন্ধনগুলো যেকোন জায়গা থেকে অফলাইনে উপলব্ধি করুন</string>
+    <string name="wind_animation_layer">বায়ু প্রবাহ অ্যানিমেশন স্তর</string>
+    <string name="update_maps">মানচিত্র নবায়ন করুন</string>
+    <string name="reconnect">পুনরায় সংযোগ স্থাপন করুন</string>
+    <string name="rendering_attr_showSkiSlopes_name">স্কি ঢালগুলো দেখান</string>
+    <string name="rendering_attr_showSkiSlopes_description">সরলীকৃত স্কি ঢাল গুলো দেখান</string>
+    <string name="trip_recording_downhill_widget_desc">বর্তমানে রেকর্ড করা ভ্রমণের সমস্ত অবতরণের যোগফল অথবা শেষ অবতরণের সমষ্টি দেখায়।</string>
+    <string name="trip_recording_uphill_widget_desc">সমস্ত আরোহণের যোগফল অথবা বর্তমানে রেকর্ড করা ট্রিপের শেষ আরোহণটি দেখায়।</string>
+    <string name="trip_recording_distance_widget_desc">আপনার বর্তমানে রেকর্ড করা ভ্রমণের মোট দূরত্ব দেখায়, শেষ আরোহণ এবং অবতরণের দূরত্ব দেখার মোড সহ।</string>
+    <string name="trip_recording_max_speed_widget_description">বর্তমানে রেকর্ড করা ট্রিপের সর্বোচ্চ গতি দেখায়। শেষ চড়াই বা উতরাই থেকে সামগ্রিক সর্বোচ্চ গতি এবং সর্বোচ্চ গতির মধ্যে স্যুইচ করতে ট্যাপ করুন।</string>
+    <string name="trip_recording_average_slope_widget_description">বর্তমানে রেকর্ড করা ট্রিপের শেষ উতরাই বা চড়াই অংশের গড় ঢাল দেখায়।</string>
+</resources>

@@ -1,0 +1,1484 @@
+package net.osmand.plus.myplaces.favorites;
+
+import static net.osmand.data.FavouritePoint.DEFAULT_BACKGROUND_TYPE;
+import static net.osmand.plus.myplaces.favorites.SaveOption.APPLY_TO_ALL;
+import static net.osmand.plus.myplaces.favorites.SaveOption.APPLY_TO_NEW;
+import static net.osmand.shared.gpx.GpxUtilities.DEFAULT_ICON_NAME;
+
+import android.graphics.drawable.Drawable;
+
+import androidx.annotation.ColorInt;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+
+import net.osmand.Location;
+import net.osmand.PlatformUtil;
+import net.osmand.ResultMatcher;
+import net.osmand.binary.RouteDataObject;
+import net.osmand.data.BackgroundType;
+import net.osmand.data.FavouritePoint;
+import net.osmand.data.LatLon;
+import net.osmand.data.SpecialPointType;
+import net.osmand.plus.GeocodingLookupService.AddressLookupRequest;
+import net.osmand.plus.OsmandApplication;
+import net.osmand.plus.R;
+import net.osmand.plus.mapmarkers.MapMarkersGroup;
+import net.osmand.plus.mapmarkers.MapMarkersHelper;
+import net.osmand.plus.myplaces.favorites.FavoriteDeletionsJournal.ReadResult;
+import net.osmand.plus.myplaces.favorites.add.AddFavoriteOptions;
+import net.osmand.plus.myplaces.favorites.add.AddFavoriteResult;
+import net.osmand.plus.myplaces.favorites.dialogs.FavoriteSortModesHelper;
+import net.osmand.plus.plugins.PluginsHelper;
+import net.osmand.plus.plugins.parking.ParkingPositionPlugin;
+import net.osmand.plus.track.helpers.GpxDisplayGroup;
+import net.osmand.plus.track.helpers.GpxDisplayItem;
+import net.osmand.plus.utils.ColorUtilities;
+import net.osmand.shared.gpx.GpxUtilities.PointsGroup;
+import net.osmand.util.Algorithms;
+import net.osmand.util.CollectionUtils;
+
+import org.apache.commons.logging.Log;
+
+import java.io.File;
+import java.text.Collator;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+
+public class FavouritesHelper {
+
+	private static final Log log = PlatformUtil.getLog(FavouritesHelper.class);
+
+	private final OsmandApplication app;
+	private final FavouritesFileHelper fileHelper;
+	private final FavoriteSortModesHelper favoriteSortModesHelper;
+
+	private List<FavoriteGroup> favoriteGroups = new ArrayList<>();
+	private Map<String, FavoriteGroup> flatGroups = new LinkedHashMap<>();
+	private List<FavouritePoint> cachedFavoritePoints = new ArrayList<>();
+	@Nullable
+	private FavoriteFolderSnapshot favoriteFolderSnapshot;
+
+	private List<FavoritesListener> listeners = new ArrayList<>();
+	private final Map<FavouritePoint, AddressLookupRequest> addressRequestMap = new ConcurrentHashMap<>();
+	private final FavoritesListener saveFavoritesListener = new FavoritesListener() {
+		@Override
+		public void onSavingFavoritesFinished(boolean success) {
+			notifySavingFavoritesFinished(null, success);
+		}
+	};
+
+	private boolean favoritesLoaded;
+	private long lastModifiedTime;
+
+	public FavouritesHelper(@NonNull OsmandApplication app) {
+		this.app = app;
+		fileHelper = new FavouritesFileHelper(app);
+		favoriteSortModesHelper = new FavoriteSortModesHelper(app);
+	}
+
+	public long getLastUploadedTime() {
+		return app.getSettings().FAVORITES_LAST_UPLOADED_TIME.get();
+	}
+
+	public void setLastUploadedTime(long time) {
+		app.getSettings().FAVORITES_LAST_UPLOADED_TIME.set(time);
+	}
+
+	@NonNull
+	public FavouritesFileHelper getFileHelper() {
+		return fileHelper;
+	}
+
+	@NonNull
+	public FavoriteSortModesHelper getFavoriteSortModesHelper() {
+		return favoriteSortModesHelper;
+	}
+
+	@NonNull
+	public List<FavoriteGroup> getFavoriteGroups() {
+		return favoriteGroups;
+	}
+
+	@NonNull
+	public FavoriteFolder getFavoriteFolderRoot() {
+		return ensureFavoriteFolderSnapshot().root;
+	}
+
+	@Nullable
+	public FavoriteFolder getFavoriteFolder(@NonNull String fullPath) {
+		return ensureFavoriteFolderSnapshot().folders.get(fullPath);
+	}
+
+	@NonNull
+	public List<FavoriteFolder> getFavoriteRootFolders() {
+		return ensureFavoriteFolderSnapshot().root.getSubFolders();
+	}
+
+	@NonNull
+	public List<FavoriteFolder> getFlattenedFavoriteFolders(boolean includeRoot) {
+		List<FavoriteFolder> result = new ArrayList<>();
+		FavoriteFolder root = ensureFavoriteFolderSnapshot().root;
+		if (includeRoot) {
+			result.add(root);
+		}
+		for (FavoriteFolder subFolder : root.getSubFolders()) {
+			collectFlattenedFavoriteFolders(subFolder, result);
+		}
+		return result;
+	}
+
+	@NonNull
+	public List<FavoriteGroup> getFavoriteGroupsInSubtree(@NonNull String fullPath) {
+		List<FavoriteGroup> result = new ArrayList<>();
+		for (FavoriteFolder folder : getFavoriteFoldersInSubtree(fullPath)) {
+			FavoriteGroup group = folder.getGroup();
+			if (group != null) {
+				result.add(group);
+			}
+		}
+		return result;
+	}
+
+	@NonNull
+	private FavoriteFolderSnapshot ensureFavoriteFolderSnapshot() {
+		FavoriteFolderSnapshot snapshot = favoriteFolderSnapshot;
+		if (snapshot == null) {
+			snapshot = buildFavoriteFolderSnapshot();
+			favoriteFolderSnapshot = snapshot;
+		}
+		return snapshot;
+	}
+
+	@NonNull
+	private FavoriteFolderSnapshot buildFavoriteFolderSnapshot() {
+		FavoriteFolder root = new FavoriteFolder("", null);
+		Map<String, FavoriteFolder> folders = new LinkedHashMap<>();
+		folders.put(root.getFullPath(), root);
+		for (FavoriteGroup group : favoriteGroups) {
+			addFavoriteGroupToSnapshot(root, folders, group);
+		}
+		Collator collator = getCollator();
+		root.sortSubFolders(collator);
+		root.updateSubtreeStats();
+		return new FavoriteFolderSnapshot(root, folders);
+	}
+
+	private void addFavoriteGroupToSnapshot(@NonNull FavoriteFolder root,
+	                                        @NonNull Map<String, FavoriteFolder> folders,
+	                                        @NonNull FavoriteGroup group) {
+		String fullPath = group.getName();
+		if (Algorithms.isEmpty(fullPath)) {
+			root.setGroup(group);
+			return;
+		}
+		FavoriteFolder parent = root;
+		String currentPath = "";
+		for (String segment : FavoriteFolderPath.split(fullPath)) {
+			currentPath = Algorithms.isEmpty(currentPath)
+					? segment
+					: currentPath + FavoriteFolderPath.DELIMITER + segment;
+			FavoriteFolder folder = folders.get(currentPath);
+			if (folder == null) {
+				folder = new FavoriteFolder(currentPath, parent);
+				folders.put(currentPath, folder);
+				parent.addSubFolder(folder);
+			}
+			parent = folder;
+		}
+		parent.setGroup(group);
+	}
+
+	private void collectFlattenedFavoriteFolders(@NonNull FavoriteFolder folder,
+	                                             @NonNull List<FavoriteFolder> result) {
+		result.add(folder);
+		for (FavoriteFolder subFolder : folder.getSubFolders()) {
+			collectFlattenedFavoriteFolders(subFolder, result);
+		}
+	}
+
+	@NonNull
+	private List<FavoriteFolder> getFavoriteFoldersInSubtree(@NonNull String fullPath) {
+		List<FavoriteFolder> result = new ArrayList<>();
+		FavoriteFolder folder = getFavoriteFolder(fullPath);
+		if (folder != null) {
+			collectFlattenedFavoriteFolders(folder, result);
+		}
+		return result;
+	}
+
+	private void invalidateFavoriteFolderCache() {
+		favoriteFolderSnapshot = null;
+	}
+
+	private record FavoriteFolderSnapshot(FavoriteFolder root,
+	                                      Map<String, FavoriteFolder> folders) {
+
+			private FavoriteFolderSnapshot(@NonNull FavoriteFolder root,
+			                               @NonNull Map<String, FavoriteFolder> folders) {
+				this.root = root;
+				this.folders = folders;
+			}
+		}
+
+	@NonNull
+	public List<FavouritePoint> getFavouritePoints() {
+		return new ArrayList<>(cachedFavoritePoints);
+	}
+
+	@Nullable
+	public Drawable getColoredIconForGroup(@NonNull String groupName) {
+		String groupIdName = FavoriteGroup.convertDisplayNameToGroupIdName(app, groupName);
+		FavoriteGroup favoriteGroup = getGroup(groupIdName);
+		if (favoriteGroup != null) {
+			int color = favoriteGroup.getColor() == 0 ? ContextCompat.getColor(app, R.color.color_favorite) : favoriteGroup.getColor();
+			return app.getUIUtilities().getPaintedIcon(R.drawable.ic_action_group_name_16, color);
+		}
+		return null;
+	}
+
+	public int getColorWithCategory(@NonNull FavouritePoint point, int defaultColor) {
+		FavoriteGroup favoriteGroup = getGroup(point);
+		int groupColor = favoriteGroup != null ? favoriteGroup.getColor() : 0;
+		return getColorWithCategory(point.getColor(), groupColor, defaultColor);
+	}
+
+	public int getColorWithCategory(@ColorInt int pointColor, @ColorInt int groupColor, @ColorInt int defaultColor) {
+		if (pointColor != 0) {
+			return pointColor;
+		}
+		if (groupColor != 0) {
+			return groupColor;
+		}
+		return defaultColor;
+	}
+
+	public void loadFavorites() {
+		ReadResult journalRead = FavoriteDeletionsJournal.read(app);
+		FavoritePendingDeletions pendingDeletions = journalRead.getDeletions();
+
+		Map<String, FavoriteGroup> groups = fileHelper.loadInternalGroups();
+		Map<String, FavoriteGroup> extGroups = fileHelper.loadExternalGroups();
+
+		if (!pendingDeletions.isEmpty()) {
+			applyPendingDeletions(groups, pendingDeletions);
+			applyPendingDeletions(extGroups, pendingDeletions);
+		}
+
+		boolean changed = merge(extGroups, groups);
+
+		flatGroups = groups;
+		favoriteGroups = new ArrayList<>(groups.values());
+
+		recalculateCachedFavPoints();
+		sortAll();
+		invalidateFavoriteFolderCache();
+
+		File legacyExternalFile = fileHelper.getLegacyExternalFile();
+		// Force save favorites to file if internals are different from externals
+		// or no favorites created yet or legacy favourites.gpx present
+		if (changed || !fileHelper.getExternalDir().exists()
+				|| legacyExternalFile.exists() || !pendingDeletions.isEmpty()) {
+			saveCurrentPointsIntoFile(false);
+			// Delete legacy favourites.gpx if exists
+			if (legacyExternalFile.exists()) {
+				legacyExternalFile.delete();
+			}
+		} else {
+			updateLastModifiedTime();
+		}
+		favoritesLoaded = true;
+		notifyListeners();
+	}
+
+	private void applyPendingDeletions(@NonNull Map<String, FavoriteGroup> groups,
+	                                   @NonNull FavoritePendingDeletions pendingDeletions) {
+		Set<String> pendingGroupDeletions = pendingDeletions.getGroupNames();
+		Set<String> pendingPointDeletions = pendingDeletions.getPointKeys();
+
+		Iterator<Entry<String, FavoriteGroup>> it = groups.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry<String, FavoriteGroup> entry = it.next();
+			if (pendingGroupDeletions.contains(entry.getKey())) {
+				it.remove();
+			} else {
+				entry.getValue().getPoints().removeIf(point -> pendingPointDeletions.contains(point.getKey()));
+			}
+		}
+	}
+
+	public long getLastModifiedTime() {
+		MapMarkersHelper mapMarkersHelper = app.getMapMarkersHelper();
+		if (mapMarkersHelper != null) {
+			return Math.max(lastModifiedTime, mapMarkersHelper.getFavoriteMarkersModifiedTime());
+		} else {
+			return lastModifiedTime;
+		}
+	}
+
+	private void updateLastModifiedTime() {
+		lastModifiedTime = System.currentTimeMillis();
+	}
+
+	public void fixBlackBackground() {
+		flatGroups = new LinkedHashMap<>();
+		favoriteGroups = new ArrayList<>();
+		for (FavouritePoint fp : getFavouritePoints()) {
+			if (fp.getColor() == 0xFF000000 || fp.getColor() == ContextCompat.getColor(app, R.color.color_favorite)) {
+				fp.setColor(0);
+			}
+			if (fp.getBackgroundType() == FavouritePoint.DEFAULT_BACKGROUND_TYPE) {
+				fp.setBackgroundType(null);
+			}
+			if (fp.getIconIdOrDefault() == FavouritePoint.DEFAULT_UI_ICON_ID) {
+				fp.setIconId(0);
+			}
+			FavoriteGroup group = getOrCreateGroup(fp);
+			group.getPoints().add(fp);
+		}
+		sortAll();
+		invalidateFavoriteFolderCache();
+		saveCurrentPointsIntoFile(false);
+		notifyListeners();
+	}
+
+	private void notifyListeners() {
+		app.runInUIThread(() -> {
+			for (FavoritesListener listener : listeners) {
+				listener.onFavoritesLoaded();
+			}
+		});
+	}
+
+	@Nullable
+	public FavouritePoint getSpecialPoint(SpecialPointType pointType) {
+		for (FavouritePoint point : getFavouritePoints()) {
+			if (point.getSpecialPointType() == pointType) {
+				return point;
+			}
+		}
+		return null;
+	}
+
+	public boolean isFavoritesLoaded() {
+		return favoritesLoaded;
+	}
+
+	public void addListener(@NonNull FavoritesListener listener) {
+		boolean added = false;
+		if (!listeners.contains(listener)) {
+			listeners = CollectionUtils.addToList(listeners, listener);
+			added = true;
+		}
+		if (isFavoritesLoaded()) {
+			listener.onFavoritesLoaded();
+		}
+	}
+
+	public void removeListener(@NonNull FavoritesListener listener) {
+		listeners = CollectionUtils.removeFromList(listeners, listener);
+	}
+
+	private boolean merge(@NonNull Map<String, FavoriteGroup> source, @NonNull Map<String, FavoriteGroup> destination) {
+		boolean changed = false;
+		for (Map.Entry<String, FavoriteGroup> entry : source.entrySet()) {
+			String key = entry.getKey();
+			FavoriteGroup sourceGroup = entry.getValue();
+			FavoriteGroup destinationGroup = destination.get(key);
+
+			if (destinationGroup == null) {
+				changed = true;
+				destinationGroup = new FavoriteGroup(sourceGroup);
+				destination.put(key, destinationGroup);
+			} else {
+				destinationGroup.copyFileMetadata(sourceGroup);
+				boolean groupChanged = false;
+				if (!destinationGroup.appearanceEquals(sourceGroup)) {
+					groupChanged = true;
+					destinationGroup.copyAppearance(sourceGroup);
+				}
+				Map<String, FavouritePoint> destPointsMap = new LinkedHashMap<>();
+				for (FavouritePoint point : destinationGroup.getPoints()) {
+					destPointsMap.put(point.getKey(), point);
+				}
+				for (FavouritePoint sourcePoint : sourceGroup.getPoints()) {
+					String pointKey = sourcePoint.getKey();
+					FavouritePoint destPoint = destPointsMap.get(pointKey);
+					if (destPoint == null) {
+						groupChanged = true;
+						destPointsMap.put(pointKey, sourcePoint);
+					} else if (!destPoint.appearanceEquals(sourcePoint)) {
+						groupChanged = true;
+						destPoint.copyAppearance(sourcePoint);
+					}
+				}
+				if (groupChanged) {
+					changed = true;
+					destinationGroup.setPoints(new ArrayList<>(destPointsMap.values()));
+				}
+			}
+		}
+		return changed;
+	}
+
+	private void runSyncWithMarkers(FavoriteGroup favGroup) {
+		MapMarkersHelper helper = app.getMapMarkersHelper();
+		MapMarkersGroup group = helper.getMarkersGroup(favGroup);
+		if (group != null) {
+			helper.runSynchronization(group);
+		}
+	}
+
+	private boolean removeFromMarkers(FavoriteGroup favGroup) {
+		MapMarkersHelper helper = app.getMapMarkersHelper();
+		MapMarkersGroup group = helper.getMarkersGroup(favGroup);
+		if (group != null) {
+			helper.removeMarkersGroup(group);
+			return true;
+		}
+		return false;
+	}
+
+	private void addToMarkers(FavoriteGroup favGroup) {
+		MapMarkersHelper helper = app.getMapMarkersHelper();
+		helper.addOrEnableGroup(favGroup);
+	}
+
+	public void delete(@Nullable Set<FavoriteGroup> groupsToDelete, @Nullable Set<FavouritePoint> favoritesSelected) {
+		if (!Algorithms.isEmpty(favoritesSelected) || !Algorithms.isEmpty(groupsToDelete)) {
+			FavoriteDeletionsJournal.addAll(app, favoritesSelected, groupsToDelete);
+		}
+		if (!Algorithms.isEmpty(favoritesSelected)) {
+			Set<FavoriteGroup> groupsToSync = new HashSet<>();
+			for (FavouritePoint point : favoritesSelected) {
+				FavoriteGroup group = flatGroups.get(point.getCategory());
+				if (group != null) {
+					group.getPoints().remove(point);
+					groupsToSync.add(group);
+				}
+				if (point.isHomeOrWork()) {
+					app.getLauncherShortcutsHelper().updateLauncherShortcuts();
+				}
+				removeFavouritePoint(point);
+			}
+			for (FavoriteGroup group : groupsToSync) {
+				runSyncWithMarkers(group);
+			}
+			invalidateFavoriteFolderCache();
+		}
+		if (!Algorithms.isEmpty(groupsToDelete)) {
+			Map<String, FavoriteGroup> tmpFlatGroups = new LinkedHashMap<>(flatGroups);
+			ArrayList<FavoriteGroup> tmpFavoriteGroups = new ArrayList<>(favoriteGroups);
+			for (FavoriteGroup g : groupsToDelete) {
+				tmpFlatGroups.remove(g.getName());
+				tmpFavoriteGroups.remove(g);
+				removeFavouritePoints(g.getPoints());
+				removeFromMarkers(g);
+				if (g.isPersonal()) {
+					app.getLauncherShortcutsHelper().updateLauncherShortcuts();
+				}
+			}
+			flatGroups = tmpFlatGroups;
+			favoriteGroups = tmpFavoriteGroups;
+			invalidateFavoriteFolderCache();
+		}
+		saveCurrentPointsIntoFile(true);
+	}
+
+	public boolean deleteFavourite(FavouritePoint point) {
+		return deleteFavourite(point, true);
+	}
+
+	public boolean deleteFavourite(FavouritePoint p, boolean saveImmediately) {
+		if (p != null) {
+			FavoriteDeletionsJournal.addPoint(app, p);
+
+			FavoriteGroup group = flatGroups.get(p.getCategory());
+			if (group != null) {
+				group.getPoints().remove(p);
+				runSyncWithMarkers(group);
+			}
+			removeFavouritePoint(p);
+			if (p.isHomeOrWork()) {
+				app.getLauncherShortcutsHelper().updateLauncherShortcuts();
+			}
+			invalidateFavoriteFolderCache();
+		}
+		if (saveImmediately) {
+			saveCurrentPointsIntoFile(true);
+		}
+		return true;
+	}
+
+	public void setParkingPoint(@NonNull LatLon latLon, @Nullable String address, long pickupTimestamp, boolean addToCalendar) {
+		SpecialPointType specialType = SpecialPointType.PARKING;
+		FavouritePoint point = getSpecialPoint(specialType);
+		if (point != null) {
+			point.setIconId(specialType.getIconId(app));
+			point.setPickupDate(pickupTimestamp);
+			point.setCalendarEvent(addToCalendar);
+			point.setTimestamp(System.currentTimeMillis());
+			editFavourite(point, latLon.getLatitude(), latLon.getLongitude(), address);
+			lookupAddress(point);
+		} else {
+			point = new FavouritePoint(latLon.getLatitude(), latLon.getLongitude(), specialType.getName(), specialType.getCategory());
+			point.setAddress(address);
+			point.setPickupDate(pickupTimestamp);
+			point.setCalendarEvent(addToCalendar);
+			point.setIconId(specialType.getIconId(app));
+			addFavourite(point);
+		}
+	}
+
+	public void setSpecialPoint(@NonNull LatLon latLon, SpecialPointType specialType, @Nullable String address) {
+		FavouritePoint point = getSpecialPoint(specialType);
+		if (point != null) {
+			point.setIconId(specialType.getIconId(app));
+			editFavourite(point, latLon.getLatitude(), latLon.getLongitude(), address);
+			lookupAddress(point);
+		} else {
+			point = new FavouritePoint(latLon.getLatitude(), latLon.getLongitude(), specialType.getName(), specialType.getCategory());
+			point.setAddress(address);
+			point.setIconId(specialType.getIconId(app));
+			addFavourite(point);
+		}
+	}
+
+	public void copyToFavorites(@NonNull GpxDisplayGroup displayGroup, @NonNull String groupName) {
+		ParkingPositionPlugin plugin = PluginsHelper.getPlugin(ParkingPositionPlugin.class);
+		FavouritesHelper favouritesHelper = app.getFavoritesHelper();
+
+		List<FavouritePoint> addedPoints = new ArrayList<>();
+		List<FavouritePoint> duplicatePoints = new ArrayList<>();
+		AddFavoriteOptions options = new AddFavoriteOptions().setLookupAddress(true);
+
+		for (GpxDisplayItem item : displayGroup.getDisplayItems()) {
+			if (item.locationStart != null) {
+				FavouritePoint point = FavouritePoint.fromWpt(item.locationStart, groupName);
+				if (!Algorithms.isEmpty(item.description)) {
+					point.setDescription(item.description);
+				}
+				if (plugin != null && point.getSpecialPointType() == SpecialPointType.PARKING) {
+					plugin.updateParkingPoint(point);
+				}
+				switch (favouritesHelper.addFavourite(point, options)) {
+					case ADDED -> addedPoints.add(point);
+					case DUPLICATE -> duplicatePoints.add(point);
+				}
+			}
+		}
+		favouritesHelper.saveCurrentPointsIntoFile(true);
+
+		if (!addedPoints.isEmpty()) {
+			app.showShortToastMessage(R.string.msg_gpx_waypoints_copied_to_favorites, addedPoints.size());
+		}
+		if (!duplicatePoints.isEmpty()) {
+			app.showShortToastMessage(R.string.msg_favorites_skipped_as_existing, duplicatePoints.size());
+		}
+	}
+
+	public boolean addFavourite(@NonNull FavouritePoint point) {
+		return addFavourite(point, new AddFavoriteOptions().enableAll()) == AddFavoriteResult.ADDED;
+	}
+
+	@NonNull
+	public AddFavoriteResult addFavourite(@NonNull FavouritePoint point, @NonNull AddFavoriteOptions options) {
+		return addFavourite(point, null, options);
+	}
+
+	@NonNull
+	public AddFavoriteResult addFavourite(@NonNull FavouritePoint point,
+	                                      @Nullable PointsGroup pointsGroup,
+	                                      @NonNull AddFavoriteOptions options) {
+		if (Double.isNaN(point.getAltitude()) || point.getAltitude() == 0) {
+			initAltitude(point);
+		}
+
+		String pointName = point.getName();
+		FavoriteGroup favoriteGroup = flatGroups.get(point.getCategory());
+		if (favoriteGroup != null && pointName.isEmpty()) {
+			return AddFavoriteResult.IGNORED;
+		}
+		if (favoriteGroup != null && favoriteGroup.containsPointByName(pointName)) {
+			return AddFavoriteResult.DUPLICATE;
+		}
+
+		if (options.lookupAddress && !point.isAddressSpecified()) {
+			lookupAddress(point);
+		}
+		app.getSettings().SHOW_FAVORITES.set(true);
+
+		FavoriteGroup group = getOrCreateGroup(point, pointsGroup);
+		if (!pointName.isEmpty()) {
+			point.setVisible(group.isVisible());
+			if (SpecialPointType.PARKING == point.getSpecialPointType()) {
+				point.setColor(getParkingIconColor());
+			} else if (point.getColor() == 0) {
+				point.setColor(group.getColor());
+			}
+			group.getPoints().add(point);
+			addFavouritePoint(point);
+			invalidateFavoriteFolderCache();
+		}
+		if (options.sortAndSave) {
+			sortAll();
+			saveCurrentPointsIntoFile(options.saveAsync);
+		}
+
+		runSyncWithMarkers(group);
+		if (point.isHomeOrWork()) {
+			app.getLauncherShortcutsHelper().updateLauncherShortcuts();
+		}
+
+		return AddFavoriteResult.ADDED;
+	}
+
+	public void lookupAddress(@NonNull FavouritePoint point) {
+		AddressLookupRequest request = addressRequestMap.get(point);
+		double latitude = point.getLatitude();
+		double longitude = point.getLongitude();
+		if (request == null || !request.getLatLon().equals(new LatLon(latitude, longitude))) {
+			cancelAddressRequest(point);
+			request = new AddressLookupRequest(new LatLon(latitude, longitude), address -> {
+				addressRequestMap.remove(point);
+				editAddressDescription(point, address);
+				app.runInUIThread(() -> {
+					for (FavoritesListener listener : listeners) {
+						listener.onFavoriteDataUpdated(point);
+					}
+				});
+			}, null);
+			addressRequestMap.put(point, request);
+			app.getGeocodingLookupService().lookupAddress(request);
+		}
+	}
+
+	private void cancelAddressRequest(@NonNull FavouritePoint point) {
+		AddressLookupRequest request = addressRequestMap.get(point);
+		if (request != null) {
+			app.getGeocodingLookupService().cancel(request);
+			addressRequestMap.remove(point);
+		}
+	}
+
+	@ColorInt
+	public int getParkingIconColor() {
+		return ColorUtilities.getColor(app, R.color.parking_icon_background);
+	}
+
+	public boolean editFavouriteName(FavouritePoint p, String newName, String category, String descr, String address) {
+		String oldCategory = p.getCategory();
+		p.setName(newName);
+		p.setCategory(category);
+		p.setDescription(descr);
+		p.setAddress(address);
+		if (!oldCategory.equals(category)) {
+			FavoriteGroup old = flatGroups.get(oldCategory);
+			if (old != null) {
+				old.getPoints().remove(p);
+			}
+			FavoriteGroup pg = getOrCreateGroup(p);
+			p.setVisible(pg.isVisible());
+			if (SpecialPointType.PARKING == p.getSpecialPointType()) {
+				p.setColor(ContextCompat.getColor(app, R.color.parking_icon_background));
+			} else {
+				if (p.getColor() == 0) {
+					p.setColor(pg.getColor());
+				}
+			}
+			pg.getPoints().add(p);
+		}
+		sortAll();
+		invalidateFavoriteFolderCache();
+		saveCurrentPointsIntoFile(true);
+		runSyncWithMarkers(getOrCreateGroup(p));
+		return true;
+	}
+
+	public void editFavouritesGroup(@NonNull List<FavouritePoint> points, @NonNull String newCategory) {
+		int skippedDuplicates = 0;
+		FavoriteGroup targetGroup = flatGroups.get(newCategory);
+		for (FavouritePoint point : points) {
+			String oldCategory = point.getCategory();
+			if (!oldCategory.equals(newCategory)) {
+				if (targetGroup != null && targetGroup.containsPointByName(point.getName())) {
+					skippedDuplicates++;
+					continue;
+				}
+				FavoriteGroup old = flatGroups.get(oldCategory);
+				if (old != null) {
+					old.getPoints().remove(point);
+				}
+				point.setCategory(newCategory);
+				FavoriteGroup pg = getOrCreateGroup(point);
+				point.setVisible(pg.isVisible());
+				if (SpecialPointType.PARKING == point.getSpecialPointType()) {
+					point.setColor(ContextCompat.getColor(app, R.color.parking_icon_background));
+				} else {
+					if (point.getColor() == 0) {
+						point.setColor(pg.getColor());
+					}
+				}
+				pg.getPoints().add(point);
+				targetGroup = pg;
+			}
+		}
+
+		sortAll();
+		invalidateFavoriteFolderCache();
+		saveCurrentPointsIntoFile(true);
+		if (!Algorithms.isEmpty(points)) {
+			runSyncWithMarkers(getOrCreateGroup(points.get(0)));
+		}
+		if (skippedDuplicates > 0) {
+			app.showShortToastMessage(R.string.msg_favorites_skipped_as_existing, skippedDuplicates);
+		}
+	}
+
+	private void editAddressDescription(@NonNull FavouritePoint p, @Nullable String address) {
+		p.setAddress(address);
+		saveCurrentPointsIntoFile(true);
+		runSyncWithMarkers(getOrCreateGroup(p));
+	}
+
+	public boolean editFavourite(@NonNull FavouritePoint p, double lat, double lon) {
+		return editFavourite(p, lat, lon, null);
+	}
+
+	public boolean favouritePassed(@NonNull FavouritePoint point, boolean passed, boolean saveImmediately) {
+		point.setVisitedDate(passed ? System.currentTimeMillis() : 0);
+		if (saveImmediately) {
+			saveCurrentPointsIntoFile(true);
+		}
+		FavoriteGroup group = getOrCreateGroup(point);
+		runSyncWithMarkers(group);
+		return true;
+	}
+
+	private boolean editFavourite(@NonNull FavouritePoint point, double lat, double lon, @Nullable String description) {
+		cancelAddressRequest(point);
+		point.setLatitude(lat);
+		point.setLongitude(lon);
+		initAltitude(point);
+		if (description != null) {
+			point.setDescription(description);
+		}
+		saveCurrentPointsIntoFile(true);
+		runSyncWithMarkers(getOrCreateGroup(point));
+		return true;
+	}
+
+	public void saveCurrentPointsIntoFile(boolean async) {
+		saveGroupsInternal(new ArrayList<>(favoriteGroups), true, async);
+	}
+
+	public void saveCurrentPointsIntoFile(boolean async, @Nullable FavoritesListener listener) {
+		saveFavoriteGroups(new ArrayList<>(favoriteGroups), true, async, listener);
+	}
+
+	public void saveSelectedGroupsIntoFile(@NonNull List<FavoriteGroup> groups, boolean async) {
+		saveGroupsInternal(groups, false, async);
+	}
+
+	private void saveGroupsInternal(@NonNull List<FavoriteGroup> groups, boolean saveAllGroups, boolean async) {
+		saveFavoriteGroups(groups, saveAllGroups, async, null);
+	}
+
+	private void saveFavoriteGroups(@NonNull List<FavoriteGroup> groups, boolean saveAllGroups, boolean async, @Nullable FavoritesListener listener) {
+		updateLastModifiedTime();
+		FavoritesListener saveListener = listener == null ? saveFavoritesListener : new FavoritesListener() {
+			@Override
+			public void onSavingFavoritesFinished(boolean success) {
+				notifySavingFavoritesFinished(listener, success);
+			}
+		};
+		if (async) {
+			fileHelper.saveFavoritesIntoFile(groups, saveAllGroups, saveListener);
+		} else {
+			fileHelper.saveFavoritesIntoFileSync(groups, saveAllGroups, saveListener);
+		}
+	}
+
+	public boolean deleteGroup(@NonNull FavoriteGroup group, boolean saveImmediately) {
+		List<FavoriteGroup> tmpFavoriteGroups = new ArrayList<>(favoriteGroups);
+		boolean remove = tmpFavoriteGroups.remove(group);
+		if (remove) {
+			FavoriteDeletionsJournal.addGroup(app, group);
+			favoriteGroups = tmpFavoriteGroups;
+			Map<String, FavoriteGroup> tmpFlatGroups = new LinkedHashMap<>(flatGroups);
+			tmpFlatGroups.remove(group.getName());
+			flatGroups = tmpFlatGroups;
+			invalidateFavoriteFolderCache();
+			if (saveImmediately) {
+				saveCurrentPointsIntoFile(true);
+			}
+			removeFromMarkers(group);
+			return true;
+		}
+		return false;
+	}
+
+	public boolean deleteFavoriteFolderSubtree(@NonNull String fullPath, boolean saveImmediately) {
+		if (Algorithms.isEmpty(fullPath)) {
+			return false;
+		}
+		List<FavoriteGroup> groupsToDelete = getFavoriteGroupsInSubtree(fullPath);
+		if (Algorithms.isEmpty(groupsToDelete)) {
+			return false;
+		}
+		boolean updateLauncherShortcuts = false;
+		List<FavoriteGroup> tmpFavoriteGroups = new ArrayList<>(favoriteGroups);
+		Map<String, FavoriteGroup> tmpFlatGroups = new LinkedHashMap<>(flatGroups);
+		for (FavoriteGroup group : groupsToDelete) {
+			FavoriteDeletionsJournal.addGroup(app, group);
+			tmpFavoriteGroups.remove(group);
+			tmpFlatGroups.remove(group.getName());
+			removeFavouritePoints(group.getPoints());
+			removeFromMarkers(group);
+			updateLauncherShortcuts |= group.isPersonal();
+		}
+		favoriteGroups = tmpFavoriteGroups;
+		flatGroups = tmpFlatGroups;
+		invalidateFavoriteFolderCache();
+		if (updateLauncherShortcuts) {
+			app.getLauncherShortcutsHelper().updateLauncherShortcuts();
+		}
+		if (saveImmediately) {
+			saveCurrentPointsIntoFile(true);
+		}
+		return true;
+	}
+
+	@NonNull
+	public FavoriteGroup ensureFavoriteGroup(@NonNull String fullPath) {
+		return ensureFavoriteGroup(fullPath, false);
+	}
+
+	@NonNull
+	public FavoriteGroup ensureFavoriteGroup(@NonNull String fullPath, boolean saveImmediately) {
+		FavoriteFolderPath.requireValidFullPath(fullPath);
+		FavoriteGroup group = flatGroups.get(fullPath);
+		if (group == null) {
+			group = addFavoriteGroup(fullPath, 0);
+			sortAll();
+			if (saveImmediately) {
+				saveCurrentPointsIntoFile(true);
+			}
+		}
+		return group;
+	}
+
+	public FavoriteGroup addFavoriteGroup(@NonNull String name, int color) {
+		return addFavoriteGroup(name, color, DEFAULT_ICON_NAME, DEFAULT_BACKGROUND_TYPE);
+	}
+
+	public FavoriteGroup addFavoriteGroup(@NonNull String name, int color, @NonNull String iconName, @NonNull BackgroundType backgroundType) {
+		FavoriteGroup group = new FavoriteGroup();
+		group.setName(FavoriteGroup.convertDisplayNameToGroupIdName(app, name));
+		group.setColor(color);
+		group.setIconName(iconName);
+		group.setBackgroundType(backgroundType);
+		favoriteGroups = CollectionUtils.addToList(favoriteGroups, group);
+		Map<String, FavoriteGroup> tmpFlatGroups = new LinkedHashMap<>(flatGroups);
+		tmpFlatGroups.put(group.getName(), group);
+		flatGroups = tmpFlatGroups;
+		if (FavoriteGroup.isBaseFavoriteOrPersonalGroup(group.getName())){
+			group.setPinned(true);
+		}
+		invalidateFavoriteFolderCache();
+		return group;
+	}
+
+	public void initAltitude(@NonNull FavouritePoint point) {
+		initAltitude(point, null);
+	}
+
+	public void initAltitude(@NonNull FavouritePoint point, @Nullable Runnable callback) {
+		Location location = new Location("", point.getLatitude(), point.getLongitude());
+		app.getLocationProvider().getRouteSegment(location, null, false,
+				new ResultMatcher<RouteDataObject>() {
+
+					@Override
+					public boolean publish(RouteDataObject routeDataObject) {
+						if (routeDataObject != null) {
+							LatLon latLon = new LatLon(point.getLatitude(), point.getLongitude());
+							routeDataObject.calculateHeightArray(latLon);
+							point.setAltitude(routeDataObject.heightByCurrentLocation);
+						}
+						if (callback != null) {
+							callback.run();
+						}
+						return true;
+					}
+
+					@Override
+					public boolean isCancelled() {
+						return false;
+					}
+				});
+	}
+
+	@NonNull
+	public List<FavouritePoint> getVisibleFavouritePoints() {
+		List<FavouritePoint> points = new ArrayList<>();
+		for (FavouritePoint point : getFavouritePoints()) {
+			if (point.isVisible()) {
+				points.add(point);
+			}
+		}
+		return points;
+	}
+
+	@Nullable
+	public FavouritePoint getVisibleFavByLatLon(@NonNull LatLon latLon) {
+		for (FavouritePoint point : getFavouritePoints()) {
+			if (point.isVisible() && latLon.equals(new LatLon(point.getLatitude(), point.getLongitude()))) {
+				return point;
+			}
+		}
+		return null;
+	}
+
+	public boolean isGroupVisible(@NonNull String name) {
+		String nameLowercase = name.toLowerCase();
+		for (Map.Entry<String, FavoriteGroup> entry : flatGroups.entrySet()) {
+			String groupName = entry.getKey();
+			if (groupName.toLowerCase().equals(nameLowercase) || FavoriteGroup.getDisplayName(app, groupName).equals(name)) {
+				return entry.getValue().isVisible();
+			}
+		}
+		return false;
+	}
+
+	public boolean groupExists(String name) {
+		String nameLowercase = name.toLowerCase();
+		for (String groupName : flatGroups.keySet()) {
+			if (groupName.toLowerCase().equals(nameLowercase) || FavoriteGroup.getDisplayName(app, groupName).equals(name)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Nullable
+	public FavoriteGroup getGroup(FavouritePoint p) {
+		if (p != null && flatGroups.containsKey(p.getCategory())) {
+			return flatGroups.get(p.getCategory());
+		} else {
+			return null;
+		}
+	}
+
+	@Nullable
+	public FavoriteGroup getGroup(String nameId) {
+		if (flatGroups.containsKey(nameId)) {
+			return flatGroups.get(nameId);
+		} else {
+			return null;
+		}
+	}
+
+	private void addFavouritePoint(@NonNull FavouritePoint point) {
+		cachedFavoritePoints = CollectionUtils.addToList(cachedFavoritePoints, point);
+	}
+
+	private void removeFavouritePoint(@NonNull FavouritePoint point) {
+		cachedFavoritePoints = CollectionUtils.removeFromList(cachedFavoritePoints, point);
+	}
+
+	private void removeFavouritePoints(@NonNull List<FavouritePoint> points) {
+		cachedFavoritePoints = CollectionUtils.removeAllFromList(cachedFavoritePoints, points);
+	}
+
+	public void recalculateCachedFavPoints() {
+		List<FavouritePoint> allPoints = new ArrayList<>();
+		for (FavoriteGroup f : favoriteGroups) {
+			allPoints.addAll(f.getPoints());
+		}
+		cachedFavoritePoints = new ArrayList<>(allPoints);
+		invalidateFavoriteFolderCache();
+	}
+
+	public void sortAll() {
+		Collator collator = getCollator();
+		List<FavoriteGroup> tmpFavoriteGroups = new ArrayList<>(favoriteGroups);
+		Collections.sort(tmpFavoriteGroups, (lhs, rhs) -> lhs.isPersonal() ? -1
+				: rhs.isPersonal() ? 1 : collator.compare(lhs.getName(), rhs.getName()));
+
+		Comparator<FavouritePoint> comparator = new FavouritePointComparator(collator);
+		for (FavoriteGroup group : tmpFavoriteGroups) {
+			List<FavouritePoint> points = new ArrayList<>(group.getPoints());
+			Collections.sort(points, comparator);
+			group.setPoints(points);
+		}
+		favoriteGroups = tmpFavoriteGroups;
+		List<FavouritePoint> tmpCechPoints = new ArrayList<>(cachedFavoritePoints);
+		Collections.sort(tmpCechPoints, comparator);
+		cachedFavoritePoints = tmpCechPoints;
+	}
+
+	@NonNull
+	private static Collator getCollator() {
+		Collator collator = Collator.getInstance();
+		collator.setStrength(Collator.SECONDARY);
+		return collator;
+	}
+
+	public void updateGroupColor(@NonNull FavoriteGroup group, int color, @NonNull SaveOption saveOption, boolean saveImmediately) {
+		if (saveOption.shouldUpdatePoints()) {
+			for (FavouritePoint point : group.getPoints()) {
+				point.setColor(color);
+			}
+		}
+		if (saveOption.shouldUpdateGroup()) {
+			group.setColor(color);
+		}
+		runSyncWithMarkers(group);
+		if (saveImmediately) {
+			saveCurrentPointsIntoFile(true);
+		}
+	}
+
+	public void updateGroupColor(@NonNull FavoriteGroup group, int color, boolean updatePoints, boolean saveImmediately) {
+		SaveOption saveOption = updatePoints ? APPLY_TO_ALL : APPLY_TO_NEW;
+		updateGroupColor(group, color, saveOption, saveImmediately);
+	}
+
+	public void updateGroupIconName(@NonNull FavoriteGroup group, @NonNull String iconName,
+	                                @NonNull SaveOption saveOption, boolean saveImmediately) {
+		if (saveOption.shouldUpdatePoints()) {
+			for (FavouritePoint point : group.getPoints()) {
+				point.setIconIdFromName(iconName);
+			}
+		}
+		if (saveOption.shouldUpdateGroup()) {
+			group.setIconName(iconName);
+		}
+		runSyncWithMarkers(group);
+		if (saveImmediately) {
+			saveCurrentPointsIntoFile(true);
+		}
+	}
+
+	public void updateGroupIconName(@NonNull FavoriteGroup group, @NonNull String iconName,
+	                                boolean updatePoints, boolean saveImmediately) {
+		SaveOption saveOption = updatePoints ? APPLY_TO_ALL : APPLY_TO_NEW;
+		updateGroupIconName(group, iconName, saveOption, saveImmediately);
+	}
+
+	public void updateGroupBackgroundType(@NonNull FavoriteGroup group, @NonNull BackgroundType backgroundType,
+	                                      @NonNull SaveOption saveOption, boolean saveImmediately) {
+		if (saveOption.shouldUpdatePoints()) {
+			for (FavouritePoint point : group.getPoints()) {
+				point.setBackgroundType(backgroundType);
+			}
+		}
+		if (saveOption.shouldUpdateGroup()) {
+			group.setBackgroundType(backgroundType);
+		}
+		runSyncWithMarkers(group);
+		if (saveImmediately) {
+			saveCurrentPointsIntoFile(true);
+		}
+	}
+
+	public void updateGroupBackgroundType(@NonNull FavoriteGroup group, @NonNull BackgroundType backgroundType,
+	                                      boolean updatePoints, boolean saveImmediately) {
+		SaveOption saveOption = updatePoints ? APPLY_TO_ALL : APPLY_TO_NEW;
+		updateGroupBackgroundType(group, backgroundType, saveOption, saveImmediately);
+	}
+
+	public void updateGroupVisibility(@NonNull FavoriteGroup group, boolean visible, boolean saveImmediately) {
+		if (group.isVisible() != visible) {
+			for (FavouritePoint point : group.getPoints()) {
+				point.setVisible(visible);
+			}
+			group.setVisible(visible);
+			runSyncWithMarkers(group);
+		}
+		if (saveImmediately) {
+			saveCurrentPointsIntoFile(true);
+		}
+	}
+
+	public void updateGroupPin(@NonNull FavoriteGroup group, boolean pinned, boolean saveImmediately) {
+		if (group.isPinned() != pinned) {
+			group.setPinned(pinned);
+		}
+		if (saveImmediately) {
+			saveCurrentPointsIntoFile(true);
+		}
+	}
+
+	public void updateGroupName(@NonNull FavoriteGroup group, @NonNull String newName, boolean saveImmediately) {
+		if (!Algorithms.stringsEqual(group.getName(), newName)) {
+			if (flatGroups.containsKey(newName)) {
+				return;
+			}
+			flatGroups.remove(group.getName());
+			boolean isInMarkers = removeFromMarkers(group);
+
+			group.setName(newName);
+			FavoriteGroup renamedGroup = flatGroups.get(group.getName());
+			boolean existing = renamedGroup != null;
+			if (renamedGroup == null) {
+				renamedGroup = group;
+				Map<String, FavoriteGroup> tmpFlatGroups = new LinkedHashMap<>(flatGroups);
+				tmpFlatGroups.put(group.getName(), group);
+				flatGroups = tmpFlatGroups;
+			} else {
+				favoriteGroups = CollectionUtils.removeFromList(favoriteGroups, group);
+			}
+			for (FavouritePoint point : group.getPoints()) {
+				point.setCategory(newName);
+			}
+			if (existing) {
+				renamedGroup.getPoints().addAll(group.getPoints());
+			}
+			if (isInMarkers) {
+				addToMarkers(renamedGroup);
+			}
+			invalidateFavoriteFolderCache();
+		}
+		if (saveImmediately) {
+			saveCurrentPointsIntoFile(true);
+		}
+	}
+
+	public boolean hasRenameFavoriteFolderSubtreeConflict(@NonNull String oldPath, @NonNull String newPath) {
+		FavoriteFolderPath.requireValidFullPath(newPath);
+		if (Algorithms.stringsEqual(oldPath, newPath)) {
+			return false;
+		}
+		if (Algorithms.isEmpty(oldPath) || FavoriteFolderPath.isDescendantOrSelf(newPath, oldPath)) {
+			return true;
+		}
+		List<FavoriteFolder> foldersToRename = getFavoriteFoldersInSubtree(oldPath);
+		List<FavoriteGroup> groupsToRename = new ArrayList<>();
+		for (FavoriteFolder folder : foldersToRename) {
+			FavoriteGroup group = folder.getGroup();
+			if (group != null) {
+				groupsToRename.add(group);
+			}
+		}
+		if (Algorithms.isEmpty(groupsToRename)) {
+			return false;
+		}
+		Set<String> sourceFolderPaths = new HashSet<>();
+		for (FavoriteFolder folder : foldersToRename) {
+			sourceFolderPaths.add(folder.getFullPath());
+		}
+		FavoriteFolder targetFolder = getFavoriteFolder(newPath);
+		if (targetFolder != null && !sourceFolderPaths.contains(newPath)) {
+			return true;
+		}
+		for (FavoriteGroup group : groupsToRename) {
+			String targetPath = FavoriteFolderPath.replacePathPrefix(group.getName(), oldPath, newPath);
+			FavoriteFolder targetChildFolder = getFavoriteFolder(targetPath);
+			if (targetChildFolder != null && !sourceFolderPaths.contains(targetPath)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean renameFavoriteFolderSubtree(@NonNull String oldPath, @NonNull String newPath, boolean saveImmediately) {
+		FavoriteFolderPath.requireValidFullPath(newPath);
+		if (Algorithms.isEmpty(oldPath) || Algorithms.stringsEqual(oldPath, newPath)) {
+			return false;
+		}
+		List<FavoriteGroup> groupsToRename = getFavoriteGroupsInSubtree(oldPath);
+		if (Algorithms.isEmpty(groupsToRename) || hasRenameFavoriteFolderSubtreeConflict(oldPath, newPath)) {
+			return false;
+		}
+		List<String> newNames = new ArrayList<>();
+		for (FavoriteGroup group : groupsToRename) {
+			newNames.add(FavoriteFolderPath.replacePathPrefix(group.getName(), oldPath, newPath));
+		}
+		List<FavoriteGroup> groupsInMarkers = new ArrayList<>();
+		boolean updateLauncherShortcuts = false;
+		Map<String, FavoriteGroup> tmpFlatGroups = new LinkedHashMap<>(flatGroups);
+		for (FavoriteGroup group : groupsToRename) {
+			tmpFlatGroups.remove(group.getName());
+			if (removeFromMarkers(group)) {
+				groupsInMarkers.add(group);
+			}
+			updateLauncherShortcuts |= group.isPersonal();
+		}
+		for (int i = 0; i < groupsToRename.size(); i++) {
+			FavoriteGroup group = groupsToRename.get(i);
+			String newName = newNames.get(i);
+			group.setName(newName);
+			for (FavouritePoint point : group.getPoints()) {
+				point.setCategory(newName);
+			}
+			tmpFlatGroups.put(newName, group);
+		}
+		flatGroups = tmpFlatGroups;
+		for (FavoriteGroup group : groupsInMarkers) {
+			addToMarkers(group);
+		}
+		if (updateLauncherShortcuts) {
+			app.getLauncherShortcutsHelper().updateLauncherShortcuts();
+		}
+		sortAll();
+		invalidateFavoriteFolderCache();
+		if (saveImmediately) {
+			saveCurrentPointsIntoFile(true);
+		}
+		return true;
+	}
+
+	public boolean moveFavoriteFolderSubtrees(@NonNull List<String> sourcePaths,
+	                                          @NonNull String destinationPath,
+	                                          boolean saveImmediately) {
+		FavoriteFolderPath.requireValidFullPath(destinationPath);
+		List<String> rootPaths = getTopLevelFavoriteFolderPaths(sourcePaths);
+		if (Algorithms.isEmpty(rootPaths)
+				|| (!Algorithms.isEmpty(destinationPath) && getFavoriteFolder(destinationPath) == null)) {
+			return false;
+		}
+
+		Map<String, String> folderPathChanges = new LinkedHashMap<>();
+		Map<FavoriteGroup, String> groupNameChanges = new LinkedHashMap<>();
+		Set<String> sourceFolderPaths = new HashSet<>();
+		return collectFavoriteFolderMoveChanges(rootPaths, destinationPath, folderPathChanges,
+				sourceFolderPaths, groupNameChanges)
+				&& !hasFavoriteFolderMoveConflict(folderPathChanges, sourceFolderPaths)
+				&& applyFavoriteFolderMove(groupNameChanges, saveImmediately);
+	}
+
+	private boolean collectFavoriteFolderMoveChanges(@NonNull List<String> sourcePaths,
+	                                                 @NonNull String destinationPath,
+	                                                 @NonNull Map<String, String> folderPathChanges,
+	                                                 @NonNull Set<String> sourceFolderPaths,
+	                                                 @NonNull Map<FavoriteGroup, String> groupNameChanges) {
+		for (String sourcePath : sourcePaths) {
+			if (!collectFavoriteFolderMoveChanges(sourcePath, destinationPath, folderPathChanges,
+					sourceFolderPaths, groupNameChanges)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private boolean collectFavoriteFolderMoveChanges(@NonNull String sourcePath,
+	                                                 @NonNull String destinationPath,
+	                                                 @NonNull Map<String, String> folderPathChanges,
+	                                                 @NonNull Set<String> sourceFolderPaths,
+	                                                 @NonNull Map<FavoriteGroup, String> groupNameChanges) {
+		if (Algorithms.isEmpty(sourcePath)
+				|| FavoriteFolderPath.isDescendantOrSelf(destinationPath, sourcePath)) {
+			return false;
+		}
+		List<FavoriteFolder> sourceFolders = getFavoriteFoldersInSubtree(sourcePath);
+		if (Algorithms.isEmpty(sourceFolders)) {
+			return false;
+		}
+		String sourceName = FavoriteFolderPath.lastSegment(sourcePath);
+		String targetRootPath = Algorithms.isEmpty(destinationPath)
+				? sourceName
+				: destinationPath + FavoriteFolderPath.DELIMITER + sourceName;
+		for (FavoriteFolder sourceFolder : sourceFolders) {
+			String oldFolderPath = sourceFolder.getFullPath();
+			String newFolderPath = FavoriteFolderPath.replacePathPrefix(
+					oldFolderPath, sourcePath, targetRootPath);
+			sourceFolderPaths.add(oldFolderPath);
+			folderPathChanges.put(oldFolderPath, newFolderPath);
+			FavoriteGroup sourceGroup = sourceFolder.getGroup();
+			if (sourceGroup != null) {
+				groupNameChanges.put(sourceGroup, newFolderPath);
+			}
+		}
+		return true;
+	}
+
+	private boolean hasFavoriteFolderMoveConflict(@NonNull Map<String, String> folderPathChanges,
+	                                              @NonNull Set<String> sourceFolderPaths) {
+		Set<String> targetFolderPaths = new HashSet<>();
+		for (Map.Entry<String, String> change : folderPathChanges.entrySet()) {
+			String oldFolderPath = change.getKey();
+			String newFolderPath = change.getValue();
+			if (!targetFolderPaths.add(newFolderPath)) {
+				return true;
+			}
+			FavoriteFolder existingFolder = getFavoriteFolder(newFolderPath);
+			if (existingFolder != null
+					&& !Algorithms.stringsEqual(oldFolderPath, newFolderPath)
+					&& !sourceFolderPaths.contains(newFolderPath)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean applyFavoriteFolderMove(@NonNull Map<FavoriteGroup, String> groupNameChanges,
+	                                        boolean saveImmediately) {
+		List<FavoriteGroup> changedGroups = getChangedFavoriteGroups(groupNameChanges);
+		if (changedGroups.isEmpty()) {
+			return true;
+		}
+		Map<String, FavoriteGroup> updatedFlatGroups = new LinkedHashMap<>(flatGroups);
+		List<FavoriteGroup> groupsInMarkers = new ArrayList<>();
+		boolean updateLauncherShortcuts = prepareFavoriteGroupsForMove(
+				changedGroups, updatedFlatGroups, groupsInMarkers);
+		applyFavoriteGroupNameChanges(groupNameChanges, updatedFlatGroups);
+		flatGroups = updatedFlatGroups;
+		restoreFavoriteGroupsInMarkers(groupsInMarkers);
+		if (updateLauncherShortcuts) {
+			app.getLauncherShortcutsHelper().updateLauncherShortcuts();
+		}
+		sortAll();
+		invalidateFavoriteFolderCache();
+		if (saveImmediately) {
+			saveCurrentPointsIntoFile(true);
+		}
+		return true;
+	}
+
+	@NonNull
+	private List<FavoriteGroup> getChangedFavoriteGroups(@NonNull Map<FavoriteGroup, String> groupNameChanges) {
+		List<FavoriteGroup> changedGroups = new ArrayList<>();
+		for (Map.Entry<FavoriteGroup, String> change : groupNameChanges.entrySet()) {
+			if (!Algorithms.stringsEqual(change.getKey().getName(), change.getValue())) {
+				changedGroups.add(change.getKey());
+			}
+		}
+		return changedGroups;
+	}
+
+	private boolean prepareFavoriteGroupsForMove(@NonNull List<FavoriteGroup> changedGroups,
+	                                             @NonNull Map<String, FavoriteGroup> updatedFlatGroups,
+	                                             @NonNull List<FavoriteGroup> groupsInMarkers) {
+		boolean updateLauncherShortcuts = false;
+		for (FavoriteGroup group : changedGroups) {
+			updatedFlatGroups.remove(group.getName());
+			if (removeFromMarkers(group)) {
+				groupsInMarkers.add(group);
+			}
+			updateLauncherShortcuts |= group.isPersonal();
+		}
+		return updateLauncherShortcuts;
+	}
+
+	private void applyFavoriteGroupNameChanges(@NonNull Map<FavoriteGroup, String> groupNameChanges,
+	                                           @NonNull Map<String, FavoriteGroup> updatedFlatGroups) {
+		for (Map.Entry<FavoriteGroup, String> change : groupNameChanges.entrySet()) {
+			FavoriteGroup group = change.getKey();
+			String newName = change.getValue();
+			if (!Algorithms.stringsEqual(group.getName(), newName)) {
+				group.setName(newName);
+				for (FavouritePoint point : group.getPoints()) {
+					point.setCategory(newName);
+				}
+			}
+			updatedFlatGroups.put(newName, group);
+		}
+	}
+
+	private void restoreFavoriteGroupsInMarkers(@NonNull List<FavoriteGroup> groupsInMarkers) {
+		for (FavoriteGroup group : groupsInMarkers) {
+			addToMarkers(group);
+		}
+	}
+
+	@NonNull
+	private List<String> getTopLevelFavoriteFolderPaths(@NonNull List<String> sourcePaths) {
+		Set<String> uniquePaths = new LinkedHashSet<>(sourcePaths);
+		List<String> rootPaths = new ArrayList<>();
+		for (String sourcePath : uniquePaths) {
+			if (!FavoriteFolderPath.isValidFullPath(sourcePath)) {
+				return Collections.emptyList();
+			}
+			boolean nestedUnderSelection = false;
+			for (String otherPath : uniquePaths) {
+				if (!Algorithms.stringsEqual(sourcePath, otherPath)
+						&& FavoriteFolderPath.isDescendantOrSelf(sourcePath, otherPath)) {
+					nestedUnderSelection = true;
+					break;
+				}
+			}
+			if (!nestedUnderSelection) {
+				rootPaths.add(sourcePath);
+			}
+		}
+		return rootPaths;
+	}
+
+	@NonNull
+	private FavoriteGroup getOrCreateGroup(@NonNull FavouritePoint point) {
+		return getOrCreateGroup(point, null);
+	}
+
+	@NonNull
+	private FavoriteGroup getOrCreateGroup(@NonNull FavouritePoint point, @Nullable PointsGroup pointsGroup) {
+		FavoriteGroup favoriteGroup = flatGroups.get(point.getCategory());
+		if (favoriteGroup == null) {
+			favoriteGroup = new FavoriteGroup(point);
+			Map<String, FavoriteGroup> tmpFlatGroups = new LinkedHashMap<>(flatGroups);
+			tmpFlatGroups.put(favoriteGroup.getName(), favoriteGroup);
+			flatGroups = tmpFlatGroups;
+			favoriteGroups = CollectionUtils.addToList(favoriteGroups, favoriteGroup);
+			invalidateFavoriteFolderCache();
+		}
+		updateGroupAppearance(favoriteGroup, pointsGroup);
+
+		return favoriteGroup;
+	}
+
+	private void updateGroupAppearance(@Nullable FavoriteGroup favoriteGroup, @Nullable PointsGroup pointsGroup) {
+		if (favoriteGroup != null && pointsGroup != null) {
+			favoriteGroup.setColor(pointsGroup.getColor());
+			favoriteGroup.setIconName(pointsGroup.getIconName());
+			favoriteGroup.setBackgroundType(BackgroundType.getByTypeName(pointsGroup.getBackgroundType(), DEFAULT_BACKGROUND_TYPE));
+			favoriteGroup.setVisible(!pointsGroup.isHidden());
+			favoriteGroup.setPinned(Boolean.TRUE.equals(pointsGroup.isPinned()));
+		}
+	}
+
+	private void notifySavingFavoritesFinished(@Nullable FavoritesListener saveListener, boolean success) {
+		if (success) {
+			invalidateFavoriteFolderCache();
+		}
+		for (FavoritesListener listener : listeners) {
+			listener.onSavingFavoritesFinished(success);
+		}
+		if (saveListener != null) {
+			saveListener.onSavingFavoritesFinished(success);
+		}
+	}
+
+	@NonNull
+	public static List<FavouritePoint> getPointsFromGroups(@NonNull List<FavoriteGroup> groups) {
+		List<FavouritePoint> favouritePoints = new ArrayList<>();
+		for (FavoriteGroup group : groups) {
+			favouritePoints.addAll(group.getPoints());
+		}
+		return favouritePoints;
+	}
+
+	public void doAddFavorite(String name, String category, String description, String address, @ColorInt int color,
+	                          BackgroundType backgroundType, @DrawableRes int iconId, @NonNull FavouritePoint favorite) {
+		favorite.setName(name);
+		favorite.setCategory(category);
+		favorite.setDescription(description);
+		favorite.setAddress(address);
+		favorite.setColor(color);
+		favorite.setBackgroundType(backgroundType);
+		favorite.setIconId(iconId);
+		app.getSettings().LAST_FAV_CATEGORY_ENTERED.set(category);
+		addFavourite(favorite);
+	}
+}

@@ -1,0 +1,386 @@
+package net.osmand.shared.gpx
+
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.ClassDiscriminatorMode
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
+import kotlinx.serialization.modules.subclass
+import net.osmand.shared.KAsyncTask
+import net.osmand.shared.api.KStateChangedListener
+import net.osmand.shared.api.SettingsAPI
+import net.osmand.shared.extensions.currentTimeMillis
+import net.osmand.shared.gpx.data.SmartFolder
+import net.osmand.shared.gpx.filters.BaseTrackFilter
+import net.osmand.shared.gpx.filters.FolderTrackFilter
+import net.osmand.shared.gpx.filters.TrackFilterList
+import net.osmand.shared.gpx.filters.TrackFiltersHelper
+import net.osmand.shared.gpx.organization.OrganizeByParams
+import net.osmand.shared.gpx.organization.OrganizeByRangeParams
+import net.osmand.shared.gpx.organization.OrganizeTracksResourceMapper
+import net.osmand.shared.io.KFile
+import net.osmand.shared.settings.enums.AltitudeMetrics
+import net.osmand.shared.settings.enums.MetricsConstants
+import net.osmand.shared.settings.enums.SpeedConstants
+import net.osmand.shared.util.KAlgorithms
+import net.osmand.shared.util.KCollectionUtils
+import net.osmand.shared.util.PlatformUtil
+
+class SmartFolderHelper {
+
+	companion object {
+		const val TRACK_FILTERS_SETTINGS_PREF = "track_filters_settings_pref"
+        private const val METRIC_SYSTEM_PREF = "default_metric_system"
+        private const val ALTITUDE_SYSTEM_PREF = "altitude_metrics"
+        private const val SPEED_SYSTEM_PREF = "default_speed_system"
+
+		private val trackFilterSerializersModule = SerializersModule {
+			polymorphic(BaseTrackFilter::class) {
+				subclass(FolderTrackFilter::class)
+			}
+			polymorphic(OrganizeByParams::class) {
+				subclass(OrganizeByRangeParams::class)
+			}
+		}
+
+		val json = Json {
+			isLenient = true
+			ignoreUnknownKeys = true
+			useArrayPolymorphism = false
+			encodeDefaults = true
+			classDiscriminator = "className"
+			classDiscriminatorMode = ClassDiscriminatorMode.NONE
+			serializersModule = trackFilterSerializersModule
+		}
+	}
+
+	private var smartFolderCollection: List<SmartFolder> = listOf()
+	private var allAvailableTrackItems = HashSet<TrackItem>()
+	private var updateListeners: List<SmartFolderUpdateListener> = listOf()
+	private var isWritingSettings = false
+	private val osmAndSettings: SettingsAPI? = try {
+		PlatformUtil.getOsmAndContext().getSettings()
+	} catch (e: Exception) {
+		null
+	}
+	private val settingsChangedListener = object : KStateChangedListener<String> {
+		override fun stateChanged(change: String) {
+			onSettingsChanged()
+		}
+	}
+    private val metricSystemListener = object : KStateChangedListener<MetricsConstants> {
+        override fun stateChanged(change: MetricsConstants) {
+            onUnitsSettingsChanged()
+        }
+    }
+    private val altitudeSystemListener = object : KStateChangedListener<AltitudeMetrics> {
+        override fun stateChanged(change: AltitudeMetrics) {
+            onUnitsSettingsChanged()
+        }
+    }
+    private val speedSystemListener = object : KStateChangedListener<SpeedConstants> {
+        override fun stateChanged(change: SpeedConstants) {
+            onUnitsSettingsChanged()
+        }
+    }
+
+	init {
+		if (osmAndSettings != null) {
+			osmAndSettings.registerPreference(TRACK_FILTERS_SETTINGS_PREF, "", global = true, shared = true)
+			osmAndSettings.addStringPreferenceListener(TRACK_FILTERS_SETTINGS_PREF, settingsChangedListener)
+		    osmAndSettings.addEnumPreferenceListener(METRIC_SYSTEM_PREF, metricSystemListener)
+		    osmAndSettings.addEnumPreferenceListener(ALTITUDE_SYSTEM_PREF, altitudeSystemListener)
+		    osmAndSettings.addEnumPreferenceListener(SPEED_SYSTEM_PREF, speedSystemListener)
+			readSettings()
+		}
+	}
+
+	private fun onSettingsChanged() {
+		if (!isWritingSettings) {
+			updateSmartFolderSettings()
+		}
+	}
+
+	fun onUnitsSettingsChanged() {
+		OrganizeTracksResourceMapper.clearCache()
+		for (smartFolder in smartFolderCollection) {
+			smartFolder.invalidateCache()
+		}
+		notifyUpdateListeners()
+	}
+
+	private fun readSettings() {
+		val settingsJson = osmAndSettings?.getStringPreference(TRACK_FILTERS_SETTINGS_PREF)
+		readJson(settingsJson)
+	}
+
+	fun readJson(settingsJson: String?) {
+		val newCollection = ArrayList<SmartFolder>()
+		if (!KAlgorithms.isEmpty(settingsJson)) {
+			TrackFilterList.parseFilters(settingsJson!!)?.let { savedFilters ->
+				for (smartFolder in savedFilters) {
+					smartFolder.filters?.let {
+						val newFilters: MutableList<BaseTrackFilter> = mutableListOf()
+						for (filter in it) {
+							val newFilter =
+								TrackFiltersHelper.createFilter(filter.trackFilterType, null)
+							newFilter.initWithValue(filter)
+							newFilters.add(newFilter)
+						}
+						smartFolder.filters = newFilters
+					}
+					smartFolder.initTracksOrganizer()
+				}
+				newCollection.addAll(savedFilters)
+			}
+		}
+		smartFolderCollection = newCollection
+	}
+
+	private fun updateSmartFolderSettings() {
+		SmartFoldersUpdateTask().execute()
+	}
+
+	fun resetSmartFoldersItems() {
+		val collection = ArrayList(smartFolderCollection)
+		for (smartFolder in collection) {
+			smartFolder.resetItems()
+		}
+	}
+
+	private fun getEnabledFilters(filters: MutableList<BaseTrackFilter>?): ArrayList<BaseTrackFilter> {
+		val enabledFilters = ArrayList<BaseTrackFilter>()
+		filters?.let {
+			for (filter in filters) {
+				if (filter.isEnabled()) {
+					enabledFilters.add(filter)
+				}
+			}
+		}
+		return enabledFilters
+	}
+
+	fun saveSmartFolder(smartFolder: SmartFolder, filters: MutableList<BaseTrackFilter>?) {
+		val enabledFilters = getEnabledFilters(filters)
+		smartFolder.filters = enabledFilters
+		writeSettings()
+		updateSmartFolderItems(smartFolder)
+		notifyFolderSavedListeners(smartFolder)
+	}
+
+	fun saveNewSmartFolder(name: String, filters: MutableList<BaseTrackFilter>?) {
+		val enabledFilters = getEnabledFilters(filters)
+		val newFolder = SmartFolder(name)
+		newFolder.creationTime = currentTimeMillis()
+		newFolder.filters = enabledFilters
+		smartFolderCollection = KCollectionUtils.addToList(smartFolderCollection, newFolder)
+		updateSmartFolderItems(newFolder)
+		writeSettings()
+		notifyFolderCreatedListeners(newFolder)
+	}
+
+	fun notifyUpdateListeners() {
+		for (listener in updateListeners) {
+			listener.onSmartFoldersUpdated()
+		}
+	}
+
+	private fun notifyFolderCreatedListeners(smartFolder: SmartFolder) {
+		for (listener in updateListeners) {
+			listener.onSmartFolderCreated(smartFolder)
+		}
+	}
+
+	private fun notifyFolderUpdatedListeners(smartFolder: SmartFolder) {
+		for (listener in updateListeners) {
+			listener.onSmartFolderUpdated(smartFolder)
+		}
+	}
+
+	private fun notifyFolderSavedListeners(smartFolder: SmartFolder) {
+		for (listener in updateListeners) {
+			listener.onSmartFolderSaved(smartFolder)
+		}
+	}
+
+	private fun notifyFolderRenamedListeners(smartFolder: SmartFolder) {
+		for (listener in updateListeners) {
+			listener.onSmartFolderRenamed(smartFolder)
+		}
+	}
+
+	fun addUpdateListener(listener: SmartFolderUpdateListener) {
+		if (!updateListeners.contains(listener)) {
+			updateListeners = KCollectionUtils.addToList(updateListeners, listener)
+		}
+	}
+
+	fun removeUpdateListener(listener: SmartFolderUpdateListener) {
+		if (updateListeners.contains(listener)) {
+			updateListeners = KCollectionUtils.removeFromList(updateListeners, listener)
+		}
+	}
+
+	private fun writeSettings() {
+		isWritingSettings = true
+		val jsonStr = json.encodeToString(smartFolderCollection)
+		osmAndSettings?.setStringPreference(TRACK_FILTERS_SETTINGS_PREF, jsonStr)
+		isWritingSettings = false
+	}
+
+	fun isSmartFolderPresent(name: String): Boolean {
+		return getSmartFolderByName(name) != null
+	}
+
+	private fun getSmartFolderByName(name: String): SmartFolder? {
+		for (folder in smartFolderCollection) {
+			if (KAlgorithms.stringsEqual(folder.folderName, name)) {
+				return folder
+			}
+		}
+		return null
+	}
+
+	fun getSmartFolders(): MutableList<SmartFolder> {
+		return ArrayList(smartFolderCollection)
+	}
+
+	fun renameSmartFolder(smartFolder: SmartFolder, newName: String) {
+		smartFolder.folderName = newName
+		writeSettings()
+		notifyFolderRenamedListeners(smartFolder)
+	}
+
+	fun deleteSmartFolder(smartFolder: SmartFolder) {
+		smartFolderCollection = KCollectionUtils.removeFromList(smartFolderCollection, smartFolder)
+		writeSettings()
+		notifyUpdateListeners()
+	}
+
+	fun addTrackItemToSmartFolder(item: TrackItem) {
+		val newSet = allAvailableTrackItems
+		newSet.add(item)
+		allAvailableTrackItems = newSet
+		addTracksToSmartFolders(arrayListOf(item), smartFolderCollection)
+	}
+
+	fun addTrackItemsToSmartFolder(items: List<TrackItem>) {
+		if (smartFolderCollection.isEmpty()) {
+			return
+		}
+		val newSet = allAvailableTrackItems
+		newSet.addAll(items)
+		allAvailableTrackItems = newSet
+		addTracksToSmartFolders(items, smartFolderCollection)
+	}
+
+	private fun addTracksToSmartFolders(items: List<TrackItem>, smartFolders: List<SmartFolder>) {
+		for (item in items) {
+			for (smartFolder in smartFolders) {
+				var trackAccepted = true
+				smartFolder.filters?.let { smartFolderFilters ->
+					for (filter in smartFolderFilters) {
+						if (!filter.isTrackAccepted(item)) {
+							trackAccepted = false
+							break
+						}
+					}
+				}
+
+				if (trackAccepted) {
+					smartFolder.addTrackItem(item, forceInvalidate = true)
+				} else {
+					smartFolder.removeTrackItem(item)
+				}
+			}
+		}
+	}
+
+	fun onGpxFileDeleted(gpxFile: KFile) {
+		val newAllTracks = HashSet<TrackItem>(allAvailableTrackItems)
+		for (trackItem in newAllTracks) {
+			if (trackItem.path == gpxFile.absolutePath()) {
+				newAllTracks.remove(trackItem)
+				allAvailableTrackItems = newAllTracks
+				break
+			}
+		}
+		updateAllSmartFoldersItems()
+	}
+
+	fun onTrackRenamed(srcTrackFile: KFile, destTrackFile: KFile) {
+		val newAllTracks = HashSet<TrackItem>(allAvailableTrackItems)
+		for (trackItem in newAllTracks) {
+			if (trackItem.path == srcTrackFile.absolutePath()) {
+				newAllTracks.remove(trackItem)
+				newAllTracks.add(TrackItem(destTrackFile))
+				allAvailableTrackItems = newAllTracks
+				break
+			}
+		}
+		updateAllSmartFoldersItems()
+		notifyUpdateListeners()
+	}
+
+	private fun updateSmartFolderItems(smartFolder: SmartFolder) {
+		smartFolder.resetItems()
+		addTracksToSmartFolders(ArrayList(allAvailableTrackItems), arrayListOf(smartFolder))
+		notifyFolderUpdatedListeners(smartFolder)
+	}
+
+	fun getSmartFolder(name: String): SmartFolder? {
+		for (folder in smartFolderCollection) {
+			if (KAlgorithms.stringsEqual(folder.folderName, name)) {
+				return folder
+			}
+		}
+		return null
+	}
+
+	fun getSmartFolderById(id: String): SmartFolder? {
+		for (folder in smartFolderCollection) {
+			if (KAlgorithms.stringsEqual(folder.getId(), id)) {
+				return folder
+			}
+		}
+		return null
+	}
+
+	fun refreshSmartFolder(smartFolder: SmartFolder) {
+		updateSmartFolderItems(smartFolder)
+	}
+
+	fun getAllAvailableTrackItems(): HashSet<TrackItem> {
+		return allAvailableTrackItems
+	}
+
+	private inner class SmartFoldersUpdateTask : KAsyncTask<Unit, Unit, Unit>() {
+
+		override suspend fun doInBackground(vararg params: Unit) {
+			readSettings()
+			updateAllSmartFoldersItems()
+		}
+
+		override fun onPostExecute(result: Unit) {
+			notifyUpdateListeners()
+		}
+	}
+
+	private fun updateAllSmartFoldersItems() {
+		for (smartFolder in smartFolderCollection) {
+			updateSmartFolderItems(smartFolder)
+		}
+	}
+
+	fun setOrganizeByParams(folderId: String, params: OrganizeByParams?) {
+		val folder = getSmartFolderById(folderId)
+		folder?.setOrganizeByParams(params)
+		writeSettings()
+		notifyFolderUpdatedListeners(folder ?: return)
+	}
+
+	fun getOrganizeByParams(folderId: String): OrganizeByParams? {
+		val folder = getSmartFolderById(folderId)
+		return folder?.organizeByParams
+	}
+}

@@ -1,0 +1,241 @@
+package net.osmand;
+
+import net.osmand.util.ArabicNormalizer;
+import net.osmand.util.SearchAlgorithms;
+import net.osmand.util.UnicodeDiacritics;
+
+import java.util.Locale;
+
+
+
+/**
+ * Abstract collator matcher that basically supports subclasses with some collator
+ * matching.
+ * 
+ * @author pavol.zibrita
+ */
+public class CollatorStringMatcher implements StringMatcher {
+
+	private final Collator collator;
+	private final StringMatcherMode mode;
+	private final String part;
+	public static final char INCOMPLETE_DOT = '.';
+	
+	public static enum StringMatcherMode {
+		// tests only first word as base starts with part
+		CHECK_ONLY_STARTS_WITH,
+		// tests all words (split by space) and one of word should start with a given part
+		CHECK_STARTS_FROM_SPACE,
+		// tests all words except first (split by space) and one of word should start with a given part
+		CHECK_STARTS_FROM_SPACE_NOT_BEGINNING,
+		// tests all words (split by space) and one of word should be equal to part
+		CHECK_EQUALS_FROM_SPACE,
+		// simple collator contains in any part of the base		
+		CHECK_CONTAINS,
+		// simple collator equals
+		CHECK_EQUALS,
+		MULTISEARCH,
+	}
+
+	public CollatorStringMatcher(String part, StringMatcherMode mode) {
+		this.collator = OsmAndCollator.primaryCollator();
+		part = lowercaseAndAlignChars(part);
+		if (part.length() > 0 && part.charAt(part.length() - 1) == INCOMPLETE_DOT && !onlyDots(part)) {
+			part = part.substring(0, part.length() - 1);
+			if (mode == StringMatcherMode.CHECK_EQUALS_FROM_SPACE) {
+				mode = StringMatcherMode.CHECK_STARTS_FROM_SPACE;
+			} else if (mode == StringMatcherMode.CHECK_EQUALS) {
+				mode = StringMatcherMode.CHECK_ONLY_STARTS_WITH;
+			}
+		}
+		this.part = part;
+		this.mode = mode;
+	}
+	
+	public boolean onlyDots(String part) {
+		for (int i = 0; i < part.length(); i++) {
+			if (part.charAt(i) != INCOMPLETE_DOT) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public Collator getCollator() {
+		return collator;
+	}
+	
+	public StringMatcherMode getMode() {
+		return mode;
+	}
+	
+	public String getPart() {
+		return part;
+	}
+	
+	@Override
+	public boolean matches(String name) {
+		return cmatches(collator, name, part, false, true, mode);
+	}
+
+	public static boolean cmatches(Collator collator, String fullName, String part, StringMatcherMode mode) {
+		return cmatches(collator, fullName, part, true, true, mode);
+	}
+	
+	public static boolean cmatchesNoAlign(Collator collator, String fullName, String part, StringMatcherMode mode) {
+		return cmatches(collator, fullName, part, false, false, mode);
+	}
+		
+	private static boolean cmatches(Collator collator, String fullName, String part, boolean alignPart, boolean alignFull,
+			StringMatcherMode mode) {
+		if (fullName != null && fullName.indexOf('-') != -1) {
+			// Test if it matches without space
+			if (cmatches(collator, fullName.replace("-", ""), part, mode)) {
+				return true;
+			}
+		}
+		if (alignPart) {
+			part = SearchAlgorithms.alignChars(part);
+		}
+		if (alignFull) {
+			// FUTURE: This is not effective code, it runs on each comparison
+			// It would be more efficient to normalize all strings in file and normalize
+			// search string before collator
+			fullName = lowercaseAndAlignChars(fullName);
+		}
+		
+		switch (mode) {
+		case CHECK_CONTAINS:
+			return ccontains(collator, fullName, part);
+		case CHECK_EQUALS_FROM_SPACE:
+			return cstartsWith(collator, fullName, part, true, true, true);
+		case CHECK_STARTS_FROM_SPACE:
+			return cstartsWith(collator, fullName, part, true, true, false);
+		case CHECK_STARTS_FROM_SPACE_NOT_BEGINNING:
+			return cstartsWith(collator, fullName, part, false, true, false);
+		case CHECK_ONLY_STARTS_WITH:
+			return cstartsWith(collator, fullName, part, true, false, false);
+		case CHECK_EQUALS:
+			return cstartsWith(collator, fullName, part, false, false, true);
+		case MULTISEARCH:
+			return cstartsWith(collator, part, fullName, true, true, true);
+		}
+		return false;
+	}
+	
+	
+	/**
+	 * Check if part contains in base
+	 *
+	 * @param collator Collator to use
+	 * @param part String to search
+	 * @param base String where to search
+	 * @return true if part is contained in base
+	 */
+	private static boolean ccontains(Collator collator, String base, String part) {
+//		int pos = 0;
+//		if (part.length() > 3) {
+//			// improve searching by searching first 3 characters
+//			pos = cindexOf(collator, pos, part.substring(0, 3), base);
+//			if (pos == -1) {
+//				return false;
+//			}
+//		}
+//		pos = cindexOf(collator, pos, part, base);
+//		if (pos == -1) {
+//			return false;
+//		}
+//		return true;
+		
+		if (base.length() <= part.length()) {
+			return collator.equals(base, part);
+		}
+		for (int pos = 0; pos <= base.length() - part.length() + 1; pos++) {
+			String temp = base.substring(pos, Math.min(pos + part.length() * 2, base.length()));
+			for (int length = temp.length(); length >= 0; length--) {
+				String temp2 = temp.substring(0, length);
+				if (collator.equals(temp2, part)) 
+					return true;
+			}
+		}
+		return false;
+	}
+
+	
+	/**
+	 * Checks if string starts with another string.
+	 * Special check try to find as well in the middle of name
+	 * 
+	 * @param collator
+	 * @param fullTextP
+	 * @param theStart
+	 * @return true if searchIn starts with token
+	 */
+	private static boolean cstartsWith(Collator collator, String searchIn, String theStart, 
+			boolean checkBeginning, boolean checkSpaces, boolean equals) {
+		int searchInLength = searchIn.length();
+		int startLength = theStart.length();
+		if (startLength == 0) {
+			return true;
+		}
+		// this is not correct without (simplifyStringAndAlignChars) because of Auhofstrasse != Auhofstraße
+		if (startLength > searchInLength) {
+			return false;
+		}
+		// simulate starts with for collator
+		if (checkBeginning) {
+			boolean starts = collator.equals(searchIn.substring(0, startLength), theStart);
+			if (starts) {
+				if (equals) {
+					if (startLength == searchInLength || isSpace(searchIn.charAt(startLength))) {
+						return true;
+					}
+				} else {
+					return true;
+				}
+			}
+		}
+		if (checkSpaces) {
+			for (int i = 1; i <= searchInLength - startLength; i++) {
+				if (isWordStart(searchIn, i, theStart)) {
+					if (collator.equals(searchIn.substring(i, i + startLength), theStart)) {
+						if(equals) {
+							if (i + startLength == searchInLength || 
+									isSpace(searchIn.charAt(i + startLength))) {
+								return true;
+							}
+						} else {
+							return true;
+						}
+					}
+				}
+			}
+		}
+		if (!checkBeginning && !checkSpaces && equals) {
+			return collator.equals(searchIn, theStart);
+		}
+		return false;
+	}
+
+	private static boolean isWordStart(String searchIn, int index, String part) {
+		if (!isSpace(searchIn.charAt(index - 1))) {
+			return false;
+		}
+		char current = searchIn.charAt(index);
+		if (!isSpace(current)) {
+			return true;
+		}
+		return current == '-' && part.length() > 1 && part.charAt(0) == '-'	&& Character.isDigit(part.charAt(1));
+	}
+	
+	private static String lowercaseAndAlignChars(String fullText) {
+		fullText = fullText.toLowerCase(Locale.getDefault());
+		fullText = SearchAlgorithms.alignChars(fullText);
+		return fullText;
+	}
+
+	private static boolean isSpace(char c){
+		return !Character.isLetter(c) && !Character.isDigit(c);
+	}
+	
+}

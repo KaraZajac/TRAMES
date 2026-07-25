@@ -1,0 +1,273 @@
+apply plugin: 'com.android.application'
+apply from: 'build-common.gradle'
+apply from: rootProject.file("versions.gradle")
+
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-parcelize'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
+
+// Global Parameters accepted
+// TARGET_APP_NAME    - app name
+// APK_NUMBER_VERSION - version number of apk
+// APK_VERSION_SUFFIX - build number like #99999Z, appended (for dev builds) to Manifest's versionName as X.X.X#99999Z
+//                      Z means flavor: M=-master, D=-main-default, Des=-design, MQA=-main-qt-arm, MQDA=-main-qt-default-arm, S=-sherpafy
+// APP_EDITION        - date stamp of builds
+
+// 1. To be done Filter fonts
+// <unzip src="OsmAndCore_android.aar" dest=".">
+//            <patternset>
+//                <include name="assets/**/map/fonts/OpenSans/*"/>
+//                <include name="assets/**/map/fonts/NotoSans/*"/>
+//            </patternset>
+//        </unzip>
+// Less important
+
+android {
+	signingConfigs {
+		development {
+			storeFile file("../keystores/debug.keystore")
+			storePassword "android"
+			keyAlias "androiddebugkey"
+			keyPassword "android"
+		}
+
+		publishing {
+			storeFile file("/var/lib/jenkins/osmand_key")
+			storePassword System.getenv("OSMAND_APK_PASSWORD")
+			keyAlias "osmand"
+			keyPassword System.getenv("OSMAND_APK_PASSWORD")
+		}
+	}
+
+	compileOptions {
+		sourceCompatibility = JavaVersion.VERSION_17
+		targetCompatibility = JavaVersion.VERSION_17
+		coreLibraryDesugaringEnabled true
+	}
+
+	kotlinOptions {
+		jvmTarget = "17"
+	}
+
+	defaultConfig {
+		minSdkVersion osmand_minSdk
+		versionCode 5399
+		versionCode System.getenv("APK_NUMBER_VERSION") ? System.getenv("APK_NUMBER_VERSION").toInteger() : versionCode
+		versionName "5.4.0"
+		versionName System.getenv("APK_VERSION")? System.getenv("APK_VERSION").toString(): versionName
+		versionName System.getenv("APK_VERSION_SUFFIX")? versionName + System.getenv("APK_VERSION_SUFFIX").toString(): versionName
+	}
+
+	lintOptions {
+		lintConfig file("lint.xml")
+		warningsAsErrors false
+	}
+
+	bundle {
+		language {
+			// Specifies that the app bundle should not support
+			// configuration APKs for language resources. These
+			// resources are instead packaged with each base and
+			// dynamic feature APK.
+			enableSplit = false
+		}
+	}
+
+	// related to kuromoji
+	//packagingOptions {
+	//	exclude '/META-INF/CONTRIBUTORS.md'
+	//	exclude '/META-INF/LICENSE.md'
+	//	exclude '/META-INF/NOTICE.md'
+	//}
+
+	sourceSets {
+		debug {
+			manifest.srcFile "AndroidManifest-debug.xml"
+		}
+		gplayFull {
+			java.srcDirs = ["src-google"]
+		}
+		gplayFree {
+			java.srcDirs = ["src-google"]
+			manifest.srcFile "AndroidManifest-gplayFree.xml"
+		}
+		androidFull {
+			java.srcDirs = ["src-google", "src-osmand"]
+			manifest.srcFile "AndroidManifest-androidFull.xml"
+		}
+		nightlyFree {
+			java.srcDirs = ["src-google", "src-osmand"]
+			manifest.srcFile "AndroidManifest-nightlyFree.xml"
+		}
+		huawei {
+			java.srcDirs = ["src-huawei"]
+			manifest.srcFile "AndroidManifest-huawei.xml"
+		}
+
+		legacy {
+			jniLibs.srcDirs = ["libc++"]
+		}
+	}
+
+	buildFeatures {
+		aidl true
+		compose true
+	}
+
+	flavorDimensions "version", "coreversion", "abi"
+	productFlavors {
+		// Version
+		nightlyFree {
+			dimension "version"
+			applicationId "net.osmand.dev"
+			resValue "string", "app_name", "OsmAnd Nightly"
+			resValue "string", "app_edition", System.getenv("APP_EDITION") ? System.getenv("APP_EDITION") : ""
+			// resConfig "en"
+		}
+		androidFull {
+			dimension "version"
+			applicationId "net.osmand.plus"
+			resValue "string", "app_name", "OsmAnd~"
+			resValue "string", "app_edition", System.getenv("APP_EDITION") ? System.getenv("APP_EDITION") : ""
+		}
+		gplayFree {
+			dimension "version"
+			applicationId "net.osmand"
+			resValue "string", "app_name", "OsmAnd"
+			resValue "string", "app_edition", System.getenv("APP_EDITION") ? System.getenv("APP_EDITION") : ""
+		}
+		gplayFull {
+			dimension "version"
+			applicationId "net.osmand.plus"
+			resValue "string", "app_name", "OsmAnd+"
+			resValue "string", "app_edition", System.getenv("APP_EDITION") ? System.getenv("APP_EDITION") : ""
+		}
+		huawei {
+			dimension "version"
+			applicationId "net.osmand.huawei"
+			resValue "string", "app_name", "OsmAnd"
+			resValue "string", "app_edition", ""
+		}
+
+        // Build that includes 3D OpenGL release
+		opengl {
+			dimension "coreversion"
+		}
+        // Build that includes 3D OpenGL debug
+		opengldebug {
+			dimension "coreversion"
+		}
+	}
+
+	buildTypes {
+		debug {
+			signingConfig signingConfigs.development
+		}
+		release {
+			signingConfig signingConfigs.publishing
+			minifyEnabled true
+			shrinkResources false
+			proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+		}
+	}
+
+	applicationVariants.configureEach {
+		def variant = it
+		def taskName = variant.name.capitalize()
+		def mergeAssetsTaskName = "merge${taskName}Assets"
+		tasks.named(mergeAssetsTaskName).configure { osmandTask ->
+			println(osmandTask.getName() + " merge assets")
+			osmandTask.dependsOn(collectExternalResources)
+		}
+		if (taskName.endsWith("Debug")) {
+			def mergeAndroidTestAssetsTaskName = "merge${taskName}AndroidTestAssets"
+			tasks.named(mergeAndroidTestAssetsTaskName).configure { osmandTask ->
+				println(osmandTask.getName() + " merge test assets")
+				osmandTask.dependsOn(collectExternalResources)
+			}
+		}
+		def mapSourceSetPathsName= "map${taskName}SourceSetPaths"
+		tasks.named(mapSourceSetPathsName).configure { osmandTask ->
+			println(osmandTask.getName())
+			osmandTask.dependsOn(copyIcons)
+		}
+		def mergeResources= "merge${taskName}Resources"
+		tasks.named(mergeResources).configure { osmandTask ->
+			println(osmandTask.getName() + " merge resources")
+			osmandTask.dependsOn(collectExternalResources)
+		}
+		def generateResources= "generate${taskName}Resources"
+		tasks.named(generateResources).configure { osmandTask ->
+			println(osmandTask.getName() + " generate resources")
+			osmandTask.dependsOn(collectExternalResources)
+		}
+	}
+}
+
+afterEvaluate {
+	android.applicationVariants.configureEach { variant ->
+		if (variant.name.contains('Opengldebug')) {
+			variant.javaCompileProvider.configure {
+				dependsOn collectExternalResources, buildOsmAndCore, copyOsmAndCoreWithJNI, cleanupDuplicatesInCore
+			}
+		} else {
+			variant.javaCompileProvider.configure {
+				dependsOn collectExternalResources, buildOsmAndCore, cleanupDuplicatesInCore
+			}
+		}
+	}
+
+	Gradle gradle = getGradle()
+	String tskReqStr = gradle.getStartParameter().getTaskRequests().toString().toLowerCase()
+	if (tskReqStr.contains("huawei")) {
+		apply plugin: 'com.huawei.agconnect'
+	}
+}
+
+tasks.register('copyOsmAndCoreWithJNI') {
+	dependsOn buildOsmAndCore
+	doLast {
+		file("libs/armeabi-v7a").mkdirs()
+		copy { from("../../binaries/android/clang-armeabi-v7a/Debug/libOsmAndCoreWithJNI.so") into("libs/armeabi-v7a") }
+
+		file("libs/arm64-v8a").mkdirs()
+		copy { from("../../binaries/android/clang-arm64-v8a/Debug/libOsmAndCoreWithJNI.so") into("libs/arm64-v8a") }
+
+		file("libs/x86").mkdirs()
+		copy { from("../../binaries/android/clang-x86/Debug/libOsmAndCoreWithJNI.so") into("libs/x86") }
+
+		file("libs/x86_64").mkdirs()
+		copy { from("../../binaries/android/clang-x86_64/Debug/libOsmAndCoreWithJNI.so") into("libs/x86_64") }
+	}
+}
+
+dependencies {
+	openglImplementation fileTree(include:  ['QtAndroid.jar', 'QtAndroidBearer.jar', 'QtAndroidNetwork.jar'], dir: 'libs')
+	opengldebugImplementation fileTree(include:  ['QtAndroid.jar', 'QtAndroidBearer.jar', 'QtAndroidNetwork.jar'], dir: 'libs')
+
+	//huaweiImplementation 'com.huawei.agconnect:agconnect-core:1.8.0.300'
+	huaweiImplementation 'com.huawei.hms:iap:6.4.0.301'
+	huaweiImplementation 'com.huawei.hms:appservice:6.8.0.300'
+
+	coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.3")
+}
+
+afterEvaluate {
+	def remoteAarSnapshot = "master-snapshot"
+	def localAarFile = file("../../core/wrappers/android/build/outputs/aar/OsmAndCore_android-debug.aar")
+
+	def requestedTasks = gradle.startParameter.taskNames.join(",").toLowerCase()
+	def useLocalOsmAndCore = requestedTasks.contains("opengldebug") && localAarFile.exists()
+
+	if (useLocalOsmAndCore) {
+		println "Using local OsmAndCore AAR (${localAarFile})"
+		dependencies.add("openglImplementation", files(localAarFile))
+		dependencies.add("opengldebugImplementation", files(localAarFile))
+	} else {
+		println "Using remote OsmAndCore snapshot (${remoteAarSnapshot})"
+		dependencies.add("openglImplementation", "net.osmand:OsmAndCore_androidNativeRelease:${remoteAarSnapshot}@aar")
+		dependencies.add("openglImplementation", "net.osmand:OsmAndCore_android:${remoteAarSnapshot}@aar")
+		dependencies.add("opengldebugImplementation", "net.osmand:OsmAndCore_androidNativeDebug:${remoteAarSnapshot}@aar")
+		dependencies.add("opengldebugImplementation", "net.osmand:OsmAndCore_android:${remoteAarSnapshot}@aar")
+	}
+}

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:layout_gravity="bottom"
+	android:orientation="vertical">
+
+	<LinearLayout
+		android:id="@+id/bottom_controls_container"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal">
+
+		<FrameLayout
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="bottom|start">
+
+			<include layout="@layout/speedometer_widget" />
+
+			<include layout="@layout/map_alarm_warning" />
+
+			<LinearLayout
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_gravity="bottom|start">
+
+				<include
+					layout="@layout/recording_note_fragment"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="bottom|start" />
+
+			</LinearLayout>
+
+		</FrameLayout>
+
+		<FrameLayout
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_gravity="bottom"
+			android:layout_marginBottom="@dimen/map_button_margin"
+			android:layout_weight="1"
+			android:minHeight="@dimen/map_button_size">
+
+			<LinearLayout
+				android:id="@+id/map_transparency_layout"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_gravity="bottom|center_horizontal"
+				android:orientation="horizontal">
+
+				<com.google.android.material.slider.Slider
+					android:id="@+id/map_transparency_slider"
+					android:layout_width="@dimen/map_trans_seek_size"
+					android:layout_height="wrap_content" />
+
+			</LinearLayout>
+
+			<LinearLayout
+				android:id="@+id/layer_param_layout"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_gravity="bottom|center_horizontal"
+				android:layout_marginBottom="@dimen/map_button_size"
+				android:orientation="horizontal"
+				android:visibility="gone">
+
+				<com.google.android.material.slider.Slider
+					android:id="@+id/layer_param_slider"
+					android:layout_width="140dp"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:layout_marginStart="@dimen/dashPadding"
+					android:layout_marginLeft="@dimen/dashPadding"
+					android:layout_marginEnd="@dimen/dashPadding"
+					android:layout_marginRight="@dimen/dashPadding" />
+
+			</LinearLayout>
+
+			<me.zhanghai.android.materialprogressbar.MaterialProgressBar
+				android:id="@+id/map_horizontal_progress"
+				style="@style/Widget.MaterialProgressBar.ProgressBar.Horizontal"
+				android:layout_width="match_parent"
+				android:layout_height="4dp"
+				android:layout_gravity="bottom"
+				android:max="100"
+				android:visibility="gone"
+				app:mpb_progressStyle="horizontal"
+				app:mpb_setBothDrawables="true"
+				app:mpb_useIntrinsicPadding="false"
+				tools:progress="60"
+				tools:visibility="visible" />
+
+		</FrameLayout>
+
+	</LinearLayout>
+
+	<include
+		layout="@layout/add_gpx_point_bottom_sheet"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_gravity="bottom|start"
+		tools:visibility="visible" />
+
+</LinearLayout>

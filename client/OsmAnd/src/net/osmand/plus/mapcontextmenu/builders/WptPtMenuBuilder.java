@@ -1,0 +1,235 @@
+package net.osmand.plus.mapcontextmenu.builders;
+
+import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.view.View;
+import android.widget.LinearLayout;
+
+import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+
+import net.osmand.IndexConstants;
+import net.osmand.data.AdditionalInfoBundle;
+import net.osmand.data.Amenity;
+import net.osmand.data.LatLon;
+import net.osmand.data.PointDescription;
+import net.osmand.plus.R;
+import net.osmand.plus.activities.MapActivity;
+import net.osmand.plus.gallery.data.GalleryKey;
+import net.osmand.plus.helpers.AmenityExtensionsHelper;
+import net.osmand.plus.mapcontextmenu.BuildRowAttrs;
+import net.osmand.plus.mapcontextmenu.CollapsableView;
+import net.osmand.plus.mapcontextmenu.MenuBuilder;
+import net.osmand.plus.track.fragments.ReadPointDescriptionFragment;
+import net.osmand.plus.track.fragments.TrackMenuFragment;
+import net.osmand.plus.track.helpers.GpxSelectionHelper;
+import net.osmand.plus.track.helpers.SelectedGpxFile;
+import net.osmand.plus.utils.OsmAndFormatter;
+import net.osmand.plus.views.layers.POIMapLayer;
+import net.osmand.plus.views.layers.PlaceDetailsObject;
+import net.osmand.plus.widgets.TextViewEx;
+import net.osmand.shared.gpx.GpxFile;
+import net.osmand.shared.gpx.primitives.WptPt;
+import net.osmand.util.Algorithms;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class WptPtMenuBuilder extends MenuBuilder {
+
+	private final WptPt wpt;
+	private Map<String, String> amenityExtensions = new HashMap<>();
+
+	public WptPtMenuBuilder(@NonNull MapActivity mapActivity, @NonNull WptPt wpt,
+			@Nullable PlaceDetailsObject detailsObject) {
+		super(mapActivity);
+		this.wpt = wpt;
+		if (detailsObject != null) {
+			setAmenity(detailsObject.getSyntheticAmenity());
+		}
+		setShowNearestWiki(true);
+		acquireAmenityExtensions();
+	}
+
+	private void acquireAmenityExtensions() {
+		AmenityExtensionsHelper helper = new AmenityExtensionsHelper(app);
+		if (amenity == null) {
+			String originName = wpt.getAmenityOriginName();
+			if (!Algorithms.isEmpty(originName)) {
+				setAmenity(helper.findAmenity(originName, wpt.getLatitude(), wpt.getLongitude()));
+			}
+		}
+		amenityExtensions = helper.getUpdatedAmenityExtensions(wpt.getExtensionsToRead(), amenity);
+	}
+
+	@Override
+	protected void buildNearestRow(@NonNull View view, @NonNull List<Amenity> nearestAmenities,
+			int iconId, String text, String amenityKey) {
+		if (amenity == null) {
+			super.buildNearestRow(view, nearestAmenities, iconId, text, amenityKey);
+		}
+	}
+
+	@Override
+	protected boolean needBuildPlainMenuItems() {
+		return false;
+	}
+
+	@Override
+	protected void buildTopInternal(View view) {
+		super.buildTopInternal(view);
+		buildWaypointsView(view);
+
+		SelectedGpxFile selectedGpxFile = app.getSelectedGpxHelper().getSelectedGPXFile(wpt);
+		if (selectedGpxFile != null) {
+			GpxFile gpxFile = selectedGpxFile.getGpxFile();
+			GalleryKey galleryKey = new GalleryKey.Waypoint(gpxFile.getPath(), wpt.getKey());
+			buildAttachedMediaRow(view, galleryKey, wpt);
+		}
+	}
+
+	@Override
+	protected void buildDescription(View view) {
+		if (!Algorithms.isEmpty(wpt.getDesc())) {
+			String textPrefix = app.getString(R.string.shared_string_description);
+			View.OnClickListener clickListener = v -> POIMapLayer.showPlainDescriptionDialog(view.getContext(), app, wpt.getDesc(), textPrefix);
+
+			buildRow(view, new BuildRowAttrs.Builder().setTextPrefix(textPrefix).setText(wpt.getDesc())
+					.setNeedLinks(true).setTextLinesLimit(10).setOnClickListener(clickListener)
+					.setMatchWithDivider(matchWidthDivider).build());
+		}
+	}
+
+	@Override
+	protected void showDescriptionDialog(@NonNull Context ctx, @NonNull String description, @NonNull String title) {
+		ReadPointDescriptionFragment.showInstance(mapActivity, description);
+	}
+
+	@Override
+	@NonNull
+	public Map<String, String> getAdditionalImageParams() {
+		return AmenityExtensionsHelper.getImagesParams(amenityExtensions);
+	}
+
+	@Override
+	public void buildInternal(View view) {
+		buildDateRow(view, app.getString(R.string.created_on), wpt.getTime());
+		if (wpt.getSpeed() > 0) {
+			buildRow(view, new BuildRowAttrs.Builder().setIconId(R.drawable.ic_action_speed)
+					.setText(OsmAndFormatter.getFormattedSpeed((float) wpt.getSpeed(), app))
+					.setTextPrefix(app.getString(R.string.shared_string_speed)).build());
+		}
+		if (!Double.isNaN(wpt.getEle())) {
+			buildRow(view, new BuildRowAttrs.Builder().setIconId(R.drawable.ic_action_altitude)
+					.setText(OsmAndFormatter.getFormattedDistance((float) wpt.getEle(), app))
+					.setTextPrefix(app.getString(R.string.altitude)).build());
+		}
+		if (!Double.isNaN(wpt.getHdop())) {
+			buildRow(view, new BuildRowAttrs.Builder().setIconId(R.drawable.ic_action_gps_info)
+					.setText("" + (int) wpt.getHdop())
+					.setTextPrefix(Algorithms.capitalizeFirstLetterAndLowercase(app.getString(R.string.plugin_distance_point_hdop))).build());
+		}
+		prepareDescription(wpt, view);
+		buildCommentRow(view, wpt.getComment());
+
+		if (!Algorithms.isEmpty(amenityExtensions)) {
+			boolean light = isLightContent();
+			AdditionalInfoBundle bundle = new AdditionalInfoBundle(app.getPoiTypes(), amenityExtensions);
+			AmenityUIHelper helper = new AmenityUIHelper(mapActivity, getPreferredMapAppLang(), bundle);
+			helper.setLight(light);
+			helper.setLatLon(getLatLon());
+			helper.setCollapseExpandListener(getCollapseExpandListener());
+			helper.buildInternal(view);
+		}
+
+		buildPlainMenuItems(view);
+	}
+
+	protected void prepareDescription(WptPt wpt, View view) {
+
+	}
+
+	private void buildWaypointsView(View view) {
+		GpxSelectionHelper gpxSelectionHelper = app.getSelectedGpxHelper();
+		SelectedGpxFile selectedGpxFile = gpxSelectionHelper.getSelectedGPXFile(wpt);
+		if (selectedGpxFile != null) {
+			List<WptPt> points = selectedGpxFile.getGpxFile().getPointsList();
+			if (!points.isEmpty()) {
+				Context context = view.getContext();
+				GpxFile gpx = selectedGpxFile.getGpxFile();
+				String title = context.getString(R.string.context_menu_points_of_group);
+				File file = new File(gpx.getPath());
+				String gpxName = file.getName().replace(IndexConstants.GPX_FILE_EXT, "").replace("/", " ").replace("_", " ");
+				int color = getPointColor(wpt, getFileColor(selectedGpxFile));
+				Drawable icon = app.getUIUtilities().getPaintedIcon(R.drawable.ic_type_waypoints_group, color);
+				CollapsableView collapsableView = getCollapsableWaypointsView(context, true, gpx, wpt);
+				buildRow(view, new BuildRowAttrs.Builder().setText(title).setIcon(icon)
+						.setSecondaryText(gpxName).setCollapsable(true)
+						.setCollapsableView(collapsableView).build());
+			}
+		}
+	}
+
+	private int getFileColor(@NonNull SelectedGpxFile g) {
+		return g.getColor() == 0 ? ContextCompat.getColor(app, R.color.gpx_color_point) : g.getColor();
+	}
+
+	@ColorInt
+	private int getPointColor(WptPt o, @ColorInt int fileColor) {
+		boolean visit = isPointVisited(o);
+		return visit ? ContextCompat.getColor(app, R.color.color_ok) : o.getColor(fileColor);
+	}
+
+	private boolean isPointVisited(WptPt o) {
+		boolean visit = false;
+		String visited = o.getExtensionsToRead().get("VISITED_KEY");
+		if (visited != null && !visited.equals("0")) {
+			visit = true;
+		}
+		return visit;
+	}
+
+	private CollapsableView getCollapsableWaypointsView(Context context, boolean collapsed,
+			@NonNull GpxFile gpxFile, WptPt selectedPoint) {
+		LinearLayout view = buildCollapsableContentView(context, collapsed, true);
+
+		List<WptPt> points = gpxFile.getPointsList();
+		String selectedCategory = selectedPoint != null && selectedPoint.getCategory() != null ? selectedPoint.getCategory() : "";
+		int showCount = 0;
+		for (WptPt point : points) {
+			String currentCategory = point != null ? point.getCategory() : null;
+			if (selectedCategory.equals(currentCategory)) {
+				showCount++;
+				boolean selected = point.equals(selectedPoint);
+				TextViewEx button = buildButtonInCollapsableView(context, selected, false);
+				button.setText(point.getName());
+
+				if (!selected) {
+					button.setOnClickListener(v -> {
+						LatLon latLon = new LatLon(point.getLatitude(), point.getLongitude());
+						PointDescription pointDescription = new PointDescription(PointDescription.POINT_TYPE_WPT, point.getName());
+						mapActivity.getContextMenu().setCenterMarker(true);
+						mapActivity.getContextMenu().show(latLon, pointDescription, point);
+					});
+				}
+				view.addView(button);
+			}
+			if (showCount >= 10) {
+				break;
+			}
+		}
+
+		if (points.size() > 10) {
+			TextViewEx button = buildButtonInCollapsableView(context, false, true);
+			button.setText(context.getString(R.string.shared_string_show_all));
+			button.setOnClickListener(v -> TrackMenuFragment.openTrack(mapActivity, new File(gpxFile.getPath()), null));
+			view.addView(button);
+		}
+
+		return new CollapsableView(view, this, collapsed);
+	}
+}

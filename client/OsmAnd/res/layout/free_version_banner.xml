@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/freeVersionBanner"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	app:cardBackgroundColor="?attr/list_background_color"
+	app:cardCornerRadius="@dimen/radius_double_large"
+	app:cardElevation="0dp"
+	app:strokeWidth="0dp">
+
+	<LinearLayout
+		android:id="@+id/bannerTopLayout"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		android:paddingTop="12dp">
+
+		<LinearLayout
+			android:id="@+id/freeVersionBannerTitle"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginStart="@dimen/content_padding"
+			android:layout_marginEnd="@dimen/content_padding"
+			android:gravity="center_vertical"
+			android:orientation="horizontal">
+
+			<TextView
+				android:id="@+id/freeVersionTitleTextView"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:layout_weight="1"
+				android:text="@string/free_version_title"
+				android:textColor="@color/text_color_primary_light"
+				android:textSize="16sp" />
+
+			<TextView
+				android:id="@+id/downloadsLeftTextView"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:textColor="@color/text_color_secondary_light"
+				android:textSize="16sp"
+				tools:text="@string/downloads_left_template" />
+		</LinearLayout>
+
+		<TextView
+			android:id="@+id/freeVersionSubtitleTextView"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginStart="@dimen/content_padding"
+			android:layout_marginEnd="@dimen/content_padding"
+			android:text="@string/free_download_limit_reached_description"
+			android:textColor="@color/text_color_secondary_light"
+			android:textSize="16sp"
+			android:visibility="gone"
+			tools:visibility="visible" />
+
+		<LinearLayout
+			android:id="@+id/marksLinearLayout"
+			android:layout_width="match_parent"
+			android:layout_height="24dp"
+			android:layout_marginStart="@dimen/content_padding"
+			android:layout_marginTop="11dp"
+			android:layout_marginEnd="@dimen/content_padding"
+			android:orientation="horizontal" />
+
+		<FrameLayout
+			android:id="@+id/freeVersionCtaContainer"
+			android:layout_width="match_parent"
+			android:layout_height="48dp"
+			android:layout_marginTop="@dimen/content_padding_small"
+			android:clickable="true"
+			android:focusable="true">
+
+			<LinearLayout
+				android:id="@+id/freeVersionCtaContentContainer"
+				android:layout_width="match_parent"
+				android:layout_height="42dp"
+				android:layout_gravity="center_vertical"
+				android:gravity="center_vertical"
+				android:orientation="horizontal">
+
+				<net.osmand.plus.widgets.TextViewEx
+					android:id="@+id/freeVersionDescriptionTextView"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_marginStart="@dimen/content_padding"
+					android:layout_weight="1"
+					android:text="@string/get_unlimited_downloads"
+					android:textColor="?attr/btn_text_on_secondary"
+					android:textSize="16sp"
+					app:typefaceWeight="medium" />
+
+				<ImageView
+					android:id="@+id/freeVersionCtaArrow"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginEnd="@dimen/content_padding"
+					android:contentDescription="@string/get_unlimited_downloads"
+					android:src="@drawable/ic_arrow_forward"
+					app:tint="?attr/btn_icon_on_secondary" />
+
+				<TextView
+					android:id="@+id/freeVersionCtaDiscountBadge"
+					android:layout_width="wrap_content"
+					android:layout_height="match_parent"
+					android:layout_gravity="center_vertical"
+					android:layout_marginTop="@dimen/content_padding_small_half"
+					android:layout_marginEnd="@dimen/content_padding"
+					android:layout_marginBottom="@dimen/content_padding_small_half"
+					android:background="@drawable/free_version_banner_cta_discount_bg"
+					android:gravity="center"
+					android:paddingLeft="@dimen/content_padding_medium"
+					android:paddingRight="@dimen/content_padding_medium"
+					android:textColor="@color/active_buttons_and_links_text_light"
+					android:textSize="14sp"
+					android:visibility="gone"
+					tools:text="-50%"
+					tools:visibility="visible" />
+			</LinearLayout>
+		</FrameLayout>
+	</LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

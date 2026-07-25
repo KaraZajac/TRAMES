@@ -1,0 +1,77 @@
+# =====================================================================
+# TRAMES monorepo
+#
+# The rule here is: anything that can be regenerated from a script in
+# this repo does not belong in it. That is not a style preference —
+# server/ alone holds 33 GB of OSM extract and routing graph, and the
+# research data directory is another 583 MB of Census downloads.
+# =====================================================================
+
+# --- staging leftovers from the OsmAnd fork migration ----------------
+/OsmAnd/
+/resources/
+/build-logs/
+
+# --- routing server: downloaded and derived artifacts ----------------
+# 18 GB continental extract, 14 GB prepared graph. Rebuild:
+#   server/graphhopper/import.sh  (~82 min)
+*.pbf
+server/graphhopper/data/
+server/graphhopper/graph-cache/
+server/graphhopper/test-sandbox/
+server/graphhopper/logs/
+server/graphhopper/graphhopper-web-*.jar
+graph-cache/
+
+# Overpass responses and generated cone geometry (~55 MB).
+# Rebuild: server/alpr/fetch-na-cones.sh + build_cones.py
+region_cache/
+tile_cache/
+**/custom_areas/*.geojson
+
+# --- research: downloaded inputs and heavy outputs -------------------
+# 583 MB of Census Gazetteer / ACS / LODES. Rebuild: research/data/fetch.sh
+research/data/
+# ~82 MB of route polylines. Regenerable, but only by re-running the
+# full 7-hour experiment — kept out of git because it is over GitHub's
+# comfortable file size, not because it is cheap.
+research/out/routes.jsonl.gz
+research/out/*.log
+# US state boundary GeoJSON fetched by make_figures.py
+research/paper/figures/us-states.json
+
+# LaTeX build products (trames.pdf IS committed — see research/paper/)
+*.aux
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
+# --- Android / Gradle ------------------------------------------------
+*.hprof
+.gradle/
+build/
+client/build/
+client/*/build/
+local.properties
+!client/ui-test-app/local.properties
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.iml
+captures/
+
+# --- Python ----------------------------------------------------------
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# --- editors / OS ----------------------------------------------------
+.idea/
+.vscode/
+.DS_Store
+*.swp

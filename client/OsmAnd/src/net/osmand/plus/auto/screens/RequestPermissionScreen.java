@@ -1,0 +1,85 @@
+package net.osmand.plus.auto.screens;
+
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.car.app.CarContext;
+import androidx.car.app.model.Action;
+import androidx.car.app.model.CarColor;
+import androidx.car.app.model.MessageTemplate;
+import androidx.car.app.model.OnClickListener;
+import androidx.car.app.model.ParkedOnlyOnClickListener;
+import androidx.car.app.model.Template;
+
+import net.osmand.PlatformUtil;
+import net.osmand.plus.R;
+
+import org.apache.commons.logging.Log;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Screen for asking the user to grant location permission.
+ */
+public class RequestPermissionScreen extends BaseAndroidAutoScreen {
+
+	private static final Log log = PlatformUtil.getLog(RequestPermissionScreen.class);
+
+	/**
+	 * Callback called when the location permission is granted.
+	 */
+	public interface LocationPermissionCheckCallback {
+		/**
+		 * Callback called when the location permission is granted.
+		 */
+		void onPermissionGranted();
+	}
+
+	LocationPermissionCheckCallback mLocationPermissionCheckCallback;
+
+	public RequestPermissionScreen(@NonNull CarContext carContext,
+	                               @Nullable LocationPermissionCheckCallback callback) {
+		super(carContext);
+		mLocationPermissionCheckCallback = callback;
+	}
+
+	@NonNull
+	@Override
+	public Template getTemplate() {
+		List<String> permissions = new ArrayList<>();
+		permissions.add(ACCESS_FINE_LOCATION);
+		permissions.add(ACCESS_COARSE_LOCATION);
+
+		String message = getCarContext().getString(R.string.location_access_request_title);
+
+		OnClickListener listener = ParkedOnlyOnClickListener.create(() -> {
+			try {
+				getCarContext().requestPermissions(
+						permissions,
+						(approved, rejected) -> {
+							if (!approved.isEmpty()) {
+								LocationPermissionCheckCallback locationPermissionCheckCallback = mLocationPermissionCheckCallback;
+								if (locationPermissionCheckCallback != null) {
+									locationPermissionCheckCallback.onPermissionGranted();
+								}
+							}
+							finish();
+						});
+			} catch (RuntimeException error) {
+				log.error("Can't request permissions", error);
+			}
+		});
+
+		Action action = new Action.Builder()
+				.setTitle(getCarContext().getString(R.string.location_access_request_action))
+				.setBackgroundColor(CarColor.GREEN)
+				.setOnClickListener(listener)
+				.build();
+
+		return new MessageTemplate.Builder(message).addAction(action).setHeaderAction(
+				Action.APP_ICON).build();
+	}
+}

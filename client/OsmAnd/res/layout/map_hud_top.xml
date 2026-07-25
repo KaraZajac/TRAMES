@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:orientation="vertical">
+
+	<include layout="@layout/widget_top_bar" />
+
+	<net.osmand.plus.views.controls.VerticalWidgetPanel
+		android:id="@+id/top_widgets_panel"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_gravity="top"
+		android:orientation="vertical"
+		app:topPanel="true" />
+
+	<FrameLayout
+		android:id="@+id/lanes_widget_special_position"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center_horizontal|top"
+		android:layout_marginTop="@dimen/map_button_margin" />
+
+	<net.osmand.plus.views.controls.SideWidgetsPanel
+		android:id="@+id/map_left_widgets_panel"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="top|start"
+		android:layout_marginTop="@dimen/content_padding_small_half"
+		app:rightSide="false" />
+
+	<net.osmand.plus.views.controls.SideWidgetsPanel
+		android:id="@+id/map_right_widgets_panel"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="top|end"
+		android:layout_marginTop="@dimen/content_padding_small_half"
+		app:rightSide="true"
+		tools:ignore="UselessParent" />
+
+</FrameLayout>

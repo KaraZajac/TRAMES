@@ -1,0 +1,318 @@
+package net.osmand.plus.configmap;
+
+import static net.osmand.plus.widgets.dialogbutton.DialogButtonType.PRIMARY;
+import static net.osmand.plus.widgets.dialogbutton.DialogButtonType.STROKED;
+
+import android.graphics.Rect;
+import android.os.Bundle;
+import android.util.TypedValue;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.view.ViewCompat;
+import androidx.fragment.app.FragmentActivity;
+
+import net.osmand.plus.R;
+import net.osmand.plus.activities.MapActivity;
+import net.osmand.plus.base.BaseFullScreenFragment;
+import net.osmand.plus.helpers.AndroidUiHelper;
+import net.osmand.plus.utils.AndroidUtils;
+import net.osmand.plus.utils.ColorUtilities;
+import net.osmand.plus.utils.InsetTarget;
+import net.osmand.plus.utils.InsetTarget.Type;
+import net.osmand.plus.utils.InsetTargetsCollection;
+import net.osmand.plus.views.MapLayers;
+import net.osmand.plus.views.controls.MapHudLayout;
+import net.osmand.plus.views.controls.maphudbuttons.Map3DButton;
+import net.osmand.plus.views.controls.maphudbuttons.MapButton;
+import net.osmand.plus.views.layers.MapControlsLayer;
+import net.osmand.plus.views.layers.MapInfoLayer;
+import net.osmand.plus.views.mapwidgets.TopToolbarController.TopToolbarControllerType;
+import net.osmand.plus.views.mapwidgets.widgets.RulerWidget;
+import net.osmand.plus.widgets.dialogbutton.DialogButton;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+public abstract class ConfigureMapOptionFragment extends BaseFullScreenFragment {
+
+	public static final String TAG = ConfigureMapOptionFragment.class.getSimpleName();
+
+	private RulerWidget rulerWidget;
+	private DialogButton applyButton;
+	private List<MapButton> mapButtons = new ArrayList<>();
+
+	@Override
+	protected boolean isUsedOnMap() {
+		return true;
+	}
+
+	@Override
+	public int getStatusBarColorId() {
+		AndroidUiHelper.setStatusBarContentColor(getView(), nightMode);
+		boolean portrait = AndroidUiHelper.isPortrait(requireMapActivity());
+		return portrait ? ColorUtilities.getListBgColorId(nightMode) : R.color.status_bar_transparent_light;
+	}
+
+	public boolean getContentStatusBarNightMode() {
+		return nightMode;
+	}
+
+	@Nullable
+	@Override
+	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+		updateNightMode();
+		MapActivity activity = requireMapActivity();
+		View view = inflate(R.layout.configure_map_option_fragment, container, false);
+		AndroidUtils.addStatusBarPadding21v(activity, view);
+
+		mapButtons = new ArrayList<>();
+		setupApplyButton(applyButton = view.findViewById(R.id.apply_button));
+		setupToolBar(view);
+		if (!shouldShowMapWidgets()) {
+			buildZoomButtons(view);
+			moveMap3DButton(view);
+		}
+		setupBackgroundShadow(view);
+		setupBottomContainer(view.findViewById(R.id.bottom_container));
+		setupMainContent(view.findViewById(R.id.main_content));
+		if (shouldShowMapWidgets()) {
+			View.OnLayoutChangeListener listener = (changedView, left, top, right, bottom,
+					oldLeft, oldTop, oldRight, oldBottom) -> {
+				if (isResumed() && (left != oldLeft || top != oldTop || right != oldRight || bottom != oldBottom)) {
+					view.post(() -> updateMapHudVisibleArea(activity, view, false));
+				}
+			};
+			view.findViewById(R.id.appbar).addOnLayoutChangeListener(listener);
+			view.findViewById(R.id.bottom_container).addOnLayoutChangeListener(listener);
+			view.findViewById(R.id.map_controls_container).addOnLayoutChangeListener(listener);
+		}
+
+		refreshMap();
+		refreshControlsButtons();
+
+		return view;
+	}
+
+	@Override
+	public InsetTargetsCollection getInsetTargets() {
+		InsetTargetsCollection collection = super.getInsetTargets();
+		collection.removeType(Type.LANDSCAPE_SIDES);
+		collection.replace(InsetTarget.createBottomContainer(R.id.bottom_container).landscapeLeftSided(true));
+		collection.replace(InsetTarget.createLeftSideContainer(true, R.id.main_view));
+		collection.replace(InsetTarget.createHorizontalLandscape(false, R.id.map_controls_container));
+		collection.add(InsetTarget.createHorizontalLandscape(true, R.id.toolbar, R.id.main_content));
+		return collection;
+	}
+
+	protected void setupBottomContainer(@NonNull View bottomContainer) {
+	}
+
+	@Nullable
+	protected abstract String getToolbarTitle();
+
+	protected void resetToDefault() {
+	}
+
+	protected void applyChanges() {
+	}
+
+	protected abstract void setupMainContent(@NonNull ViewGroup container);
+
+	protected void updateApplyButton(boolean enable) {
+		applyButton.setEnabled(enable);
+		applyButton.setButtonType(enable ? PRIMARY : STROKED);
+	}
+
+	protected void refreshMap() {
+		MapActivity mapActivity = getMapActivity();
+		if (mapActivity != null) {
+			mapActivity.refreshMap();
+		}
+	}
+
+	private void buildZoomButtons(@NonNull View view) {
+		View zoomButtonsView = view.findViewById(R.id.map_hud_controls);
+
+		MapActivity activity = requireMapActivity();
+		MapLayers mapLayers = activity.getMapLayers();
+		MapControlsLayer controlsLayer = mapLayers.getMapControlsLayer();
+
+		mapButtons.add(view.findViewById(R.id.map_zoom_in_button));
+		mapButtons.add(view.findViewById(R.id.map_zoom_out_button));
+		mapButtons.add(view.findViewById(R.id.map_my_location_button));
+		controlsLayer.addCustomizedDefaultMapButtons(mapButtons);
+
+		AndroidUiHelper.updateVisibility(zoomButtonsView, true);
+
+		MapInfoLayer mapInfoLayer = mapLayers.getMapInfoLayer();
+		rulerWidget = mapInfoLayer.setupRulerWidget(view.findViewById(R.id.map_ruler_layout));
+
+		MapButton compassButton = view.findViewById(R.id.map_compass_button);
+		controlsLayer.addCustomMapButton(compassButton);
+		mapButtons.add(compassButton);
+	}
+
+	private void setupBackgroundShadow(@NonNull View view) {
+		MapActivity activity = requireMapActivity();
+		View mainView = view.findViewById(R.id.main_view);
+		if (mainView != null && !AndroidUiHelper.isPortrait(activity)) {
+			TypedValue typedValueAttr = new TypedValue();
+			int bgAttrId = AndroidUtils.isLayoutRtl(activity) ? R.attr.right_menu_view_bg : R.attr.left_menu_view_bg;
+			activity.getTheme().resolveAttribute(bgAttrId, typedValueAttr, true);
+			mainView.setBackgroundResource(typedValueAttr.resourceId);
+		}
+	}
+
+	protected void setupApplyButton(@NonNull DialogButton applyButton) {
+		applyButton.setOnClickListener(viewOnCLick -> {
+			applyChanges();
+			dismiss();
+		});
+		updateApplyButton(false);
+	}
+
+	protected void setupToolBar(@NonNull View view) {
+		View appbar = view.findViewById(R.id.appbar);
+		ViewCompat.setElevation(appbar, 5.0f);
+
+		TextView title = appbar.findViewById(R.id.title);
+		title.setText(getToolbarTitle());
+
+		ImageView backButton = appbar.findViewById(R.id.back_button);
+		backButton.setImageDrawable(getContentIcon(R.drawable.ic_action_close));
+		backButton.setOnClickListener(v -> dismiss());
+
+		ImageButton resetButton = appbar.findViewById(R.id.reset_button);
+		resetButton.setImageDrawable(getIcon(R.drawable.ic_action_reset, ColorUtilities.getDefaultIconColorId(nightMode)));
+		resetButton.setOnClickListener(v -> resetToDefault());
+	}
+
+	private void moveMap3DButton(@NonNull View view) {
+		MapActivity activity = getMapActivity();
+		if (activity != null) {
+			ViewGroup container = view.findViewById(R.id.hud_button_container);
+			MapButton map3DButton = (Map3DButton) inflate(R.layout.map_3d_button, container, false);
+			activity.getMapLayers().getMapControlsLayer().addCustomMapButton(map3DButton);
+			container.addView(map3DButton);
+			mapButtons.add(map3DButton);
+		}
+	}
+
+	public boolean shouldShowMapWidgets() {
+		return false;
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+
+		MapActivity activity = requireMapActivity();
+		activity.disableDrawer();
+		if (shouldShowMapWidgets()) {
+			activity.hideTopToolbar(TopToolbarControllerType.SUGGEST_MAP);
+			View view = getView();
+			if (view != null) {
+				view.post(() -> updateMapHudVisibleArea(activity, view, true));
+			}
+		} else {
+			updateWidgetsVisibility(activity, View.GONE);
+		}
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+
+		MapActivity activity = requireMapActivity();
+		activity.enableDrawer();
+		if (shouldShowMapWidgets()) {
+			MapHudLayout mapHudLayout = activity.findViewById(R.id.map_hud_layout);
+			if (mapHudLayout != null) {
+				mapHudLayout.clearExternalVisibleArea();
+			}
+			refreshPreviewControls(activity);
+		} else {
+			updateWidgetsVisibility(activity, View.VISIBLE);
+		}
+	}
+
+	private void updateMapHudVisibleArea(@NonNull MapActivity activity, @NonNull View view, boolean forceRefresh) {
+		Rect visibleArea = new Rect();
+		if (AndroidUiHelper.isPortrait(activity)) {
+			if (!view.getGlobalVisibleRect(visibleArea)) {
+				return;
+			}
+			Rect overlayBounds = new Rect();
+			View appBar = view.findViewById(R.id.appbar);
+			if (appBar.getGlobalVisibleRect(overlayBounds)) {
+				visibleArea.top = Math.max(visibleArea.top, overlayBounds.bottom);
+			}
+			View bottomContainer = view.findViewById(R.id.bottom_container);
+			if (bottomContainer.getGlobalVisibleRect(overlayBounds)) {
+				visibleArea.bottom = Math.min(visibleArea.bottom, overlayBounds.top);
+			}
+		} else {
+			View mapArea = view.findViewById(R.id.map_controls_container);
+			if (!mapArea.getGlobalVisibleRect(visibleArea)) {
+				return;
+			}
+		}
+
+		MapHudLayout mapHudLayout = activity.findViewById(R.id.map_hud_layout);
+		if (mapHudLayout != null && (mapHudLayout.setExternalVisibleArea(visibleArea) || forceRefresh)) {
+			refreshPreviewControls(activity);
+		}
+	}
+
+	private void refreshPreviewControls(@NonNull MapActivity activity) {
+		MapLayers mapLayers = activity.getMapLayers();
+		MapInfoLayer mapInfoLayer = mapLayers.getMapInfoLayer();
+		if (mapInfoLayer != null) {
+			mapInfoLayer.refreshWidgetPanels();
+		}
+		refreshControlsButtons();
+		activity.refreshMap();
+	}
+
+	protected void dismiss() {
+		FragmentActivity activity = getActivity();
+		if (activity != null) {
+			activity.onBackPressed();
+		}
+	}
+
+	private void updateWidgetsVisibility(@NonNull MapActivity activity, int visibility) {
+		AndroidUiHelper.setVisibility(activity, visibility, R.id.map_left_widgets_panel,
+				R.id.map_right_widgets_panel, R.id.map_center_info);
+	}
+
+	@Override
+	public void onDestroyView() {
+		super.onDestroyView();
+
+		MapActivity activity = getMapActivity();
+		if (activity != null) {
+			MapLayers mapLayers = activity.getMapLayers();
+			mapLayers.getMapControlsLayer().removeCustomMapButtons(mapButtons);
+
+			if (rulerWidget != null) {
+				MapInfoLayer mapInfoLayer = mapLayers.getMapInfoLayer();
+				mapInfoLayer.removeRulerWidgets(Collections.singletonList(rulerWidget));
+			}
+		}
+		refreshMap();
+		refreshControlsButtons();
+	}
+
+	private void refreshControlsButtons() {
+		app.getOsmandMap().getMapLayers().getMapControlsLayer().refreshButtons();
+	}
+}

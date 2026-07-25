@@ -1,0 +1,685 @@
+package net.osmand.plus.views.layers;
+
+import static net.osmand.IndexConstants.GPX_FILE_EXT;
+import static net.osmand.data.Amenity.ROUTE_ACTIVITY_TYPE;
+import static net.osmand.data.Amenity.ROUTE_ID;
+import static net.osmand.data.FavouritePoint.DEFAULT_BACKGROUND_TYPE;
+import static net.osmand.osm.OsmRouteType.HIKING;
+import static net.osmand.plus.transport.TransportLinesMenu.RENDERING_CATEGORY_TRANSPORT;
+import static net.osmand.render.RenderingRuleStorageProperties.UI_CATEGORY_HIDDEN;
+
+import android.content.Context;
+import android.graphics.PointF;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import net.osmand.NativeLibrary.RenderedObject;
+import net.osmand.PlatformUtil;
+import net.osmand.RenderingContext;
+import net.osmand.binary.ObfConstants;
+import net.osmand.core.android.MapRendererView;
+import net.osmand.core.jni.AmenitySymbolsProvider.AmenitySymbolsGroup;
+import net.osmand.core.jni.*;
+import net.osmand.core.jni.IMapRenderer.MapSymbolInformation;
+import net.osmand.core.jni.MapObject;
+import net.osmand.core.jni.MapObjectsSymbolsProvider.MapObjectSymbolsGroup;
+import net.osmand.core.jni.MapSymbol.ContentClass;
+import net.osmand.core.jni.MapSymbolsGroup.AdditionalBillboardSymbolInstanceParameters;
+import net.osmand.data.*;
+import net.osmand.data.Amenity;
+import net.osmand.data.LatLon;
+import net.osmand.osm.OsmRouteType;
+import net.osmand.plus.OsmandApplication;
+import net.osmand.plus.configmap.ConfigureMapUtils;
+import net.osmand.plus.mapcontextmenu.controllers.SelectedGpxMenuController.SelectedGpxPoint;
+import net.osmand.plus.plugins.osmedit.OsmBugsLayer.OpenStreetNote;
+import net.osmand.plus.render.MapRenderRepositories;
+import net.osmand.plus.render.NativeOsmandLibrary;
+import net.osmand.plus.settings.backend.OsmandSettings;
+import net.osmand.plus.settings.backend.preferences.CommonPreference;
+import net.osmand.plus.track.clickable.ClickableWay;
+import net.osmand.plus.utils.NativeUtilities;
+import net.osmand.plus.views.MapLayers;
+import net.osmand.plus.views.OsmandMapTileView;
+import net.osmand.plus.views.layers.ContextMenuLayer.IContextMenuProvider;
+import net.osmand.plus.views.layers.base.OsmandMapLayer;
+import net.osmand.plus.wikivoyage.data.TravelGpx;
+import net.osmand.render.RenderingRuleProperty;
+import net.osmand.router.network.NetworkRouteSelector;
+import net.osmand.router.network.NetworkRouteSelector.NetworkRouteSelectorFilter;
+import net.osmand.search.AmenitySearcher;
+import net.osmand.shared.gpx.GpxUtilities;
+import net.osmand.shared.gpx.primitives.WptPt;
+import net.osmand.util.Algorithms;
+import net.osmand.util.MapUtils;
+
+import org.apache.commons.logging.Log;
+
+import java.util.*;
+
+
+public class MapSelectionHelper {
+
+	private static final Log log = PlatformUtil.getLog(MapSelectionHelper.class);
+	private static final int TILE_SIZE = 256;
+
+	private final OsmandApplication app;
+	private final OsmandSettings settings;
+
+	private final OsmandMapTileView view;
+	private final MapLayers mapLayers;
+
+	private Map<LatLon, BackgroundType> touchedFullMapObjects = new HashMap<>();
+	private Map<LatLon, BackgroundType> touchedSmallMapObjects = new HashMap<>();
+
+	public MapSelectionHelper(@NonNull Context context) {
+		app = (OsmandApplication) context.getApplicationContext();
+		settings = app.getSettings();
+		view = app.getOsmandMap().getMapView();
+		mapLayers = app.getOsmandMap().getMapLayers();
+	}
+
+	@NonNull
+	public Map<LatLon, BackgroundType> getTouchedFullMapObjects() {
+		return touchedFullMapObjects;
+	}
+
+	@NonNull
+	public Map<LatLon, BackgroundType> getTouchedSmallMapObjects() {
+		return touchedSmallMapObjects;
+	}
+
+	public boolean hasTouchedMapObjects() {
+		return !touchedSmallMapObjects.isEmpty() || !touchedFullMapObjects.isEmpty();
+	}
+
+	public void clearTouchedMapObjects() {
+		touchedFullMapObjects.clear();
+		touchedSmallMapObjects.clear();
+	}
+
+	@NonNull
+	MapSelectionResult collectObjectsFromMap(@NonNull PointF point, @NonNull RotatedTileBox tileBox,
+	                                         boolean showUnknownLocation) {
+		MapSelectionRules rules = createCustomizedMapSelectionRules(showUnknownLocation);
+		MapSelectionResult result = new MapSelectionResult(app, tileBox, point);
+
+		collectObjectsFromLayers(result, rules, false);
+		collectObjectsFromMap(result, rules, point, tileBox);
+
+		if (result.isEmpty()) {
+			collectObjectsFromLayers(result, rules, true);
+		}
+		result.groupByOsmIdAndWikidataId();
+		return result;
+	}
+
+	@NonNull
+	private MapSelectionRules createCustomizedMapSelectionRules(boolean showUnknownLocation) {
+		MapSelectionRules rules = new MapSelectionRules();
+		rules.setUnknownLocation(showUnknownLocation);
+
+		for (OsmandMapLayer layer : view.getLayers()) {
+			if (layer instanceof IContextMenuProvider provider) {
+				if (provider.customizeMapSelectionRules(rules)) {
+					break;
+				}
+			}
+		}
+		return rules;
+	}
+
+	private void collectObjectsFromMap(@NonNull MapSelectionResult result,
+	                                   @NonNull MapSelectionRules rules,
+	                                   @NonNull PointF point, @NonNull RotatedTileBox tileBox) {
+		NativeOsmandLibrary nativeLib = NativeOsmandLibrary.getLoadedLibrary();
+		if (app.useOpenGlRenderer()) {
+			selectObjectsFromOpenGl(result, rules, tileBox, point);
+		} else if (nativeLib != null) {
+			selectObjectsFromNative(result, rules, nativeLib, tileBox, point);
+		}
+	}
+
+	protected void collectObjectsFromLayers(@NonNull MapSelectionResult result,
+	                                        @NonNull MapSelectionRules rules, boolean secondaryObjects) {
+		for (OsmandMapLayer layer : view.getLayers()) {
+			if (layer instanceof IContextMenuProvider provider && (!provider.isSecondaryProvider() || secondaryObjects)) {
+				provider.collectObjectsFromPoint(result, rules);
+			}
+		}
+	}
+
+	private boolean collectMapSymbolByExtraId(@NonNull MapSelectionResult result,
+	                                          @NonNull IBillboardMapSymbol billboardMapSymbol,
+	                                          @NonNull LatLon objectLatLon) {
+		int extraId = billboardMapSymbol.getExtraId();
+		for (OsmandMapLayer layer : view.getLayers()) {
+			if (layer instanceof IContextMenuProvider provider && provider.collectMapSymbolByExtraId(extraId, result)) {
+				result.setObjectLatLon(objectLatLon);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public void acquireTouchedMapObjects(@NonNull RotatedTileBox tileBox,
+	                                     @NonNull PointF point, boolean unknownLocation) {
+		MapSelectionRules rules = new MapSelectionRules();
+		rules.setOnlyTouchableObjects(true);
+		rules.setUnknownLocation(unknownLocation);
+
+		Map<LatLon, BackgroundType> touchedMapObjectsFull = new HashMap<>();
+		Map<LatLon, BackgroundType> touchedMapObjectsSmall = new HashMap<>();
+		for (OsmandMapLayer layer : view.getLayers()) {
+			if (layer instanceof IContextMenuProvider provider) {
+				MapSelectionResult result = new MapSelectionResult(app, tileBox, point);
+				provider.collectObjectsFromPoint(result, rules);
+				for (SelectedMapObject selectedObject : result.getAllObjects()) {
+					Object object = selectedObject.object();
+					LatLon latLon = provider.getObjectLocation(object);
+					BackgroundType backgroundType = DEFAULT_BACKGROUND_TYPE;
+					if (object instanceof OpenStreetNote) {
+						backgroundType = BackgroundType.COMMENT;
+					}
+					if (object instanceof FavouritePoint) {
+						backgroundType = ((FavouritePoint) object).getBackgroundType();
+					}
+					if (object instanceof WptPt) {
+						backgroundType = BackgroundType.getByTypeName(((WptPt) object).getBackgroundType(), DEFAULT_BACKGROUND_TYPE);
+					}
+					if (layer.isPresentInFullObjects(latLon) && !touchedMapObjectsFull.containsKey(latLon)) {
+						touchedMapObjectsFull.put(latLon, backgroundType);
+					} else if (layer.isPresentInSmallObjects(latLon) && !touchedMapObjectsSmall.containsKey(latLon)) {
+						touchedMapObjectsSmall.put(latLon, backgroundType);
+					}
+				}
+			}
+		}
+		this.touchedFullMapObjects = touchedMapObjectsFull;
+		this.touchedSmallMapObjects = touchedMapObjectsSmall;
+	}
+
+	private void selectObjectsFromNative(@NonNull MapSelectionResult result,
+	                                     @NonNull MapSelectionRules rules,
+	                                     @NonNull NativeOsmandLibrary nativeLib,
+	                                     @NonNull RotatedTileBox tileBox, @NonNull PointF point) {
+		MapRenderRepositories maps = app.getResourceManager().getRenderer();
+		RenderingContext rc = maps.getVisibleRenderingContext();
+		RenderedObject[] renderedObjects = null;
+		if (rc != null && rc.zoom == tileBox.getZoom()) {
+			double sinRotate = Math.sin(Math.toRadians(rc.rotate - tileBox.getRotate()));
+			double cosRotate = Math.cos(Math.toRadians(rc.rotate - tileBox.getRotate()));
+			float x = tileBox.getPixXFrom31((int) (rc.leftX * rc.tileDivisor), (int) (rc.topY * rc.tileDivisor));
+			float y = tileBox.getPixYFrom31((int) (rc.leftX * rc.tileDivisor), (int) (rc.topY * rc.tileDivisor));
+			float dx = point.x - x;
+			float dy = point.y - y;
+			int coordX = (int) (dx * cosRotate - dy * sinRotate);
+			int coordY = (int) (dy * cosRotate + dx * sinRotate);
+
+			renderedObjects = nativeLib.searchRenderedObjectsFromContext(rc, coordX, coordY, true);
+		}
+		if (renderedObjects != null) {
+			Set<Long> uniqueRenderedObjectIds = new HashSet<>();
+			for (RenderedObject renderedObject : renderedObjects) {
+				Long objectId = renderedObject.getId();
+				if (objectId != null && uniqueRenderedObjectIds.contains(objectId)) {
+					log.warn("selectObjectsFromNative(v1) got duplicate: " + renderedObject);
+					continue;
+				}
+				Map<String, String> tags = renderedObject.getTags();
+
+				boolean isTravelGpx = app.getTravelHelper().isTravelGpxTags(tags);
+				boolean isOldOsmRoute = !Algorithms.isEmpty(NetworkRouteSelector.getRouteKeys(tags));
+				boolean isClickableWay = app.getClickableWayHelper().isClickableWay(renderedObject);
+
+				String routeId = tags.get(ROUTE_ID);
+				boolean isNewOsmRoute = isNewOsmRoute(routeId, isTravelGpx);
+				boolean isSpecial = isOldOsmRoute || isNewOsmRoute || isTravelGpx || isClickableWay;
+
+				boolean shouldFilterRenderedObject = renderedObject.getId() == null
+						|| !renderedObject.isVisible() || renderedObject.isDrawOnPath();
+
+				if ((isSpecial && rules.isOnlyPoints()) || (!isSpecial && shouldFilterRenderedObject)) {
+					continue;
+				}
+
+				if (renderedObject.getLabelX() != 0 && renderedObject.getLabelY() != 0) {
+					double lat = MapUtils.get31LatitudeY(renderedObject.getLabelY());
+					double lon = MapUtils.get31LongitudeX(renderedObject.getLabelX());
+					renderedObject.setLabelLatLon(new LatLon(lat, lon));
+				} else {
+					double cx = renderedObject.getBbox().centerX();
+					double cy = renderedObject.getBbox().centerY();
+					double cosRotateTileSize = Math.cos(Math.toRadians(rc.rotate)) * TILE_SIZE;
+					double sinRotateTileSize = Math.sin(Math.toRadians(rc.rotate)) * TILE_SIZE;
+					double dTileX = (cx * cosRotateTileSize + cy * sinRotateTileSize) / (TILE_SIZE * TILE_SIZE);
+					double dTileY = (cy * cosRotateTileSize - cx * sinRotateTileSize) / (TILE_SIZE * TILE_SIZE);
+					int x31 = (int) ((dTileX + rc.leftX) * rc.tileDivisor);
+					int y31 = (int) ((dTileY + rc.topY) * rc.tileDivisor);
+					double lat = MapUtils.get31LatitudeY(y31);
+					double lon = MapUtils.get31LongitudeX(x31);
+					LatLon clickLatLon = new LatLon(lat, lon);
+					renderedObject.setLabelLatLon(snapLatLonToWayGeometry(clickLatLon, renderedObject));
+				}
+
+				LatLon objectLatLon;
+				if (renderedObject.isSimplePoint()) {
+					double lat = MapUtils.get31LatitudeY(renderedObject.getY().get(0));
+					double lon = MapUtils.get31LongitudeX(renderedObject.getX().get(0));
+					objectLatLon = new LatLon(lat, lon);
+				} else {
+					objectLatLon = renderedObject.getLabelLatLon(); // @NonNull
+				}
+
+				if (isNewOsmRoute || isOldOsmRoute) {
+					NetworkRouteSelectorFilter enabledRouteTypes = createRouteFilter();
+					addFilteredOsmRoutesAtLatLon(objectLatLon, enabledRouteTypes, result);
+				}
+				if (isClickableWay) {
+					addClickableWay(result, app.getClickableWayHelper()
+							.loadClickableWay(objectLatLon, renderedObject));
+				}
+				if (isTravelGpx && !isNewOsmRoute) {
+					addTravelGpx(result, routeId, objectLatLon); // WikiVoyage or User TravelGpx
+				}
+
+				boolean allowMapObjects = !renderedObject.isDrawOnPath() &&
+						!NetworkRouteSelector.containsUnclickableRouteTags(tags);
+
+				if (allowMapObjects) {
+					result.collect(renderedObject, null);
+				}
+
+				if (objectId != null) {
+					uniqueRenderedObjectIds.add(objectId);
+				}
+				if (objectLatLon != null) {
+					result.setObjectLatLon(objectLatLon);
+				}
+			}
+		}
+	}
+
+	private void selectObjectsFromOpenGl(@NonNull MapSelectionResult result, @NonNull MapSelectionRules rules,
+	                                     @NonNull RotatedTileBox tileBox, @NonNull PointF point) {
+		MapRendererView rendererView = view.getMapRenderer();
+		if (rendererView != null) {
+			int delta = 20;
+			PointI tl = new PointI((int) point.x - delta, (int) point.y - delta);
+			PointI br = new PointI((int) point.x + delta, (int) point.y + delta);
+			MapSymbolInformationList symbols = rendererView.getSymbolsIn(new AreaI(tl, br), false);
+			AmenitySearcher amenitySearcher = app.getResourceManager().getAmenitySearcher();
+			for (int i = 0; i < symbols.size(); i++) {
+				MapSymbolInformation symbolInfo = symbols.get(i);
+				MapSymbol mapSymbol = symbolInfo.getMapSymbol();
+				if (mapSymbol.getIgnoreClick()) continue;
+
+				LatLon objectLatLon;
+				BaseDetailsObject detailsObject = null;
+				net.osmand.core.jni.Amenity jniAmenity = null;
+
+				IBillboardMapSymbol billboardMapSymbol = getBillboardMapSymbol(mapSymbol);
+				if (billboardMapSymbol != null) {
+					objectLatLon = fetchBillboardSymbolLatLon(symbolInfo, billboardMapSymbol);
+					if (collectMapSymbolByExtraId(result, billboardMapSymbol, objectLatLon)) {
+						continue;
+					}
+					jniAmenity = getJniAmenity(mapSymbol);
+				} else {
+					LatLon clickLatLon = NativeUtilities.getLatLonFromElevatedPixel(rendererView, tileBox, point);
+					objectLatLon = snapLatLonToWayGeometry(clickLatLon, mapSymbol);
+				}
+
+				if (jniAmenity != null) {
+					List<String> names = getValues(jniAmenity.getLocalizedNames());
+					names.add(jniAmenity.getNativeName());
+					long id = jniAmenity.getId().getId().longValue();
+					Amenity requestAmenity = new Amenity();
+					requestAmenity.setId(id);
+					requestAmenity.setLocation(objectLatLon);
+
+					AmenitySearcher.Settings settings = app.getResourceManager().getDefaultAmenitySearchSettings();
+					AmenitySearcher.Request request = new AmenitySearcher.Request(requestAmenity, names);
+					detailsObject = amenitySearcher.searchDetailedObject(request, settings, null);
+				} else {
+					ObfMapObject obfMapObject = getObfMapObject(mapSymbol);
+					if (obfMapObject != null) {
+						Map<String, String> tags = getOrderedTags(obfMapObject.getResolvedAttributesListPairs());
+						boolean isTravelGpx = app.getTravelHelper().isTravelGpxTags(tags);
+						boolean isOldOsmRoute = !Algorithms.isEmpty(NetworkRouteSelector.getRouteKeys(tags));
+						boolean isClickableWay = app.getClickableWayHelper().isClickableWay(obfMapObject, tags);
+
+						String routeId = tags.get(ROUTE_ID);
+						boolean isNewOsmRoute = isNewOsmRoute(routeId, isTravelGpx);
+						boolean isSpecial = isOldOsmRoute || isNewOsmRoute || isTravelGpx || isClickableWay;
+
+						if (rules.isOnlyPoints() && isSpecial) continue;
+
+						if (isNewOsmRoute || isOldOsmRoute) {
+							NetworkRouteSelectorFilter enabledRouteTypes = createRouteFilter();
+							addFilteredOsmRoutesAtLatLon(objectLatLon, enabledRouteTypes, result);
+						}
+						if (isClickableWay) {
+							addClickableWay(result, app.getClickableWayHelper()
+									.loadClickableWay(objectLatLon, obfMapObject, tags));
+						}
+						if (isTravelGpx && !isNewOsmRoute) {
+							addTravelGpx(result, routeId, objectLatLon); // WikiVoyage or User TravelGpx
+						}
+
+						boolean allowMapObjects = getOnPathMapSymbol(symbolInfo) == null &&
+								!NetworkRouteSelector.containsUnclickableRouteTags(tags);
+
+						if (allowMapObjects) {
+							RenderedObject renderedObject = createRenderedObject(symbolInfo, obfMapObject, tags);
+							if (renderedObject != null) {
+								result.collect(renderedObject, null);
+							}
+						}
+					}
+				}
+				if (detailsObject != null && !isTransportStop(result.getAllObjects(), detailsObject)) {
+					result.collect(detailsObject, mapLayers.getPoiMapLayer());
+				}
+				result.setObjectLatLon(objectLatLon);
+			}
+		}
+	}
+
+	@NonNull
+	private LatLon snapLatLonToWayGeometry(@NonNull LatLon location, @NonNull RenderedObject renderedObject) {
+		LatLon result = location;
+		double minDist = Double.POSITIVE_INFINITY;
+		for (int i = 0; i < renderedObject.getX().size(); i++) {
+			int x = renderedObject.getX().get(i);
+			int y = renderedObject.getY().get(i);
+			LatLon ll = new LatLon(MapUtils.get31LatitudeY(y), MapUtils.get31LongitudeX(x));
+			double dist = MapUtils.getDistance(ll, location);
+			if (dist < minDist) {
+				minDist = dist;
+				result = ll;
+			}
+		}
+		return result;
+	}
+
+
+	@NonNull
+	private LatLon snapLatLonToWayGeometry(@NonNull LatLon location, @NonNull MapSymbol mapSymbol) {
+		LatLon result = location;
+		ObfMapObject obfMapObject = getObfMapObject(mapSymbol);
+		if (obfMapObject != null) {
+			QVectorPointI points31 = obfMapObject.getPoints31();
+			double minDist = Double.POSITIVE_INFINITY;
+			for (int i = 0; i < points31.size(); i++) {
+				PointI p = points31.get(i);
+				LatLon ll = new LatLon(MapUtils.get31LatitudeY(p.getY()), MapUtils.get31LongitudeX(p.getX()));
+				double dist = MapUtils.getDistance(ll, location);
+				if (dist < minDist) {
+					minDist = dist;
+					result = ll;
+				}
+			}
+		}
+		return result;
+	}
+
+	@Nullable
+	private RenderedObject createRenderedObject(@NonNull MapSymbolInformation symbolInfo,
+			@NonNull ObfMapObject obfMapObject, Map<String, String> tags) {
+		RasterMapSymbol rasterMapSymbol = getRasterMapSymbol(symbolInfo);
+		if (rasterMapSymbol != null) {
+			MapSymbolsGroup group = rasterMapSymbol.getGroupPtr();
+			RasterMapSymbol symbolIcon = getRasterMapSymbol(group.getFirstSymbolWithContentClass(ContentClass.Icon));
+			RasterMapSymbol symbolCaption = getRasterMapSymbol(group.getFirstSymbolWithContentClass(ContentClass.Caption));
+
+			RenderedObject renderedObject = new RenderedObject();
+			renderedObject.setId(obfMapObject.getId().getId().longValue());
+			QVectorPointI points31 = obfMapObject.getPoints31();
+			for (int k = 0; k < points31.size(); k++) {
+				PointI pointI = points31.get(k);
+				renderedObject.addLocation(pointI.getX(), pointI.getY());
+			}
+			double lat = MapUtils.get31LatitudeY(obfMapObject.getLabelCoordinateY());
+			double lon = MapUtils.get31LongitudeX(obfMapObject.getLabelCoordinateX());
+			renderedObject.setLabelLatLon(new LatLon(lat, lon));
+
+			if (symbolIcon != null) {
+				renderedObject.setIconRes(symbolIcon.getContent());
+			}
+			if (symbolCaption != null) {
+				renderedObject.setName(symbolCaption.getContent());
+			}
+			for (Map.Entry<String, String> entry : tags.entrySet()) {
+				renderedObject.putTag(entry.getKey(), entry.getValue());
+			}
+			return renderedObject;
+		}
+		return null;
+	}
+
+	@Nullable
+	private IOnPathMapSymbol getOnPathMapSymbol(@NonNull MapSymbolInformation symbolInfo) {
+		try {
+			return IOnPathMapSymbol.dynamic_pointer_cast(symbolInfo.getMapSymbol());
+		} catch (Exception ignore) {
+		}
+		return null;
+	}
+
+	@Nullable
+	private RasterMapSymbol getRasterMapSymbol(@NonNull MapSymbolInformation symbolInfo) {
+		return getRasterMapSymbol(symbolInfo.getMapSymbol());
+	}
+
+	@Nullable
+	private RasterMapSymbol getRasterMapSymbol(@NonNull MapSymbol mapSymbol) {
+		try {
+			return RasterMapSymbol.dynamic_pointer_cast(mapSymbol);
+		} catch (Exception ignore) {
+		}
+		return null;
+	}
+
+	@Nullable
+	private IBillboardMapSymbol getBillboardMapSymbol(@NonNull MapSymbol mapSymbol) {
+		try {
+			return IBillboardMapSymbol.dynamic_pointer_cast(mapSymbol);
+		} catch (Exception ignore) {
+		}
+		return null;
+	}
+
+	@Nullable
+	private net.osmand.core.jni.Amenity getJniAmenity(@NonNull MapSymbol mapSymbol) {
+		try {
+			return AmenitySymbolsGroup.dynamic_cast(mapSymbol.getGroupPtr()).getAmenity();
+		} catch (Exception ignore) {
+		}
+		return null;
+	}
+
+	@Nullable
+	private ObfMapObject getObfMapObject(@NonNull MapSymbol mapSymbol) {
+		MapObject mapObject = getMapObject(mapSymbol);
+		if (mapObject != null) {
+			try {
+				return ObfMapObject.dynamic_pointer_cast(mapObject);
+			} catch (Exception ignore) {
+			}
+		}
+		return null;
+	}
+
+	@Nullable
+	private MapObject getMapObject(@NonNull MapSymbol mapSymbol) {
+		try {
+			return MapObjectSymbolsGroup.dynamic_cast(mapSymbol.getGroupPtr()).getMapObject();
+		} catch (Exception ignore) {
+		}
+		return null;
+	}
+
+	@NonNull
+	private LatLon fetchBillboardSymbolLatLon(@NonNull MapSymbolInformation symbolInfo,
+	                                          @NonNull IBillboardMapSymbol billboardMapSymbol) {
+		double lat = Utilities.get31LatitudeY(billboardMapSymbol.getPosition31().getY());
+		double lon = Utilities.get31LongitudeX(billboardMapSymbol.getPosition31().getX());
+		LatLon latLon = new LatLon(lat, lon);
+
+		AdditionalBillboardSymbolInstanceParameters billboardAdditionalParams;
+		try {
+			billboardAdditionalParams = AdditionalBillboardSymbolInstanceParameters
+					.dynamic_pointer_cast(symbolInfo.getInstanceParameters());
+		} catch (Exception eBillboardParams) {
+			billboardAdditionalParams = null;
+		}
+		if (billboardAdditionalParams != null && billboardAdditionalParams.getOverridesPosition31()) {
+			lat = Utilities.get31LatitudeY(billboardAdditionalParams.getPosition31().getY());
+			lon = Utilities.get31LongitudeX(billboardAdditionalParams.getPosition31().getX());
+			latLon = new LatLon(lat, lon);
+		}
+		return latLon;
+	}
+
+	private void addFilteredOsmRoutesAtLatLon(LatLon ll, NetworkRouteSelectorFilter filter, MapSelectionResult result) {
+		for (TravelGpx travelGpx : app.getTravelHelper().searchTravelGpx(ll, filter)) {
+			if (travelGpx.getAmenity() != null && isUniqueTravelGpx(result.getAllObjects(), travelGpx)) {
+				result.collect(travelGpx.getAmenity(), mapLayers.getPoiMapLayer());
+			}
+		}
+	}
+
+	private void addTravelGpx(@NonNull MapSelectionResult result, @Nullable String routeId, @NonNull LatLon location) {
+		TravelGpx travelGpx = app.getTravelHelper().searchTravelGpx(location, routeId);
+		if (travelGpx != null && travelGpx.getAmenity() != null && isUniqueTravelGpx(result.getAllObjects(), travelGpx)) {
+			result.collect(travelGpx.getAmenity(), mapLayers.getPoiMapLayer());
+		} else if (travelGpx == null) {
+			log.error("addTravelGpx() searchTravelGpx() travelGpx is null");
+		}
+	}
+
+	private void addClickableWay(@NonNull MapSelectionResult result, @Nullable ClickableWay clickableWay) {
+		if (clickableWay != null && isUniqueClickableWay(result.getAllObjects(), clickableWay)) {
+			result.collect(clickableWay, app.getClickableWayHelper().getContextMenuProvider());
+		}
+	}
+
+	private boolean isUniqueGpxFileName(@NonNull List<SelectedMapObject> selectedObjects,
+			@NonNull String gpxFileName) {
+		for (SelectedMapObject selectedObject : selectedObjects) {
+			Object object = selectedObject.object();
+			if (object instanceof SelectedGpxPoint gpxPoint && selectedObject.provider() instanceof GPXLayer) {
+				if (gpxPoint.getSelectedGpxFile().getGpxFile().getPath().endsWith(gpxFileName)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	private boolean isUniqueClickableWay(@NonNull List<SelectedMapObject> selectedObjects,
+			@NonNull ClickableWay clickableWay) {
+		for (SelectedMapObject selectedObject : selectedObjects) {
+			if (selectedObject.object() instanceof Amenity that && haveSameActivityType(that, clickableWay)) {
+				return false; // skip if same-kind-of OSM route(s) found before
+			}
+			if (selectedObject.object() instanceof Amenity that && clickableWay.getOsmId() == that.getOsmId()) {
+				return false; // skip if ClickableWayAmenity is selected
+			}
+			if (selectedObject.object() instanceof ClickableWay that && clickableWay.getOsmId() == that.getOsmId()) {
+				return false;
+			}
+		}
+		return isUniqueGpxFileName(selectedObjects, clickableWay.getGpxFileName() + GPX_FILE_EXT);
+	}
+
+	private boolean haveSameActivityType(@NonNull Amenity amenity, @NonNull ClickableWay clickableWay) {
+		String gpxActivityType = clickableWay.getGpxFile()
+				.getMetadata().getExtensionsToRead().get(GpxUtilities.ACTIVITY_TYPE);
+		return gpxActivityType != null && gpxActivityType
+				.equals(amenity.getAdditionalInfo(ROUTE_ACTIVITY_TYPE + "_" + gpxActivityType));
+	}
+
+	private boolean isUniqueTravelGpx(@NonNull List<SelectedMapObject> selectedObjects,
+	                                  @NonNull TravelGpx travelGpx) {
+		for (SelectedMapObject selectedObject : selectedObjects) {
+			Object object = selectedObject.object();
+			if (object instanceof SelectedGpxPoint gpxPoint && selectedObject.provider() instanceof GPXLayer) {
+				String gpxRouteId = gpxPoint.getSelectedGpxFile().getGpxFile().getExtensionsToRead().get(ROUTE_ID);
+				if (Algorithms.stringsEqual(travelGpx.getRouteId(), gpxRouteId)) {
+					return false;
+				}
+			}
+		}
+		return isUniqueGpxFileName(selectedObjects, travelGpx.getGpxFileName() + GPX_FILE_EXT);
+	}
+
+	private boolean isTransportStop(@NonNull List<SelectedMapObject> selectedObjects, @NonNull BaseDetailsObject detail) {
+		for (SelectedMapObject selectedObject : selectedObjects) {
+			Object sel = selectedObject.object();
+			if (sel instanceof TransportStop stop && stop.getName().startsWith(detail.getSyntheticAmenity().getName())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@NonNull
+	private static List<String> getValues(@Nullable QStringStringHash set) {
+		List<String> res = new ArrayList<>();
+		if (set != null) {
+			QStringList keys = set.keys();
+			for (int i = 0; i < keys.size(); i++) {
+				res.add(set.get(keys.get(i)));
+			}
+		}
+		return res;
+	}
+
+	@NonNull
+	private static Map<String, String> getOrderedTags(@Nullable QStringStringList tagsList) {
+		Map<String, String> tagsMap = new LinkedHashMap<>();
+		if (tagsList != null) {
+			for (int i = 0; i < tagsList.size(); i++) {
+				QStringStringPair pair = tagsList.get(i);
+				tagsMap.put(pair.getFirst(), pair.getSecond());
+			}
+		}
+		return tagsMap;
+	}
+
+	private static boolean isNewOsmRoute(@Nullable String routeId, boolean isTravelGpx) {
+		if (!isTravelGpx || routeId == null) return false;
+		long osmRouteId = ObfConstants.getOsmIdFromPrefixedRouteId(routeId);
+		return osmRouteId > 0;
+	}
+
+	private NetworkRouteSelectorFilter createRouteFilter() {
+		NetworkRouteSelectorFilter routeSelectorFilter = new NetworkRouteSelectorFilter();
+		Set<OsmRouteType> filteredOsmRouteTypes = new HashSet<>();
+		List<RenderingRuleProperty> customRules = ConfigureMapUtils.getCustomRules(app,
+				UI_CATEGORY_HIDDEN, RENDERING_CATEGORY_TRANSPORT);
+		for (RenderingRuleProperty property : customRules) {
+			String attrName = property.getAttrName();
+			OsmRouteType osmRouteType = OsmRouteType.getByRenderingProperty(attrName);
+			if (osmRouteType != null) {
+				boolean enabled;
+				if (HIKING.getRenderingPropertyAttr().equals(attrName)) {
+					CommonPreference<String> pref = settings.getCustomRenderProperty(attrName);
+					enabled = property.containsValue(pref.get());
+				} else {
+					enabled = settings.getRenderBooleanPropertyValue(property);
+				}
+				if (enabled) {
+					filteredOsmRouteTypes.add(osmRouteType);
+				}
+			}
+		}
+		if (!Algorithms.isEmpty(filteredOsmRouteTypes)) {
+			routeSelectorFilter.typeFilter = filteredOsmRouteTypes;
+		}
+		return routeSelectorFilter;
+	}
+}

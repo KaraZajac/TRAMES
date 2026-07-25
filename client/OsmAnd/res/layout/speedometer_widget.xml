@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<net.osmand.plus.widgets.LinearLayoutEx xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/speedometer_widget"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:clipChildren="false"
+	android:clipToPadding="false"
+	android:orientation="horizontal"
+	android:paddingTop="@dimen/content_padding_half"
+	android:paddingBottom="@dimen/content_padding_half"
+	android:paddingHorizontal="@dimen/measurement_tool_menu_title_padding_bottom">
+
+	<LinearLayout
+		android:id="@+id/speedometer_container"
+		android:layout_width="88dp"
+		android:layout_height="96dp"
+		android:layout_gravity="center_vertical|start"
+		android:background="@drawable/speedometer_shape"
+		android:elevation="2dp"
+		android:orientation="vertical"
+		android:paddingHorizontal="9dp"
+		android:paddingVertical="9dp">
+
+		<androidx.appcompat.widget.AppCompatTextView
+			android:id="@+id/speedometer_value"
+			android:layout_width="match_parent"
+			android:layout_height="0dp"
+			android:layout_gravity="start|top"
+			android:layout_weight="1"
+			android:autoSizeMaxTextSize="80sp"
+			android:autoSizeMinTextSize="12sp"
+			android:autoSizeStepGranularity="1sp"
+			android:autoSizeTextType="uniform"
+			android:ellipsize="none"
+			android:lines="1"
+			android:gravity="start|center_vertical"
+			android:includeFontPadding="false"
+			android:textColor="@color/widgettext_day"
+			android:textSize="36sp"
+			tools:text="85" />
+
+		<net.osmand.plus.widgets.TextViewEx
+			android:id="@+id/speedometer_units"
+			android:layout_width="match_parent"
+			android:layout_height="13dp"
+			android:layout_gravity="start"
+			android:gravity="top"
+			android:lines="1"
+			android:maxLines="1"
+			android:textAllCaps="true"
+			android:textColor="?android:textColorSecondary"
+			android:textSize="11dp"
+			tools:ignore="SpUsage"
+			tools:text="KM/H" />
+
+	</LinearLayout>
+
+	<LinearLayout
+		android:id="@+id/speed_limit_container"
+		android:layout_width="72dp"
+		android:layout_height="72dp"
+		android:layout_gravity="center"
+		android:background="@drawable/speed_limit_shape"
+		android:elevation="2dp"
+		android:gravity="center"
+		android:orientation="vertical"
+		android:paddingHorizontal="9dp"
+		android:paddingVertical="9dp"
+		android:translationX="-6dp"
+		android:translationZ="2dp">
+
+		<TextView
+			android:id="@+id/limit_description"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:gravity="center"
+			android:includeFontPadding="false"
+			android:lines="1"
+			android:paddingTop="2dp"
+			android:text="@string/shared_string_limit"
+			android:textAllCaps="true"
+			android:textColor="@color/widgettext_day"
+			android:textSize="11sp" />
+
+		<androidx.appcompat.widget.AppCompatTextView
+			android:id="@+id/speed_limit_value"
+			android:layout_width="match_parent"
+			android:layout_height="0dp"
+			android:layout_weight="1"
+			android:ellipsize="none"
+			android:autoSizeMaxTextSize="48sp"
+			android:autoSizeMinTextSize="10sp"
+			android:autoSizeStepGranularity="1sp"
+			android:autoSizeTextType="uniform"
+			android:gravity="center"
+			android:lines="1"
+			android:includeFontPadding="false"
+			android:textColor="@color/widgettext_day"
+			android:textSize="24sp"
+			tools:text="85" />
+
+	</LinearLayout>
+
+</net.osmand.plus.widgets.LinearLayoutEx>

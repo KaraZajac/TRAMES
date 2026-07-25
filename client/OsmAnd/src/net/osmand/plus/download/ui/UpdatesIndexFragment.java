@@ -1,0 +1,644 @@
+package net.osmand.plus.download.ui;
+
+import static net.osmand.plus.download.local.OperationType.BACKUP_OPERATION;
+import static net.osmand.plus.download.local.OperationType.RESTORE_OPERATION;
+import static net.osmand.plus.liveupdates.LiveUpdatesFragment.showUpdateDialog;
+
+import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.util.TypedValue;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.view.MenuItemCompat;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+
+import net.osmand.Collator;
+import net.osmand.OsmAndCollator;
+import net.osmand.map.OsmandRegions;
+import net.osmand.plus.OsmAndTaskManager;
+import net.osmand.plus.OsmandApplication;
+import net.osmand.plus.R;
+import net.osmand.plus.base.BaseNestedListFragment;
+import net.osmand.plus.download.DownloadActivity;
+import net.osmand.plus.download.DownloadIndexesThread.DownloadEvents;
+import net.osmand.plus.download.DownloadItem;
+import net.osmand.plus.download.DownloadResources;
+import net.osmand.plus.download.IndexItem;
+import net.osmand.plus.download.local.BaseLocalItem;
+import net.osmand.plus.download.local.LocalItem;
+import net.osmand.plus.download.local.LocalItemType;
+import net.osmand.plus.download.local.LocalOperationTask;
+import net.osmand.plus.download.local.LocalOperationTask.OperationListener;
+import net.osmand.plus.download.local.OperationType;
+import net.osmand.plus.download.local.dialogs.DeleteConfirmationDialogController;
+import net.osmand.plus.download.local.dialogs.DeleteConfirmationDialogController.ConfirmDeletionListener;
+import net.osmand.plus.download.local.dialogs.LocalItemFragment;
+import net.osmand.plus.helpers.AndroidUiHelper;
+import net.osmand.plus.importfiles.ImportTaskListener;
+import net.osmand.plus.inapp.InAppPurchaseHelper.InAppPurchaseListener;
+import net.osmand.plus.inapp.InAppPurchaseUtils;
+import net.osmand.plus.liveupdates.LiveUpdatesClearBottomSheet.RefreshLiveUpdates;
+import net.osmand.plus.liveupdates.LiveUpdatesFragment;
+import net.osmand.plus.liveupdates.LiveUpdatesHelper.LiveUpdateListener;
+import net.osmand.plus.liveupdates.LoadLiveMapsTask;
+import net.osmand.plus.liveupdates.LoadLiveMapsTask.LocalIndexInfoAdapter;
+import net.osmand.plus.utils.AndroidUtils;
+import net.osmand.plus.utils.ColorUtilities;
+import net.osmand.plus.widgets.popup.PopUpMenu;
+import net.osmand.plus.widgets.popup.PopUpMenuDisplayData;
+import net.osmand.plus.widgets.popup.PopUpMenuItem;
+import net.osmand.plus.widgets.popup.PopUpMenuWidthMode;
+import net.osmand.util.Algorithms;
+import net.osmand.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+public class UpdatesIndexFragment extends BaseNestedListFragment implements DownloadEvents,
+		OperationListener, ConfirmDeletionListener, RefreshLiveUpdates, LiveUpdateListener, InAppPurchaseListener,
+		ImportTaskListener {
+	private static final int RELOAD_ID = 5;
+	private UpdateIndexAdapter listAdapter;
+	private String errorMessage;
+	private LoadLiveMapsTask loadLiveMapsTask;
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		invalidateListView(requireContext());
+		startLoadLiveMapsAsyncTask();
+		setHasOptionsMenu(true);
+		DeleteConfirmationDialogController.askUpdateListener(app, this);
+	}
+
+	@Override
+	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+	                         @Nullable Bundle savedInstanceState) {
+		updateNightMode();
+		View view = inflate(R.layout.update_index_frament, container, false);
+		requireMyActivity().getAccessibilityAssistant().registerPage(view, DownloadActivity.UPDATES_TAB_NUMBER);
+		return view;
+	}
+
+	@Override
+	public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+		super.onViewCreated(view, savedInstanceState);
+		setupOnItemLongClickListener();
+	}
+
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		updateErrorMessage();
+	}
+
+	private void setupOnItemLongClickListener() {
+		getListView().setOnItemLongClickListener((parent, v, position, id) -> {
+			ListAdapter adapter = getListAdapter();
+			if (adapter != null) {
+				LocalIndexItem localIndexItem = (LocalIndexItem) adapter.getItem(position);
+				if (localIndexItem.isDownloadItem()) {
+					DownloadItem downloadItem = localIndexItem.downloadItem;
+					if (downloadItem instanceof IndexItem indexItem) {
+						LocalItem localItem = indexItem.toLocalItem(app);
+						if (localItem != null) {
+							askShowContextMenu(v, indexItem, localItem);
+							return true;
+						}
+					}
+				}
+			}
+			return false;
+		});
+	}
+
+	@Override
+	public ArrayAdapter<?> getAdapter() {
+		return listAdapter;
+	}
+
+	@Override
+	public void downloadHasFinished() {
+		invalidateListView(requireMyActivity());
+		updateUpdateAllButton();
+		startLoadLiveMapsAsyncTask();
+	}
+
+	@Override
+	public void downloadInProgress() {
+		listAdapter.notifyDataSetChanged();
+	}
+
+	@Override
+	public void onUpdatedIndexesList() {
+		invalidateListView(requireMyActivity());
+		updateUpdateAllButton();
+	}
+
+	public void invalidateListView(@NonNull Context context) {//todo
+		DownloadResources indexes = app.getDownloadThread().getIndexes();
+		OsmandRegions osmandRegions = app.getResourceManager().getOsmandRegions();
+		List<DownloadItem> downloadItems = new ArrayList<>(indexes.getOutdatedItems().groupedActivated());
+		boolean showBanner = !InAppPurchaseUtils.isLiveUpdatesAvailable(app)
+				|| settings.SHOULD_SHOW_FREE_VERSION_BANNER.get();
+
+		Collator collator = OsmAndCollator.primaryCollator();
+		downloadItems.sort((item1, item2) -> collator.compare(
+				item1.getVisibleName(app, osmandRegions),
+				item2.getVisibleName(app, osmandRegions)
+		));
+		listAdapter = new UpdateIndexAdapter(context, R.layout.download_index_list_item, prepareData(downloadItems), showBanner);
+		setListAdapter(listAdapter);
+		updateErrorMessage();
+	}
+
+	private List<LocalIndexItem> prepareData(List<DownloadItem> downloadItems) {
+		List<LocalIndexItem> newLocalIndexItems = new ArrayList<>();
+		newLocalIndexItems.add(LocalIndexItem.createBannerItem());
+		DownloadResources downloadIndexes = app.getDownloadThread().getIndexes();
+		int deprecatedMapsCount = downloadIndexes.getOutdatedItems().deprecated().size();
+		if (deprecatedMapsCount > 0) {
+			newLocalIndexItems.add(LocalIndexItem.createDeletedMapsItem(deprecatedMapsCount));
+		}
+		for (DownloadItem item : downloadItems) {
+			if (!(item instanceof IndexItem) || !((IndexItem) item).isDeprecated()) {
+				newLocalIndexItems.add(LocalIndexItem.createDownloadItem(item));
+			}
+		}
+		return newLocalIndexItems;
+	}
+
+	private void updateErrorMessage() {
+		View view = getView();
+		if (view == null) return;
+
+		DownloadResources indexes = app.getDownloadThread().getIndexes();
+		List<DownloadItem> downloadItems = indexes.getOutdatedItems().groupedActivated();
+		if (getListAdapter() != null && downloadItems.isEmpty()) {
+			errorMessage = getString(indexes.isDownloadedFromInternet
+					? R.string.everything_up_to_date
+					: R.string.no_index_file_to_download);
+		} else {
+			errorMessage = null;
+		}
+		updateUpdateAllButton();
+	}
+
+	private void updateUpdateAllButton() {
+		View view = getView();
+		if (view == null) return;
+
+		DownloadResources indexes = requireMyActivity().getDownloadThread().getIndexes();
+		List<IndexItem> indexItems = indexes.getOutdatedItems().activated();
+		TextView updateAllButton = view.findViewById(R.id.updateAllButton);
+		if (indexItems.isEmpty() || indexItems.get(0).getType() == null) {
+			if (!Algorithms.isEmpty(errorMessage)) {
+				updateAllButton.setText(errorMessage);
+				updateAllButton.setEnabled(false);
+				updateAllButton.setVisibility(View.VISIBLE);
+			} else {
+				updateAllButton.setVisibility(View.GONE);
+			}
+		} else {
+			updateAllButton.setVisibility(View.VISIBLE);
+			updateAllButton.setEnabled(true);
+			long downloadsSize = 0;
+			for (IndexItem indexItem : indexItems) {
+				downloadsSize += indexItem.getSize();
+			}
+			String updateAllText = getString(
+					R.string.update_all, String.valueOf(downloadsSize >> 20));
+			updateAllButton.setText(updateAllText);
+			updateAllButton.setOnClickListener(v -> {
+				DownloadActivity activity = getMyActivity();
+				if (AndroidUtils.isActivityNotDestroyed(activity)) {
+					if (indexItems.size() > 3) {
+						AlertDialog.Builder dialog = new AlertDialog.Builder(activity);
+						dialog.setTitle(R.string.update_all_maps);
+						dialog.setMessage(getString(R.string.update_all_maps_q, indexItems.size()));
+						dialog.setNegativeButton(R.string.shared_string_cancel, null);
+						dialog.setPositiveButton(R.string.shared_string_update, (d, which) -> activity.startDownload(indexItems.toArray(new IndexItem[0])));
+						dialog.create().show();
+					} else {
+						activity.startDownload(indexItems.toArray(new IndexItem[0]));
+					}
+				}
+			});
+		}
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		if (listAdapter != null) {
+			listAdapter.notifyDataSetChanged();
+		}
+		updateUpdateAllButton();
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		stopLoadLiveMapsAsyncTask();
+	}
+
+	private void startLoadLiveMapsAsyncTask() {
+		loadLiveMapsTask = new LoadLiveMapsTask(listAdapter, app);
+		OsmAndTaskManager.executeTask(loadLiveMapsTask);
+	}
+
+	private void stopLoadLiveMapsAsyncTask() {
+		if (loadLiveMapsTask != null && loadLiveMapsTask.getStatus() == AsyncTask.Status.RUNNING) {
+			loadLiveMapsTask.cancel(false);
+		}
+	}
+
+	@Override
+	public void onListItemClick(@NonNull ListView l, @NonNull View v, int position, long id) {
+		LocalIndexItem item = listAdapter.getItem(position);
+		if (item != null) {
+			if (item.isBanner()) {
+				callActivity(activity -> {
+					if (!listAdapter.isShowSubscriptionPurchaseBanner()) {
+						LiveUpdatesFragment.showInstance(activity.getSupportFragmentManager(), this);
+					}
+				});
+			} else if (item.isDownloadItem()) {
+				DownloadItem e = item.downloadItem;
+				ItemViewHolder vh = (ItemViewHolder) v.getTag();
+				OnClickListener ls = vh.getRightButtonAction(e, vh.getClickAction(e));
+				ls.onClick(v);
+			}
+		}
+	}
+
+	@SuppressWarnings("deprecation")
+	@Override
+	public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+		ActionBar actionBar = requireMyActivity().getSupportActionBar();
+		if (actionBar != null) {
+			actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+		}
+		if (app.getAppCustomization().showDownloadExtraActions()) {
+			int colorResId = ColorUtilities.getActiveButtonsAndLinksTextColorId(nightMode);
+			MenuItem item = menu.add(0, RELOAD_ID, 0, R.string.shared_string_refresh);
+			Drawable icRefresh = getIcon(R.drawable.ic_action_refresh_dark, colorResId);
+			item.setIcon(icRefresh);
+			MenuItemCompat.setShowAsAction(item, MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
+		}
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == RELOAD_ID) {
+			// re-create the thread
+			requireMyActivity().getDownloadThread().runReloadIndexFiles();
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
+	private void askShowContextMenu(@NonNull View view, @NonNull IndexItem indexItem,
+	                                @NonNull LocalItem localItem) {
+		callActivity(activity -> showContextMenu(activity, view, indexItem, localItem));
+	}
+
+	private void showContextMenu(@NonNull FragmentActivity activity, @NonNull View view,
+	                             @NonNull IndexItem indexItem, @NonNull LocalItem localItem) {
+		List<PopUpMenuItem> items = new ArrayList<>();
+
+		items.add(new PopUpMenuItem.Builder(activity)
+				.setTitleId(R.string.info_button)
+				.setIcon(getContentIcon(R.drawable.ic_action_info_outlined))
+				.setOnClickListener(v -> showInfoScreen(localItem))
+				.create());
+
+		LocalItemType type = localItem.getType();
+		if (type.isUpdateSupported()) {
+			items.add(new PopUpMenuItem.Builder(activity)
+					.setTitleId(R.string.shared_string_update)
+					.setIcon(getContentIcon(R.drawable.ic_action_update))
+					.setOnClickListener(v -> updateItem(indexItem))
+					.create());
+		}
+
+		boolean backuped = localItem.isBackuped(app);
+		if (type.isBackupSupported() || backuped) {
+			OperationType operationType = backuped ? RESTORE_OPERATION : BACKUP_OPERATION;
+			items.add(new PopUpMenuItem.Builder(activity)
+					.setTitleId(operationType.getTitleId())
+					.setIcon(getContentIcon(operationType.getIconId()))
+					.setOnClickListener(v -> performOperation(operationType, localItem))
+					.create());
+		}
+
+		if (type.isDeletionSupported()) {
+			items.add(new PopUpMenuItem.Builder(activity)
+					.setTitleId(R.string.shared_string_delete)
+					.setIcon(getContentIcon(R.drawable.ic_action_delete_outlined))
+					.setOnClickListener(v -> showDeleteConfirmationDialog(localItem))
+					.showTopDivider(!Algorithms.isEmpty(items))
+					.create());
+		}
+
+		PopUpMenuDisplayData displayData = new PopUpMenuDisplayData();
+		displayData.anchorView = view;
+		displayData.menuItems = items;
+		displayData.nightMode = nightMode;
+		displayData.widthMode = PopUpMenuWidthMode.STANDARD;
+		PopUpMenu.show(displayData);
+	}
+
+	private void showInfoScreen(@NonNull LocalItem localItem) {
+		callActivity(activity -> {
+			FragmentManager manager = activity.getSupportFragmentManager();
+			LocalItemFragment.showInstance(manager, localItem, null);
+		});
+	}
+
+	private void updateItem(@NonNull IndexItem indexItem) {
+		DownloadActivity activity = getMyActivity();
+		if (activity != null) {
+			activity.startDownload(indexItem);
+		}
+	}
+
+	private void showDeleteConfirmationDialog(@NonNull LocalItem localItem) {
+		callActivity(activity -> {
+			FragmentManager manager = activity.getSupportFragmentManager();
+			DeleteConfirmationDialogController.showDialog(app, manager, localItem, this);
+		});
+	}
+
+	@Override
+	public void onDeletionConfirmed(@NonNull BaseLocalItem localItem) {
+		performOperation(OperationType.DELETE_OPERATION, localItem);
+	}
+
+	public void performOperation(@NonNull OperationType type, @NonNull BaseLocalItem... items) {
+		OsmAndTaskManager.executeTask(new LocalOperationTask(app, type, this), items);
+	}
+
+	@Override
+	public void onOperationStarted() {
+		updateProgressVisibility(true);
+	}
+
+	@Override
+	public void onOperationFinished(@NonNull OperationType type, @NonNull String result) {
+		updateProgressVisibility(false);
+		if (!Algorithms.isEmpty(result)) {
+			app.showToastMessage(result);
+		}
+		DownloadActivity activity = getMyActivity();
+		if (AndroidUtils.isActivityNotDestroyed(activity)) {
+			if (CollectionUtils.equalsToAny(type, RESTORE_OPERATION, BACKUP_OPERATION)) {
+				activity.getDownloadThread().runReloadIndexFiles();
+			} else {
+				activity.onUpdatedIndexesList();
+			}
+		}
+	}
+
+	protected void updateProgressVisibility(boolean visible) {
+		DownloadActivity activity = getMyActivity();
+		if (activity != null) {
+			activity.setSupportProgressBarIndeterminateVisibility(visible);
+		}
+	}
+
+	@Override
+	public void onUpdateStates(Context context) {
+		if (context instanceof OsmandApplication) {
+			startLoadLiveMapsAsyncTask();
+		}
+	}
+
+	@Override
+	public void onItemPurchased(String sku, boolean active) {
+		callActivity(activity -> {
+			invalidateListView(activity);
+			updateUpdateAllButton();
+			startLoadLiveMapsAsyncTask();
+		});
+	}
+
+	@NonNull
+	public DownloadActivity requireMyActivity() {
+		return Objects.requireNonNull(getMyActivity());
+	}
+
+	@Nullable
+	public DownloadActivity getMyActivity() {
+		return (DownloadActivity) getActivity();
+	}
+
+	@Override
+	public void onImportFinished() {
+		invalidateListView(app);
+	}
+
+	private enum LocalIndexItemType {
+		BANNER,
+		DELETED_MAPS,
+		DOWNLOAD_ITEM
+	}
+
+	static class LocalIndexItem {
+		private LocalIndexItemType type;
+		private int deletedMapsCount;
+		DownloadItem downloadItem;
+
+		static LocalIndexItem createBannerItem() {
+			LocalIndexItem item = new LocalIndexItem();
+			item.type = LocalIndexItemType.BANNER;
+			return item;
+		}
+
+		static LocalIndexItem createDeletedMapsItem(int deletedMapsCount) {
+			LocalIndexItem item = new LocalIndexItem();
+			item.type = LocalIndexItemType.DELETED_MAPS;
+			item.deletedMapsCount = deletedMapsCount;
+			return item;
+		}
+
+		static LocalIndexItem createDownloadItem(DownloadItem downloadItem) {
+			LocalIndexItem item = new LocalIndexItem();
+			item.type = LocalIndexItemType.DOWNLOAD_ITEM;
+			item.downloadItem = downloadItem;
+			return item;
+		}
+
+		public boolean isBanner() {
+			return type == LocalIndexItemType.BANNER;
+		}
+
+		public boolean isDeletedMaps() {
+			return type == LocalIndexItemType.DELETED_MAPS;
+		}
+
+		public boolean isDownloadItem() {
+			return type == LocalIndexItemType.DOWNLOAD_ITEM;
+		}
+	}
+
+	private class UpdateIndexAdapter extends ArrayAdapter<LocalIndexItem> implements LocalIndexInfoAdapter {
+
+		private static final int DOWNLOAD_ITEM = 0;
+		private static final int OSM_LIVE_BANNER = 1;
+		private static final int DELETED_MAPS = 2;
+
+		private final List<LocalItem> localItems = new ArrayList<>();
+
+		private final boolean showSubscriptionPurchaseBanner;
+
+		@Override
+		public void addData(@NonNull List<LocalItem> indexes) {
+			localItems.addAll(indexes);
+			notifyDataSetChanged();
+		}
+
+		@Override
+		public void clearData() {
+			localItems.clear();
+			notifyDataSetChanged();
+		}
+
+		public UpdateIndexAdapter(Context context, int resource, List<LocalIndexItem> items, boolean showSubscriptionPurchaseBanner) {
+			super(context, resource, items);
+			this.showSubscriptionPurchaseBanner = showSubscriptionPurchaseBanner;
+		}
+
+		public boolean isShowSubscriptionPurchaseBanner() {
+			return showSubscriptionPurchaseBanner;
+		}
+
+		@Override
+		public int getViewTypeCount() {
+			return 3;
+		}
+
+		@Override
+		public int getItemViewType(int position) {
+			LocalIndexItem item = getItem(position);
+			if (item == null) {
+				return -1;
+			} else if (item.isBanner()) {
+				return OSM_LIVE_BANNER;
+			} else if (item.isDeletedMaps()) {
+				return DELETED_MAPS;
+			} else {
+				return DOWNLOAD_ITEM;
+			}
+		}
+
+		@NonNull
+		@Override
+		public View getView(int position, View convertView, @NonNull ViewGroup parent) {
+			View view = convertView;
+			int viewType = getItemViewType(position);
+			boolean recreateBanner = viewType == OSM_LIVE_BANNER
+					&& view != null
+					&& showSubscriptionPurchaseBanner != (view.getTag() instanceof BannerAndDownloadFreeVersion);
+			if (view == null || recreateBanner) {
+				if (viewType == DELETED_MAPS) {
+					view = inflate(R.layout.item_with_title_desc, parent, false);
+					view.setTag(new DeletedItemsCountViewHolder(view, requireMyActivity()));
+				} else if (viewType == DOWNLOAD_ITEM) {
+					view = inflate(R.layout.two_line_with_images_list_item, parent, false);
+					view.setTag(new ItemViewHolder(view, requireMyActivity()));
+				} else if (viewType == OSM_LIVE_BANNER) {
+					if (showSubscriptionPurchaseBanner) {
+						view = inflate(R.layout.free_version_banner_header, parent, false);
+						BannerAndDownloadFreeVersion banner = new BannerAndDownloadFreeVersion(
+								view, requireMyActivity(), false);
+						view.setTag(banner);
+						banner.updateFreeVersionBanner();
+					} else {
+						view = inflate(R.layout.bottom_sheet_item_with_descr_switch_and_additional_button_56dp, parent, false);
+						view.setBackground(null);
+						AndroidUiHelper.setVisibility(View.GONE, view.findViewById(R.id.compound_button));
+						((ImageView) view.findViewById(R.id.icon)).setImageResource(R.drawable.ic_action_subscription_osmand_live);
+						TextView tvTitle = view.findViewById(R.id.title);
+						tvTitle.setText(R.string.download_live_updates);
+						AndroidUtils.setTextPrimaryColor(app, tvTitle, nightMode);
+						TextView countView = view.findViewById(R.id.description);
+						AndroidUtils.setTextSecondaryColor(app, countView, nightMode);
+						Drawable additionalIconDrawable = getContentIcon(R.drawable.ic_action_update);
+						((ImageView) view.findViewById(R.id.additional_button_icon)).setImageDrawable(additionalIconDrawable);
+						LinearLayout additionalButton = view.findViewById(R.id.additional_button);
+						TypedValue typedValue = new TypedValue();
+						app.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, typedValue, true);
+						additionalButton.setBackgroundResource(typedValue.resourceId);
+						additionalButton.setOnClickListener(v -> {
+							if (!listAdapter.isShowSubscriptionPurchaseBanner()) {
+								showUpdateDialog(getActivity(), getFragmentManager(), UpdatesIndexFragment.this);
+							}
+						});
+					}
+				}
+			}
+			LocalIndexItem item = getItem(position);
+			if (item != null) {
+				if (viewType == DOWNLOAD_ITEM && item.isDownloadItem()) {
+					DownloadItem downloadItem = Objects.requireNonNull(item.downloadItem);
+					ItemViewHolder holder = (ItemViewHolder) view.getTag();
+					holder.setShowRemoteDate(true);
+					holder.setShowTypeInDesc(true);
+					holder.setShowParentRegionName(true);
+					holder.setUpdatesMode(true);
+					holder.bindDownloadItem(downloadItem);
+				} else if (viewType == DELETED_MAPS && item.isDeletedMaps()) {
+					DeletedItemsCountViewHolder holder = (DeletedItemsCountViewHolder) view.getTag();
+					holder.bindItem(item.deletedMapsCount);
+					view.setOnClickListener(v -> {
+						DeletedMapsFragment.showInstance(getActivity(), UpdatesIndexFragment.this);
+					});
+				} else if (viewType == OSM_LIVE_BANNER && item.isBanner() && showSubscriptionPurchaseBanner) {
+					Object tag = view.getTag();
+					if (tag instanceof BannerAndDownloadFreeVersion banner) {
+						banner.updateFreeVersionBanner();
+					}
+				}
+			}
+			return view;
+		}
+	}
+
+	@Override
+	public List<LocalItem> getMapsToUpdate() {
+		return LiveUpdatesFragment.getMapsToUpdate(listAdapter.localItems, settings);
+	}
+
+	@Override
+	public void onStart() {
+		super.onStart();
+		app.getImportHelper().addImportTaskListener(this);
+	}
+
+	@Override
+	public void onStop() {
+		super.onStop();
+		app.getImportHelper().removeImportTaskListener(this);
+	}
+}

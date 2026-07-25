@@ -1,0 +1,73 @@
+apply plugin: 'com.android.application'
+apply from: rootProject.file("versions.gradle")
+
+android {
+	compileSdk osmand_compileSdk
+	buildToolsVersion = osmand_buildToolsVersion
+
+	namespace = "net.osmand.srtmPlugin.paid"
+
+	signingConfigs {
+		development {
+			storeFile file("../../keystores/debug.keystore")
+			storePassword "android"
+			keyAlias "androiddebugkey"
+			keyPassword "android"
+		}
+		release {
+			storeFile file("/var/lib/jenkins/osmand_key")
+			storePassword System.getenv("OSMAND_APK_PASSWORD")
+			keyAlias "osmand"
+			keyPassword System.getenv("OSMAND_APK_PASSWORD")
+		}
+
+	}
+
+	defaultConfig {
+		minSdkVersion osmand_minSdk
+		targetSdkVersion osmand_targetSdk
+	}
+
+	lintOptions {
+		abortOnError false
+	}
+
+	sourceSets {
+		main {
+			manifest.srcFile "AndroidManifest.xml"
+			jni.srcDirs = []
+			jniLibs.srcDirs = []
+			aidl.srcDirs = ["src"]
+			java.srcDirs = ["src"]
+			res.srcDirs = ["res"]
+			assets.srcDirs = ["assets"]
+		}
+	}
+
+	buildTypes {
+		debug {
+			signingConfig signingConfigs.development
+		}
+		release {
+			signingConfig signingConfigs.release
+		}
+	}
+	buildFeatures {
+		aidl true
+	}
+}
+
+repositories {
+	ivy {
+		name = "OsmAndBinariesIvy"
+		url = "https://builder.osmand.net"
+		patternLayout {
+			artifact "ivy/[organisation]/[module]/[revision]/[artifact]-[revision].[ext]"
+		}
+	}
+}
+
+dependencies {
+	implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.9.0'
+}

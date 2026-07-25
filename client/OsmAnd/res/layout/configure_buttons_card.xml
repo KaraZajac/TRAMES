@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:background="?attr/list_background_color"
+	android:orientation="vertical">
+
+	<include layout="@layout/configure_widgets_header" />
+
+	<include
+		android:id="@+id/custom_buttons"
+		layout="@layout/configure_screen_list_item" />
+
+	<include
+		android:id="@+id/default_buttons"
+		layout="@layout/configure_screen_list_item" />
+
+</LinearLayout>

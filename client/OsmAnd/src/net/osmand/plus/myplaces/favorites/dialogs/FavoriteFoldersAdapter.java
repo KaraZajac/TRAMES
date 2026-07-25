@@ -1,0 +1,350 @@
+package net.osmand.plus.myplaces.favorites.dialogs;
+
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.FragmentActivity;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView.ViewHolder;
+
+import net.osmand.data.FavouritePoint;
+import net.osmand.plus.OsmandApplication;
+import net.osmand.plus.R;
+import net.osmand.plus.configmap.tracks.viewholders.EmptyTracksViewHolder;
+import net.osmand.plus.myplaces.favorites.FavoriteFolder;
+import net.osmand.plus.myplaces.favorites.FavoriteGroup;
+import net.osmand.plus.myplaces.favorites.dialogs.SortFavoriteViewHolder.SortFavoriteListener;
+import net.osmand.plus.routepreparationmenu.cards.BaseCard.CardListener;
+import net.osmand.plus.settings.enums.FavoriteListSortMode;
+import net.osmand.plus.utils.UiUtilities;
+import net.osmand.plus.utils.UpdateLocationUtils;
+import net.osmand.plus.utils.UpdateLocationUtils.UpdateLocationViewCache;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+public class FavoriteFoldersAdapter extends RecyclerView.Adapter<ViewHolder> {
+
+	public static final Object SELECTION_MODE_PAYLOAD = new Object();
+	public static final Object SELECTION_TOGGLE_PAYLOAD = new Object();
+	public static final Object LOCATION_UPDATE_PAYLOAD = new Object();
+
+	public static final int TYPE_FREE_BACKUP_CARD = -1;
+	public static final int TYPE_SORT_FAVORITE = 0;
+	public static final int TYPE_FOLDER = 1;
+	public static final int TYPE_FAVORITE = 2;
+	public static final int TYPE_EMPTY_FOLDER = 3;
+	public static final int TYPE_EMPTY_FOLDERS = 4;
+	public static final int TYPE_FOLDER_STATS = 5;
+	public static final int TYPE_EMPTY_FAVORITES = 6;
+	public static final int TYPE_EMPTY_SEARCH = 7;
+
+
+	private final OsmandApplication app;
+	private final FragmentActivity activity;
+	private final UpdateLocationViewCache locationViewCache;
+	private final List<Object> items = new ArrayList<>();
+
+	@Nullable
+	private SortFavoriteListener sortListener;
+	@Nullable
+	private final CardListener cardListener;
+	private final boolean nightMode;
+	private final boolean showFolderNameOnSecondLine;
+	private FavoriteListSortMode sortMode;
+	private boolean selectionMode;
+
+	private final FavoriteAdapterListener listener;
+
+	public FavoriteFoldersAdapter(@NonNull FragmentActivity activity, boolean nightMode, FavoriteAdapterListener listener) {
+		this(activity, nightMode, false, listener);
+	}
+
+	public FavoriteFoldersAdapter(@NonNull FragmentActivity activity, boolean nightMode,
+	                              boolean showFolderNameOnSecondLine,
+	                              FavoriteAdapterListener listener) {
+		this(activity, nightMode, showFolderNameOnSecondLine, listener, null);
+	}
+
+	public FavoriteFoldersAdapter(@NonNull FragmentActivity activity, boolean nightMode,
+	                              boolean showFolderNameOnSecondLine,
+	                              FavoriteAdapterListener listener,
+	                              @Nullable CardListener cardListener) {
+		this.app = (OsmandApplication) activity.getApplicationContext();
+		this.activity = activity;
+		this.nightMode = nightMode;
+		this.showFolderNameOnSecondLine = showFolderNameOnSecondLine;
+		this.listener = listener;
+		this.cardListener = cardListener;
+		locationViewCache = UpdateLocationUtils.getUpdateLocationViewCache(activity);
+		sortMode = FavoriteListSortMode.NAME_ASCENDING;
+
+		setHasStableIds(false);
+	}
+
+	public void setItems(@NonNull List<Object> items) {
+		this.items.clear();
+		this.items.addAll(items);
+		notifyDataSetChanged();
+	}
+
+	public void setSortMode(@NonNull FavoriteListSortMode sortMode) {
+		this.sortMode = sortMode;
+	}
+
+	public void setSelectionMode(boolean selectionMode) {
+		this.selectionMode = selectionMode;
+		notifyItemRangeChanged(0, getItemCount(), SELECTION_MODE_PAYLOAD);
+	}
+
+	public void setSortFavoriteListener(@Nullable SortFavoriteListener sortListener) {
+		this.sortListener = sortListener;
+	}
+
+	@NonNull
+	@Override
+	public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+		LayoutInflater inflater = UiUtilities.getInflater(parent.getContext(), nightMode);
+		switch (viewType) {
+			case TYPE_FREE_BACKUP_CARD:
+				View view = inflater.inflate(R.layout.favorite_free_backup_card_item, parent, false);
+				return new FavoriteFreeBackupCardViewHolder(view, activity, cardListener);
+			case TYPE_FAVORITE:
+				view = inflater.inflate(R.layout.track_list_item, parent, false);
+				return new FavoriteViewHolder(view, locationViewCache, nightMode);
+			case TYPE_FOLDER:
+				view = inflater.inflate(R.layout.track_list_item, parent, false);
+				return new FavoriteFolderViewHolder(view, nightMode);
+			case TYPE_SORT_FAVORITE:
+				view = inflater.inflate(R.layout.sort_type_view, parent, false);
+				return new SortFavoriteViewHolder(view, sortListener, nightMode);
+			case TYPE_EMPTY_FOLDER:
+				view = inflater.inflate(R.layout.track_folder_empty_state, parent, false);
+				return new FavoriteEmptyFolderVHolder(view, listener);
+			case TYPE_EMPTY_FOLDERS:
+				view = inflater.inflate(R.layout.track_folder_empty_state, parent, false);
+				return new FavoriteEmptyFoldersVHolder(view, listener);
+			case TYPE_FOLDER_STATS:
+				view = inflater.inflate(R.layout.folder_stats_item, parent, false);
+				return new FavoriteStatsViewHolder(app, view);
+			case TYPE_EMPTY_SEARCH:
+				view = inflater.inflate(R.layout.track_folder_empty_state, parent, false);
+				return new FavoriteSearchEmptyStateVHolder(view, listener);
+			case TYPE_EMPTY_FAVORITES:
+				view = inflater.inflate(R.layout.track_folder_empty_state, parent, false);
+				return new EmptyTracksViewHolder(view, null);
+			default:
+				throw new IllegalArgumentException("Unsupported view type " + viewType);
+		}
+	}
+
+	@Override
+	public int getItemViewType(int position) {
+		Object object = items.get(position);
+		if (object instanceof FavouritePoint) {
+			return TYPE_FAVORITE;
+		} else if (object instanceof FavoriteFolder || object instanceof FavoriteGroup) {
+			return TYPE_FOLDER;
+		} else if (object instanceof FavoriteFolderAnalysis) {
+			return TYPE_FOLDER_STATS;
+		} else if (object instanceof Integer) {
+			int item = (Integer) object;
+			if (TYPE_FREE_BACKUP_CARD == item) {
+				return TYPE_FREE_BACKUP_CARD;
+			} else if (TYPE_SORT_FAVORITE == item) {
+				return TYPE_SORT_FAVORITE;
+			} else if (TYPE_EMPTY_FOLDER == item) {
+				return TYPE_EMPTY_FOLDER;
+			} else if (TYPE_EMPTY_FOLDERS == item) {
+				return TYPE_EMPTY_FOLDERS;
+			} else if (TYPE_EMPTY_FAVORITES == item) {
+				return TYPE_EMPTY_FAVORITES;
+			} else if (TYPE_EMPTY_SEARCH == item) {
+				return TYPE_EMPTY_SEARCH;
+			}
+		}
+		throw new IllegalArgumentException(String.valueOf(object));
+	}
+
+	private boolean isLastItem(int position) {
+		int itemCount = getItemCount();
+		boolean isStatsLastItem = items.get(itemCount - 1) instanceof FavoriteFolderAnalysis;
+		int offset = (isStatsLastItem && itemCount >= 2) ? 2 : 1;
+		return position == itemCount - offset;
+	}
+
+	private boolean isLastPinnedFolder(int position) {
+		Object cur = items.get(position);
+		FavoriteGroup currentGroup = getFavoriteGroup(cur);
+		if (currentGroup == null) {
+			return false;
+		}
+		if (!currentGroup.isPinned()) {
+			return false;
+		}
+
+		for (int i = position + 1; i < items.size(); i++) {
+			Object o = items.get(i);
+			FavoriteGroup g = getFavoriteGroup(o);
+			if (g != null) {
+				if (g.isPinned()) {
+					return false;
+				} else {
+					break;
+				}
+			}
+		}
+		return true;
+	}
+
+	@Nullable
+	private FavoriteGroup getFavoriteGroup(@Nullable Object object) {
+		if (object instanceof FavoriteGroup group) {
+			return group;
+		} else if (object instanceof FavoriteFolder folder) {
+			return folder.getGroup();
+		}
+		return null;
+	}
+
+	@Override
+	public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+		boolean lastItem = isLastItem(position);
+		boolean lastPinned = isLastPinnedFolder(position);
+
+		if (holder instanceof FavoriteFreeBackupCardViewHolder viewHolder) {
+			viewHolder.bindView();
+		} else if (holder instanceof SortFavoriteViewHolder viewHolder) {
+			viewHolder.bindView(hasTrackItems());
+		} else if (holder instanceof FavoriteViewHolder viewHolder) {
+			FavouritePoint favouritePoint = (FavouritePoint) items.get(position);
+			viewHolder.bindView(sortMode, favouritePoint, !lastItem,
+					showFolderNameOnSecondLine, selectionMode, listener);
+		} else if (holder instanceof FavoriteFolderViewHolder viewHolder) {
+			Object folder = items.get(position);
+			if (folder instanceof FavoriteFolder favoriteFolder) {
+				viewHolder.bindView(favoriteFolder, !lastPinned && !lastItem, lastPinned && !lastItem, selectionMode, listener);
+			} else {
+				FavoriteGroup group = (FavoriteGroup) folder;
+				viewHolder.bindView(group, !lastPinned && !lastItem, lastPinned && !lastItem, selectionMode, listener);
+			}
+		} else if (holder instanceof FavoriteStatsViewHolder viewHolder) {
+			FavoriteFolderAnalysis folderAnalysis = (FavoriteFolderAnalysis) items.get(position);
+			viewHolder.bindView(folderAnalysis);
+		} else if (holder instanceof FavoriteEmptyFolderVHolder viewHolder) {
+			viewHolder.bindView();
+		} else if (holder instanceof FavoriteEmptyFoldersVHolder viewHolder) {
+			viewHolder.bindView();
+		} else if (holder instanceof EmptyTracksViewHolder viewHolder) {
+			viewHolder.bindView();
+		} else if (holder instanceof FavoriteSearchEmptyStateVHolder viewHolder) {
+			viewHolder.bindView();
+		}
+	}
+
+	@Override
+	public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position,
+	                             @NonNull List<Object> payloads) {
+		if (!payloads.isEmpty()) {
+			for (Object p : payloads) {
+				if (p == SELECTION_MODE_PAYLOAD) {
+					if (holder instanceof FavoriteViewHolder viewHolder) {
+						FavouritePoint favouritePoint = (FavouritePoint) items.get(position);
+						viewHolder.bindSelectionMode(selectionMode, listener, favouritePoint);
+					} else if (holder instanceof FavoriteFolderViewHolder viewHolder) {
+						Object folder = items.get(position);
+						if (folder instanceof FavoriteFolder favoriteFolder) {
+							viewHolder.bindSelectionMode(selectionMode, listener, favoriteFolder);
+						} else {
+							FavoriteGroup group = (FavoriteGroup) folder;
+							viewHolder.bindSelectionMode(selectionMode, listener, group);
+						}
+					}
+					return;
+				} else if (p == SELECTION_TOGGLE_PAYLOAD) {
+					if (holder instanceof FavoriteViewHolder viewHolder) {
+						FavouritePoint favouritePoint = (FavouritePoint) items.get(position);
+						viewHolder.bindSelectionToggle(selectionMode, listener, favouritePoint);
+					} else if (holder instanceof FavoriteFolderViewHolder viewHolder) {
+						Object folder = items.get(position);
+						if (folder instanceof FavoriteFolder favoriteFolder) {
+							viewHolder.bindSelectionToggle(selectionMode, listener, favoriteFolder);
+						} else {
+							FavoriteGroup group = (FavoriteGroup) folder;
+							viewHolder.bindSelectionToggle(selectionMode, listener, group);
+						}
+					}
+					return;
+				} else if (p == LOCATION_UPDATE_PAYLOAD) {
+					if (holder instanceof FavoriteViewHolder viewHolder) {
+						FavouritePoint favouritePoint = (FavouritePoint) items.get(position);
+						viewHolder.bindLocation(sortMode, favouritePoint, showFolderNameOnSecondLine);
+					}
+					return;
+				}
+			}
+		} else {
+			onBindViewHolder(holder, position);
+		}
+	}
+
+	@Override
+	public int getItemCount() {
+		return items.size();
+	}
+
+	public int getItemPosition(@NonNull Object object) {
+		return items.indexOf(object);
+	}
+
+	public void updateItem(@NonNull Object object) {
+		int index = getItemPosition(object);
+		if (index != -1) {
+			notifyItemChanged(index);
+		}
+	}
+
+	public void onItemsSelected(@NonNull Set<?> items) {
+		for (Object item : items) {
+			updateItem(item);
+		}
+	}
+
+	private boolean hasTrackItems() {
+		for (Object o : items) {
+			if (o instanceof FavoriteFolder || o instanceof FavoriteGroup || o instanceof FavouritePoint) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public void selectItem(Object object) {
+		getItemPosition(object);
+		notifyItemChanged(getItemPosition(object), SELECTION_TOGGLE_PAYLOAD);
+	}
+
+	public void updateSelectionAllItems() {
+		notifyItemRangeChanged(0, getItemCount(), SELECTION_TOGGLE_PAYLOAD);
+	}
+
+	public void updateLocationAllItems() {
+		notifyItemRangeChanged(0, getItemCount(), LOCATION_UPDATE_PAYLOAD);
+	}
+
+	public interface FavoriteAdapterListener {
+		boolean isItemSelected(@NonNull Object object);
+
+		void onItemSingleClick(@NonNull Object object);
+
+		void onItemLongClick(@NonNull Object object);
+
+		void onActionButtonClick(@NonNull Object object, @NonNull View anchor);
+
+		void onEmptyStateClick();
+	}
+}

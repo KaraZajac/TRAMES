@@ -1,0 +1,213 @@
+package net.osmand.plus.track.clickable;
+
+import static net.osmand.IndexConstants.GPX_FILE_EXT;
+import static net.osmand.gpx.clickable.ClickableWayTags.CLICKABLE_TAGS;
+import static net.osmand.gpx.clickable.ClickableWayTags.getGpxColorByTags;
+import static net.osmand.gpx.clickable.ClickableWayTags.isClickableWayTags;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import net.osmand.NativeLibrary.RenderedObject;
+import net.osmand.binary.HeightDataLoader;
+import net.osmand.binary.HeightDataLoader.Cancellable;
+import net.osmand.binary.ObfConstants;
+import net.osmand.core.jni.ObfMapObject;
+import net.osmand.core.jni.QVectorPointI;
+import net.osmand.data.Amenity;
+import net.osmand.data.BaseDetailsObject;
+import net.osmand.data.LatLon;
+import net.osmand.data.QuadRect;
+import net.osmand.gpx.clickable.ClickableWayTags;
+import net.osmand.plus.OsmandApplication;
+import net.osmand.plus.Version;
+import net.osmand.plus.activities.MapActivity;
+import net.osmand.plus.track.helpers.GpxUiHelper;
+import net.osmand.plus.utils.FileUtils;
+import net.osmand.plus.views.layers.ContextMenuLayer;
+import net.osmand.search.AmenitySearcher;
+import net.osmand.shared.gpx.GpxFile;
+import net.osmand.shared.gpx.GpxTrackAnalysis;
+import net.osmand.shared.gpx.GpxUtilities;
+import net.osmand.shared.gpx.RouteActivityHelper;
+import net.osmand.shared.gpx.primitives.RouteActivity;
+import net.osmand.shared.gpx.primitives.Track;
+import net.osmand.shared.gpx.primitives.TrkSegment;
+import net.osmand.shared.gpx.primitives.WptPt;
+import net.osmand.util.Algorithms;
+import net.osmand.util.MapUtils;
+
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+
+import gnu.trove.list.array.TIntArrayList;
+
+public class ClickableWayHelper {
+    private final OsmandApplication app;
+    private final ClickableWayMenuProvider activator;
+
+    public ClickableWayHelper(@NonNull OsmandApplication app) {
+        this.app = app;
+        this.activator = new ClickableWayMenuProvider(app, this::readHeightData, this::openAsGpxFile);
+    }
+
+    @NonNull
+    public ContextMenuLayer.IContextMenuProvider getContextMenuProvider() {
+        return activator;
+    }
+
+    public boolean isClickableWay(@NonNull RenderedObject renderedObject) {
+        String name = renderedObject.getName();
+        return renderedObject.getX().size() > 1 && isClickableWayTags(name, renderedObject.getTags()); // v1
+    }
+
+    public boolean isClickableWay(@NonNull ObfMapObject obfMapObject, @NonNull Map<String, String> tags) {
+        String name = obfMapObject.getCaptionInNativeLanguage();
+        return obfMapObject.getPoints31().size() > 1 && isClickableWayTags(name, tags); // v2 with prefetched tags
+    }
+
+    @Nullable
+    public ClickableWay loadClickableWay(@NonNull LatLon selectedLatLon, @NonNull RenderedObject renderedObject) {
+        long osmId = ObfConstants.getOsmIdFromBinaryMapObjectId(renderedObject.getId());
+        Map<String, String> tags = renderedObject.getTags();
+        String name = renderedObject.getName();
+        if (Algorithms.isEmpty(name) || ".".equals(name)) {
+            name = tags.get(Amenity.NAME);
+        }
+        if (Algorithms.isEmpty(name) || ".".equals(name)) {
+            name = tags.get(Amenity.REF);
+        }
+        TIntArrayList xPoints = renderedObject.getX();
+        TIntArrayList yPoints = renderedObject.getY();
+        QuadRect bbox = calcSearchQuadRect(xPoints, yPoints);
+        return loadClickableWay(selectedLatLon, bbox, xPoints, yPoints, osmId, name, tags);
+    }
+
+    @Nullable
+    public ClickableWay loadClickableWay(@NonNull LatLon selectedLatLon,
+                                         @NonNull ObfMapObject obfMapObject,
+                                         @NonNull Map<String, String> tags) {
+        long osmId = ObfConstants.getOsmIdFromBinaryMapObjectId(obfMapObject.getId().getId().longValue());
+        String name = obfMapObject.getCaptionInNativeLanguage();
+        TIntArrayList xPoints = new TIntArrayList();
+        TIntArrayList yPoints = new TIntArrayList();
+        QVectorPointI points31 = obfMapObject.getPoints31();
+        for (int i = 0; i < points31.size(); i++) {
+            xPoints.add(points31.get(i).getX());
+            yPoints.add(points31.get(i).getY());
+        }
+        QuadRect bbox = calcSearchQuadRect(xPoints, yPoints);
+        return loadClickableWay(selectedLatLon, bbox, xPoints, yPoints, osmId, name, tags);
+    }
+
+    public ClickableWay loadClickableWay(@NonNull Amenity amenity) {
+        long osmId = amenity.getOsmId();
+        String name = amenity.getName();
+        TIntArrayList xPoints = amenity.getX();
+        TIntArrayList yPoints = amenity.getY();
+        LatLon selectedLatLon = amenity.getLocation();
+        Map<String, String> tags = amenity.getOsmTags();
+        QuadRect bbox = calcSearchQuadRect(xPoints, yPoints);
+        return loadClickableWay(selectedLatLon, bbox, xPoints, yPoints, osmId, name, tags);
+    }
+
+    public boolean isClickableWayAmenity(Amenity amenity) {
+        return isClickableWayTags(amenity.getName(), amenity.getOsmTags());
+    }
+
+    private ClickableWay loadClickableWay(LatLon selectedLatLon, QuadRect bbox,
+                                          TIntArrayList xPoints, TIntArrayList yPoints,
+                                          long osmId, String name, Map<String, String> tags) {
+        GpxFile gpxFile = new GpxFile(Version.getFullVersion(app));
+        RouteActivityHelper helper = app.getRouteActivityHelper();
+        for (String clickableTagValue : CLICKABLE_TAGS) {
+            String tag = clickableTagValue.split("=")[0];
+            if (tags.containsKey(tag)) {
+                RouteActivity activity = helper.findActivityByTag(clickableTagValue);
+                if (activity != null) {
+                    String activityType = activity.getId();
+                    gpxFile.getMetadata().getExtensionsToWrite().put(GpxUtilities.ACTIVITY_TYPE, activityType);
+                    break;
+                }
+            }
+        }
+
+        gpxFile.getExtensionsToWrite().putAll(tags);
+        gpxFile.getExtensionsToWrite().put("way_id", Long.toString(osmId));
+
+        TrkSegment trkSegment = new TrkSegment();
+        for (int i = 0; i < Math.min(xPoints.size(), yPoints.size()); i++) {
+            WptPt wpt = new WptPt();
+            wpt.setLat(MapUtils.get31LatitudeY(yPoints.get(i)));
+            wpt.setLon(MapUtils.get31LongitudeX(xPoints.get(i)));
+            trkSegment.getPoints().add(wpt);
+        }
+
+        Track track = new Track();
+        track.getSegments().add(trkSegment);
+        gpxFile.setTracks(List.of(track)); // immutable
+
+        String color = getGpxColorByTags(tags);
+        if (color != null) {
+            gpxFile.setColor(color);
+            for (Map.Entry<String, String> gpxShieldTags : ClickableWayTags.getGpxShieldTags(color).entrySet()) {
+                gpxFile.getExtensionsToWrite().putIfAbsent(gpxShieldTags.getKey(), gpxShieldTags.getValue());
+            }
+        }
+
+        return new ClickableWay(gpxFile, osmId, name, selectedLatLon, bbox);
+    }
+
+    private QuadRect calcSearchQuadRect(TIntArrayList x, TIntArrayList y) {
+        QuadRect bbox = new QuadRect();
+        for (int i = 0; i < Math.min(x.size(), y.size()); i++) {
+            bbox.expand(x.get(i), y.get(i), x.get(i), y.get(i));
+        }
+        return bbox; // (int)MapUtils.measuredDist31((int)bbox.left, (int)bbox.top, (int)bbox.right, (int)bbox.bottom);
+    }
+
+    private boolean readHeightData(@Nullable ClickableWay clickableWay, @Nullable Cancellable canceller) {
+        if (clickableWay != null) {
+            HeightDataLoader loader = new HeightDataLoader(app.getResourceManager().getReverseGeocodingMapFiles());
+            List<WptPt> waypoints =
+                    loader.loadHeightDataAsWaypoints(clickableWay.getOsmId(), clickableWay.getBbox(), canceller);
+            if ((canceller == null || !canceller.isCancelled())
+                    && !Algorithms.isEmpty(waypoints)
+                    && !Algorithms.isEmpty(clickableWay.getGpxFile().getTracks())
+                    && !Algorithms.isEmpty(clickableWay.getGpxFile().getTracks().get(0).getSegments())) {
+                clickableWay.getGpxFile().getTracks().get(0).getSegments().get(0).setPoints(waypoints);
+                return true;
+            }
+        }
+        return false;
+    }
+    private boolean openAsGpxFile(@Nullable ClickableWay clickableWay) {
+        return openAsGpxFile(clickableWay, false);
+    }
+
+    private boolean openAsGpxFile(@Nullable ClickableWay clickableWay, boolean adjustMapPosition) {
+        MapActivity mapActivity = app.getOsmandMap().getMapView().getMapActivity();
+        if (clickableWay != null && mapActivity != null) {
+            GpxFile gpxFile = clickableWay.getGpxFile();
+            GpxTrackAnalysis analysis = gpxFile.getAnalysis(0);
+            String safeFileName = clickableWay.getGpxFileName() + GPX_FILE_EXT;
+            File file = new File(FileUtils.getTempDir(app), safeFileName);
+            WptPt selectedPoint = clickableWay.getSelectedGpxPoint().getSelectedPoint();
+            GpxUiHelper.saveAndOpenGpx(mapActivity, file, gpxFile, selectedPoint, analysis, null, adjustMapPosition);
+            return true;
+        }
+        return false;
+    }
+
+    public void openClickableWayAmenity(Amenity amenity, boolean adjustMapPosition) {
+        AmenitySearcher amenitySearcher = app.getResourceManager().getAmenitySearcher();
+        AmenitySearcher.Settings settings = app.getResourceManager().getDefaultAmenitySearchSettings();
+        BaseDetailsObject detailedObject = amenitySearcher.searchDetailedObject(amenity, settings);
+        if (detailedObject != null) {
+            ClickableWay clickableWay = loadClickableWay(detailedObject.getSyntheticAmenity());
+            readHeightData(clickableWay, null);
+            openAsGpxFile(clickableWay, adjustMapPosition);
+        }
+    }
+}

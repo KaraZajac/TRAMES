@@ -1,0 +1,353 @@
+package net.osmand.plus.configmap;
+
+import android.content.Context;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.AppCompatCheckedTextView;
+import androidx.appcompat.widget.SwitchCompat;
+
+import net.osmand.core.android.MapRendererContext;
+import net.osmand.plus.OsmandApplication;
+import net.osmand.plus.R;
+import net.osmand.plus.activities.MapActivity;
+import net.osmand.plus.settings.backend.OsmandSettings;
+import net.osmand.plus.settings.backend.preferences.CommonPreference;
+import net.osmand.plus.settings.backend.preferences.OsmandPreference;
+import net.osmand.plus.utils.AndroidUtils;
+import net.osmand.plus.utils.ColorUtilities;
+import net.osmand.plus.utils.UiUtilities;
+import net.osmand.plus.views.OsmandMapTileView;
+import net.osmand.plus.views.corenative.NativeCoreContext;
+import net.osmand.plus.widgets.alert.AlertDialogData;
+import net.osmand.plus.widgets.alert.CustomAlert;
+import net.osmand.plus.widgets.ctxmenu.callback.OnDataChangeUiAdapter;
+import net.osmand.plus.widgets.ctxmenu.data.ContextMenuItem;
+import net.osmand.render.RenderingRuleProperty;
+import net.osmand.util.Algorithms;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import gnu.trove.list.array.TIntArrayList;
+
+public class ConfigureMapDialogs {
+
+	public static void showMapMagnifierDialog(@NonNull OsmandMapTileView view) {
+		showMapMagnifierDialog(view.requireMapActivity(), false, 0, view, view.getSettings().MAP_DENSITY, null, null);
+	}
+
+	protected static void showMapMagnifierDialog(@NonNull MapActivity activity, boolean nightMode,
+	                                             @NonNull ContextMenuItem item, @NonNull OnDataChangeUiAdapter adapter) {
+		OsmandApplication app = activity.getApp();
+		int profileColor = ColorUtilities.getAppModeColor(app, nightMode);
+		OsmandSettings settings = app.getSettings();
+
+		OsmandMapTileView view = activity.getMapView();
+		OsmandPreference<Float> mapDensity = settings.MAP_DENSITY;
+		showMapMagnifierDialog(activity, nightMode, profileColor, view, mapDensity, item, adapter);
+	}
+
+	private static void showMapMagnifierDialog(@NonNull MapActivity activity,
+	                                           boolean nightMode,
+	                                           int profileColor,
+	                                           @NonNull OsmandMapTileView view,
+	                                           @NonNull OsmandPreference<Float> mapDensity,
+	                                           @Nullable ContextMenuItem item,
+	                                           @Nullable OnDataChangeUiAdapter adapter) {
+		MapMagnifierValues magnifierValues = getMapMagnifierValues(mapDensity);
+		String[] values = magnifierValues.values.toArray(new String[0]);
+
+		if (item != null && adapter != null) {
+			AlertDialogData dialogData = new AlertDialogData(activity, nightMode)
+					.setTitle(R.string.map_magnifier)
+					.setControlsColor(profileColor)
+					.setNegativeButton(R.string.shared_string_dismiss, null);
+
+			CustomAlert.showSingleSelection(dialogData, values, magnifierValues.selectedIndex, v -> {
+				int which = (int) v.getTag();
+				setPhoneMapDensity(view, mapDensity, magnifierValues.percentValues.get(which));
+				item.setDescription(String.format(Locale.UK, "%.0f", 100f * mapDensity.get()) + " %");
+				adapter.onDataSetInvalidated();
+			});
+		} else {
+			AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+			builder.setTitle(R.string.map_magnifier);
+			builder.setSingleChoiceItems(values, magnifierValues.selectedIndex, (dialog, which) -> {
+				setPhoneMapDensity(view, mapDensity, magnifierValues.percentValues.get(which));
+				dialog.dismiss();
+			});
+			builder.show();
+		}
+	}
+
+	@NonNull
+	private static MapMagnifierValues getMapMagnifierValues(@NonNull OsmandPreference<Float> mapDensity) {
+		int currentValue = (int) (mapDensity.get() * 100);
+		TIntArrayList percentValues = new TIntArrayList(new int[] {25, 33, 50, 75, 100, 125, 150, 200, 300, 400});
+		List<String> values = new ArrayList<>();
+		int selectedIndex = -1;
+		for (int k = 0; k <= percentValues.size(); k++) {
+			boolean end = k == percentValues.size();
+			if (selectedIndex == -1) {
+				if ((end || currentValue < percentValues.get(k))) {
+					values.add(currentValue + " %");
+					selectedIndex = k;
+				} else if (currentValue == percentValues.get(k)) {
+					selectedIndex = k;
+				}
+			}
+			if (k < percentValues.size()) {
+				values.add(percentValues.get(k) + " %");
+			}
+		}
+		if (values.size() != percentValues.size()) {
+			percentValues.insert(selectedIndex, currentValue);
+		}
+		return new MapMagnifierValues(percentValues, values, selectedIndex);
+	}
+
+	private static void setPhoneMapDensity(@NonNull OsmandMapTileView view,
+	                                       @NonNull OsmandPreference<Float> mapDensity,
+	                                       int value) {
+		mapDensity.set(value / 100.0f);
+		if (!view.isCarView()) {
+			view.applyDisplayScaleSettings();
+		}
+	}
+
+	private record MapMagnifierValues(@NonNull TIntArrayList percentValues,
+	                                  @NonNull List<String> values, int selectedIndex) {
+	}
+
+	protected static void showTextSizeDialog(
+			@NonNull MapActivity activity, boolean nightMode,
+			@NonNull ContextMenuItem item, @NonNull OnDataChangeUiAdapter uiAdapter
+	) {
+		OsmandApplication app = activity.getApp();
+		int profileColor = ColorUtilities.getAppModeColor(app, nightMode);
+
+		OsmandMapTileView view = activity.getMapView();
+		Float[] txtValues = {0.33f, 0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f, 3f};
+		int selected = -1;
+		String[] txtNames = new String[txtValues.length];
+		for (int i = 0; i < txtNames.length; i++) {
+			txtNames[i] = (int) (txtValues[i] * 100) + " %";
+			if (Math.abs(view.getSettings().TEXT_SCALE.get() - txtValues[i]) < 0.1f) {
+				selected = i;
+			}
+		}
+		AlertDialogData dialogData = new AlertDialogData(activity, nightMode)
+				.setTitle(R.string.text_size)
+				.setControlsColor(profileColor)
+				.setNegativeButton(R.string.shared_string_dismiss, null);
+
+		CustomAlert.showSingleSelection(dialogData, txtNames, selected, v -> {
+			int which = (int) v.getTag();
+			view.getSettings().TEXT_SCALE.set(txtValues[which]);
+			activity.refreshMapComplete();
+			item.setDescription(ConfigureMapUtils.getScale(activity));
+			uiAdapter.onDataSetInvalidated();
+		});
+	}
+
+	protected static void showMapLanguageDialog(
+			@NonNull MapActivity activity, boolean nightMode,
+			@NonNull ContextMenuItem item, @NonNull OnDataChangeUiAdapter uiAdapter
+	) {
+
+		int[] selectedLanguageIndex = new int[1];
+		boolean[] transliterateNames = new boolean[1];
+		boolean[] showLocalNames = new boolean[1];
+
+		OsmandApplication app = activity.getApp();
+		OsmandSettings settings = app.getSettings();
+		int profileColor = ColorUtilities.getAppModeColor(app, nightMode);
+
+
+		OsmandMapTileView view = activity.getMapView();
+		Context ctx = UiUtilities.getThemedContext(activity, nightMode);
+		AlertDialog.Builder b = new AlertDialog.Builder(ctx);
+		b.setTitle(activity.getString(R.string.map_locale));
+
+		Map<String, String> mapLanguages = ConfigureMapUtils.getSorterMapLanguages(app);
+		String[] mapLanguagesIds = mapLanguages.keySet().toArray(new String[0]);
+		String[] mapLanguagesNames = mapLanguages.values().toArray(new String[0]);
+
+		int selected = -1;
+		for (int i = 0; i < mapLanguagesIds.length; i++) {
+			if (settings.MAP_PREFERRED_LOCALE.get().equals(mapLanguagesIds[i])) {
+				selected = i;
+				break;
+			}
+		}
+		selectedLanguageIndex[0] = selected;
+		transliterateNames[0] = settings.MAP_TRANSLITERATE_NAMES.get();
+		showLocalNames[0] = settings.MAP_SHOW_LOCAL_NAMES.get();
+
+		OnCheckedChangeListener translitChangdListener = (buttonView, isChecked) -> transliterateNames[0] = isChecked;
+		OnCheckedChangeListener showLocalNamesListener = (buttonView, isChecked) -> showLocalNames[0] = isChecked;
+
+		ArrayAdapter<CharSequence> singleChoiceAdapter = new ArrayAdapter<CharSequence>(
+				ctx, R.layout.single_choice_switch_item, R.id.text1, mapLanguagesNames) {
+			@NonNull
+			@Override
+			public View getView(int position, View convertView, @NonNull ViewGroup parent) {
+				View v = super.getView(position, convertView, parent);
+				AppCompatCheckedTextView checkedTextView = v.findViewById(R.id.text1);
+				UiUtilities.setupCompoundButtonDrawable(app, nightMode, profileColor, checkedTextView.getCheckMarkDrawable());
+
+				if (position == selectedLanguageIndex[0] && position > 0) {
+					checkedTextView.setChecked(true);
+					v.findViewById(R.id.topDivider).setVisibility(View.VISIBLE);
+					v.findViewById(R.id.bottomDivider).setVisibility(View.VISIBLE);
+					v.findViewById(R.id.switchLayout).setVisibility(View.VISIBLE);
+					
+					TextView transliterateTitle = v.findViewById(R.id.transliterate_title);
+					transliterateTitle.setText(app.getString(R.string.use_latin_name_if_missing, mapLanguagesNames[position]));
+					SwitchCompat transliterateSwitch = v.findViewById(R.id.transliterate_switch);
+					transliterateSwitch.setChecked(transliterateNames[0]);
+					transliterateSwitch.setOnCheckedChangeListener(translitChangdListener);
+					UiUtilities.setupCompoundButton(nightMode, profileColor, transliterateSwitch);
+
+					TextView localNamesTitle = v.findViewById(R.id.local_names_title);
+					localNamesTitle.setText(R.string.show_local_names);
+					SwitchCompat localNamesSwitch = v.findViewById(R.id.local_names_switch);
+					localNamesSwitch.setChecked(showLocalNames[0]);
+					localNamesSwitch.setOnCheckedChangeListener(showLocalNamesListener);
+					UiUtilities.setupCompoundButton(nightMode, profileColor, localNamesSwitch);
+				} else {
+					checkedTextView.setChecked(position == selectedLanguageIndex[0]);
+					v.findViewById(R.id.topDivider).setVisibility(View.GONE);
+					v.findViewById(R.id.bottomDivider).setVisibility(View.GONE);
+					v.findViewById(R.id.switchLayout).setVisibility(View.GONE);
+				}
+				return v;
+			}
+		};
+
+		b.setAdapter(singleChoiceAdapter, null);
+		b.setSingleChoiceItems(mapLanguagesNames, selected, (dialog, which) -> {
+			selectedLanguageIndex[0] = which;
+			transliterateNames[0] = settings.MAP_TRANSLITERATE_NAMES.isSet()
+					? transliterateNames[0]
+					: mapLanguagesIds[which].equals("en");
+			((AlertDialog) dialog).getListView().setSelection(which);
+			singleChoiceAdapter.notifyDataSetChanged();
+		});
+
+		b.setNegativeButton(R.string.shared_string_cancel, null);
+		b.setPositiveButton(R.string.shared_string_apply, (dialog, which) -> {
+			view.getSettings().MAP_TRANSLITERATE_NAMES.set(selectedLanguageIndex[0] > 0 && transliterateNames[0]);
+			view.getSettings().MAP_SHOW_LOCAL_NAMES.set(selectedLanguageIndex[0] > 0 && showLocalNames[0]);
+			AlertDialog dlg = (AlertDialog) dialog;
+			int index = dlg.getListView().getCheckedItemPosition();
+			view.getSettings().MAP_PREFERRED_LOCALE.set(
+					mapLanguagesIds[index]);
+			activity.refreshMapComplete();
+			String localeDescr = mapLanguagesIds[index];
+			localeDescr = localeDescr == null || localeDescr.isEmpty() ? activity
+					.getString(R.string.local_map_names) : localeDescr;
+			item.setDescription(localeDescr);
+			uiAdapter.onDataSetInvalidated();
+		});
+		b.show();
+	}
+
+	protected static void showRenderingPropertyDialog(
+			@NonNull MapActivity activity, @NonNull RenderingRuleProperty p,
+			@NonNull CommonPreference<String> pref, @NonNull ContextMenuItem item,
+			@NonNull OnDataChangeUiAdapter uiAdapter, boolean nightMode
+	) {
+		OsmandApplication app = activity.getApp();
+		String title = AndroidUtils.getRenderingStringPropertyDescription(app, p.getAttrName(), p.getName());
+		String[] possibleValuesString = ConfigureMapUtils.getRenderingPropertyPossibleValues(app, p);
+		int selectedIndex = AndroidUtils.getRenderPropertySelectedValueIndex(app, p);
+
+		AlertDialogData dialogData = new AlertDialogData(activity, nightMode)
+				.setTitle(title)
+				.setControlsColor(ColorUtilities.getAppModeColor(app, nightMode))
+				.setNegativeButton(R.string.shared_string_dismiss, null);
+
+		CustomAlert.showSingleSelection(dialogData, possibleValuesString, selectedIndex, v -> {
+			int which = (int) v.getTag();
+			if (which == 0) {
+				pref.set("");
+			} else {
+				pref.set(p.getPossibleValues()[which - 1]);
+			}
+			activity.refreshMapComplete();
+			item.setDescription(AndroidUtils.getRenderingStringPropertyValue(app, p));
+
+			if (uiAdapter != null) {
+				String id = item.getId();
+				if (!Algorithms.isEmpty(id)) {
+					uiAdapter.onRefreshItem(id);
+				} else {
+					uiAdapter.onDataSetChanged();
+				}
+			}
+		});
+	}
+
+	protected static void showPreferencesDialog(
+			@NonNull OnDataChangeUiAdapter uiAdapter, @NonNull ContextMenuItem item,
+			@NonNull MapActivity activity, @NonNull String category,
+			@NonNull List<RenderingRuleProperty> properties,
+			@NonNull List<CommonPreference<Boolean>> prefs, boolean nightMode
+	) {
+		if (!AndroidUtils.isActivityNotDestroyed(activity)) {
+			return;
+		}
+		OsmandApplication app = activity.getApp();
+		boolean[] checkedItems = new boolean[prefs.size()];
+		for (int i = 0; i < prefs.size(); i++) {
+			checkedItems[i] = prefs.get(i).get();
+		}
+		String[] propertyNames = new String[properties.size()];
+		for (int i = 0; i < properties.size(); i++) {
+			RenderingRuleProperty p = properties.get(i);
+			String propertyName = AndroidUtils.getRenderingStringPropertyName(activity, p.getAttrName(),
+					p.getName());
+			propertyNames[i] = propertyName;
+		}
+
+		AlertDialogData dialogData = new AlertDialogData(activity, nightMode)
+				.setTitle(category)
+				.setControlsColor(ColorUtilities.getAppModeColor(app, nightMode))
+				.setNegativeButton(R.string.shared_string_cancel, (dialog, whichButton) -> {
+					boolean selected = false;
+					for (int i = 0; i < prefs.size(); i++) {
+						selected |= prefs.get(i).get();
+					}
+					item.setSelected(selected);
+					item.setColor(activity, selected ? R.color.osmand_orange : ContextMenuItem.INVALID_ID);
+					uiAdapter.onDataSetInvalidated();
+				})
+				.setPositiveButton(R.string.shared_string_ok, (dialog, whichButton) -> {
+					boolean selected = false;
+					for (int i = 0; i < prefs.size(); i++) {
+						prefs.get(i).set(checkedItems[i]);
+						selected |= checkedItems[i];
+					}
+					item.setSelected(selected);
+					item.setColor(activity, selected ? R.color.osmand_orange : ContextMenuItem.INVALID_ID);
+					uiAdapter.onDataSetInvalidated();
+					activity.refreshMapComplete();
+					activity.getMapLayers().updateLayers(activity);
+				});
+
+		CustomAlert.showMultiSelection(dialogData, propertyNames, checkedItems, v -> {
+			int which = (int) v.getTag();
+			checkedItems[which] = !checkedItems[which];
+		});
+	}
+}

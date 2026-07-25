@@ -1,0 +1,821 @@
+package net.osmand.plus.views.controls;
+
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+import static net.osmand.plus.OsmAndConstants.UI_HANDLER_MAP_HUD;
+import static net.osmand.plus.quickaction.ButtonAppearanceParams.BIG_SIZE_DP;
+import static net.osmand.plus.quickaction.ButtonAppearanceParams.SMALL_SIZE_DP;
+import static net.osmand.plus.settings.backend.OsmandSettings.DEV_GRID_LAYOUT_DRAW_BUTTON_FRAMES;
+import static net.osmand.plus.settings.backend.OsmandSettings.DEV_GRID_LAYOUT_DRAW_CELLS;
+import static net.osmand.plus.settings.backend.OsmandSettings.DEV_GRID_LAYOUT_DRAW_SLOTS;
+import static net.osmand.plus.settings.backend.OsmandSettings.DEV_GRID_LAYOUT_SHOW_LOGS;
+import static net.osmand.shared.grid.ButtonPositionSize.*;
+
+import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.util.AttributeSet;
+import android.view.Gravity;
+import android.view.View;
+import android.widget.FrameLayout;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import net.osmand.PlatformUtil;
+import net.osmand.StateChangedListener;
+import net.osmand.plus.OsmandApplication;
+import net.osmand.plus.R;
+import net.osmand.plus.helpers.AndroidUiHelper;
+import net.osmand.plus.settings.backend.OsmandSettings;
+import net.osmand.plus.settings.backend.preferences.CommonPreference;
+import net.osmand.plus.settings.enums.PanelsLayoutMode;
+import net.osmand.plus.settings.enums.ScreenLayoutMode;
+import net.osmand.plus.utils.AndroidUtils;
+import net.osmand.plus.views.controls.ViewChangeProvider.ViewChangeListener;
+import net.osmand.plus.views.controls.maphudbuttons.MapButton;
+import net.osmand.plus.views.mapwidgets.TopToolbarView;
+import net.osmand.plus.views.mapwidgets.configure.buttons.MapButtonState;
+import net.osmand.plus.views.mapwidgets.widgets.RulerWidget;
+import net.osmand.shared.grid.ButtonPositionSize;
+import net.osmand.util.CollectionUtils;
+
+import org.apache.commons.logging.Log;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+public class MapHudLayout extends FrameLayout {
+
+	private static final int REFRESH_UI_ID = UI_HANDLER_MAP_HUD + 1;
+	private static final int UI_REFRESH_INTERVAL_MILLIS = 100;
+	private static final float TOP_BAR_MAX_WIDTH_PERCENTAGE_PORTRAIT = 0.5f;
+	private static final float TOP_BAR_MAX_WIDTH_PERCENTAGE_LANDSCAPE = 0.6f;
+
+	private static final Log LOG = PlatformUtil.getLog(MapHudLayout.class);
+
+	private final OsmandApplication app;
+	private final OsmandSettings settings;
+
+	private final List<MapButton> mapButtons = new ArrayList<>();
+	private final Map<View, ButtonPositionSize> widgetPositions = new LinkedHashMap<>();
+	private final Map<View, ButtonPositionSize> additionalWidgetPositions = new LinkedHashMap<>();
+	private final ScreenLayoutMode screenLayoutMode;
+
+	private PanelsLayoutMode panelsLayoutMode;
+	private StateChangedListener<PanelsLayoutMode> panelsLayoutModeListener;
+
+	private View alarmWidget;
+	private View speedometerWidget;
+	private TopToolbarView topToolbarView;
+	private SideWidgetsPanel leftWidgetsPanel;
+	private SideWidgetsPanel rightWidgetsPanel;
+	private VerticalWidgetPanel topWidgetsPanel;
+	private VerticalWidgetPanel bottomWidgetsPanel;
+	private View layerParamLayout;
+	private View mapTransparencyLayout;
+
+	private final float dpToPx;
+	private final int topButtonsMargin;
+	private final int bottomButtonsMargin;
+	private final int defaultMargin;
+
+	private final boolean portrait;
+
+	private final Paint gridPaint = new Paint();
+	private final Paint gridCrosshairPaint = new Paint();
+	private final Paint slotPaintStroke = new Paint();
+	private final Paint slotPaintFill = new Paint();
+	private final Paint framePaintStroke = new Paint();
+
+	private boolean externalVisibleAreaApplied;
+	private int basePaddingLeft;
+	private int basePaddingTop;
+	private int basePaddingRight;
+	private int basePaddingBottom;
+
+	public MapHudLayout(@NonNull Context context) {
+		this(context, null);
+	}
+
+	public MapHudLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
+		this(context, attrs, 0);
+	}
+
+	public MapHudLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+		this(context, attrs, defStyleAttr, 0);
+	}
+
+	public MapHudLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+		super(context, attrs, defStyleAttr, defStyleRes);
+
+		this.app = AndroidUtils.getApp(context);
+		this.settings = app.getSettings();
+		this.dpToPx = AndroidUtils.dpToPxF(context, 1);
+		this.portrait = AndroidUiHelper.isOrientationPortrait(context);
+		this.screenLayoutMode = ScreenLayoutMode.getDefault(context);
+		this.defaultMargin = (int) (dpToPx * DEF_MARGIN_DP);
+		this.topButtonsMargin = (int) (dpToPx * ((SMALL_SIZE_DP + (DEF_MARGIN_DP * 4)) * 2));
+		this.bottomButtonsMargin = (int) (dpToPx * ((BIG_SIZE_DP + (DEF_MARGIN_DP * 4)) * 2));
+
+		CommonPreference<PanelsLayoutMode> preference = settings.getPanelsLayoutMode(context, screenLayoutMode);
+		this.panelsLayoutMode = preference.get();
+		preference.addListener(getPanelsLayoutModeListener());
+
+		gridPaint.setColor(0xE6FF9800); // systemOrange @ 90%
+		gridPaint.setStrokeWidth(1);
+		gridPaint.setStyle(Paint.Style.STROKE);
+
+		gridCrosshairPaint.setColor(0x808E8E8E); // systemGray @ 50%
+		gridCrosshairPaint.setStrokeWidth(1);
+		gridCrosshairPaint.setStyle(Paint.Style.STROKE);
+
+		slotPaintStroke.setColor(0xFF009688); // systemTeal
+		slotPaintStroke.setStrokeWidth(1);
+		slotPaintStroke.setStyle(Paint.Style.STROKE);
+
+		slotPaintFill.setColor(0x40009688); // systemTeal @ 25%
+		slotPaintFill.setStyle(Paint.Style.FILL);
+
+		framePaintStroke.setColor(0xFFFF0000); // systemRed
+		framePaintStroke.setStrokeWidth(1);
+		framePaintStroke.setStyle(Paint.Style.STROKE);
+	}
+
+	@Override
+	protected void onFinishInflate() {
+		super.onFinishInflate();
+
+		topToolbarView = findViewById(R.id.widget_top_bar);
+		alarmWidget = findViewById(R.id.map_alarm_warning);
+		speedometerWidget = findViewById(R.id.speedometer_widget);
+		leftWidgetsPanel = findViewById(R.id.map_left_widgets_panel);
+		rightWidgetsPanel = findViewById(R.id.map_right_widgets_panel);
+		topWidgetsPanel = findViewById(R.id.top_widgets_panel);
+		bottomWidgetsPanel = findViewById(R.id.map_bottom_widgets_panel);
+		layerParamLayout = findViewById(R.id.layer_param_layout);
+		mapTransparencyLayout = findViewById(R.id.map_transparency_layout);
+
+		setupPositions();
+	}
+
+	public boolean setExternalVisibleArea(@NonNull Rect visibleArea) {
+		if (getWidth() <= 0 || getHeight() <= 0) {
+			return false;
+		}
+		if (!externalVisibleAreaApplied) {
+			basePaddingLeft = getPaddingLeft();
+			basePaddingTop = getPaddingTop();
+			basePaddingRight = getPaddingRight();
+			basePaddingBottom = getPaddingBottom();
+		}
+
+		int[] location = new int[2];
+		getLocationOnScreen(location);
+		int left = Math.max(0, visibleArea.left - location[0]);
+		int top = Math.max(0, visibleArea.top - location[1]);
+		int right = Math.max(0, location[0] + getWidth() - visibleArea.right);
+		int bottom = Math.max(0, location[1] + getHeight() - visibleArea.bottom);
+
+		int paddingLeft = Math.max(basePaddingLeft, left);
+		int paddingTop = Math.max(basePaddingTop, top);
+		int paddingRight = Math.max(basePaddingRight, right);
+		int paddingBottom = Math.max(basePaddingBottom, bottom);
+		boolean changed = getPaddingLeft() != paddingLeft || getPaddingTop() != paddingTop
+				|| getPaddingRight() != paddingRight || getPaddingBottom() != paddingBottom;
+		externalVisibleAreaApplied = true;
+		if (changed) {
+			setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
+			refresh();
+		}
+		return changed;
+	}
+
+	public boolean clearExternalVisibleArea() {
+		if (!externalVisibleAreaApplied) {
+			return false;
+		}
+		externalVisibleAreaApplied = false;
+		boolean changed = getPaddingLeft() != basePaddingLeft || getPaddingTop() != basePaddingTop
+				|| getPaddingRight() != basePaddingRight || getPaddingBottom() != basePaddingBottom;
+		if (changed) {
+			setPadding(basePaddingLeft, basePaddingTop, basePaddingRight, basePaddingBottom);
+			refresh();
+		}
+		return changed;
+	}
+
+	private int getContentWidth() {
+		return Math.max(0, getWidth() - getPaddingLeft() - getPaddingRight());
+	}
+
+	private int getContentHeight() {
+		return Math.max(0, getHeight() - getPaddingTop() - getPaddingBottom());
+	}
+
+	private void setupPositions() {
+		widgetPositions.clear();
+
+		addPosition(topToolbarView);
+		addPosition(topWidgetsPanel);
+		addPosition(bottomWidgetsPanel);
+		addPosition(leftWidgetsPanel, this::updateVerticalPanels);
+		addPosition(rightWidgetsPanel, this::updateVerticalPanels);
+
+		addPosition(findViewById(R.id.lanes_widget_special_position));
+		addPosition(findViewById(R.id.left_side_menu));
+		addPosition(findViewById(R.id.recording_note_layout));
+		addPosition(findViewById(R.id.add_gpx_point_bottom_sheet));
+
+		if (speedometerWidget != null) {
+			addWidget(speedometerWidget);
+		}
+		if (alarmWidget != null) {
+			addWidget(alarmWidget);
+		}
+		if (layerParamLayout != null) {
+			addWidget(layerParamLayout);
+		}
+		if (mapTransparencyLayout != null) {
+			addWidget(mapTransparencyLayout);
+		}
+		refresh();
+	}
+
+	private void addPosition(@Nullable View view) {
+		addPosition(view, null);
+	}
+
+	private void addPosition(@Nullable View view, @Nullable Runnable callback) {
+		if (view != null) {
+			addViewChangeListener(view, callback);
+			widgetPositions.put(view, createWidgetPosition(view));
+		}
+	}
+
+	private void addViewChangeListener(@NonNull View view, @Nullable Runnable callback) {
+		if (view instanceof ViewChangeProvider provider) {
+			provider.addViewChangeListener(new ViewChangeListener() {
+				@Override
+				public void onSizeChanged(@NonNull View view, int width, int height, int oldWidth,
+						int oldHeight) {
+					if (width != oldWidth || height != oldHeight) {
+						if (callback != null) {
+							callback.run();
+						}
+						refresh();
+					}
+				}
+
+				@Override
+				public void onVisibilityChanged(@NonNull View view, int visibility) {
+					if (callback != null) {
+						callback.run();
+					}
+					refresh();
+				}
+			});
+		}
+	}
+
+	private void refresh() {
+		app.runInUIThreadAndCancelPrevious(REFRESH_UI_ID, this::updateButtons, UI_REFRESH_INTERVAL_MILLIS);
+	}
+
+	public void addMapButton(@NonNull MapButton button) {
+		LayoutParams params = new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
+		ButtonPositionSize position = button.getDefaultPositionSize();
+		if (position != null) {
+			updateButtonParams(params, position);
+		}
+		addViewChangeListener(button, null);
+
+		if (button.getParent() == null) {
+			addView(button, params);
+		}
+		mapButtons.add(button);
+	}
+
+	public void addWidget(@NonNull View view) {
+		ButtonPositionSize position = createWidgetPosition(view);
+		LayoutParams params = new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
+
+		updateButtonParams(params, position);
+		addViewChangeListener(view, null);
+
+		if (view.getParent() == null) {
+			addView(view, params);
+		}
+		additionalWidgetPositions.put(view, position);
+	}
+
+	public void removeWidget(@NonNull View view) {
+		removeView(view);
+		additionalWidgetPositions.remove(view);
+	}
+
+	public void removeMapButton(@NonNull MapButton button) {
+		removeView(button);
+		mapButtons.remove(button);
+	}
+
+	public void updateButtons() {
+		if (getWidth() <= 0 && getHeight() <= 0 && getVisibility() != VISIBLE) {
+			return;
+		}
+		updateVerticalPanels();
+
+		Map<View, ButtonPositionSize> map = getButtonPositionSizes();
+		for (Map.Entry<View, ButtonPositionSize> entry : map.entrySet()) {
+			View view = entry.getKey();
+			ButtonPositionSize position = entry.getValue();
+			if (view instanceof MapButton || view instanceof RulerWidget || position.isMovable()) {
+				updatePositionParams(view, position);
+			}
+		}
+	}
+
+	@NonNull
+	private Map<View, ButtonPositionSize> getButtonPositionSizes() {
+		Map<View, ButtonPositionSize> map = collectPositions();
+		List<ButtonPositionSize> list = new ArrayList<>(map.values());
+
+		int width = Math.round(getContentWidth() / dpToPx / CELL_SIZE_DP);
+		int height = Math.round(getContentHeight() / dpToPx / CELL_SIZE_DP);
+
+		if (DEV_GRID_LAYOUT_SHOW_LOGS) {
+			LOG.info("--------START-------- Grid size: width " + width + " height " + height);
+			for (ButtonPositionSize b : list) {
+				LOG.info(b + " value = " + b.toLongValue());
+			}
+			LOG.info("--------");
+		}
+		ButtonPositionSize.Companion.computeNonOverlap(1, list, width, height);
+
+		if (DEV_GRID_LAYOUT_SHOW_LOGS) {
+			for (ButtonPositionSize b : list) {
+				LOG.info(b + " value = " + b.toLongValue());
+			}
+			LOG.info("--------END--------");
+		}
+		return map;
+	}
+
+	@NonNull
+	public Map<View, ButtonPositionSize> collectPositions() {
+		Map<View, ButtonPositionSize> map = new LinkedHashMap<>();
+
+		for (Map.Entry<View, ButtonPositionSize> entry : widgetPositions.entrySet()) {
+			View view = entry.getKey();
+			if (view.getVisibility() == VISIBLE) {
+				ButtonPositionSize position = updateWidgetPosition(view, entry.getValue());
+				if (position.getHeight() > 0 && position.getWidth() > 0) {
+					map.put(view, position);
+				}
+			}
+		}
+		for (MapButton button : mapButtons) {
+			if (button.getVisibility() == VISIBLE) {
+				ButtonPositionSize position = updateButtonPosition(button, button.getDefaultPositionSize());
+				if (position != null && position.getHeight() > 0 && position.getWidth() > 0) {
+					map.put(button, position);
+				}
+			}
+		}
+		for (Map.Entry<View, ButtonPositionSize> entry : getSortedAdditionalWidgetEntries()) {
+			View view = entry.getKey();
+			if (view.getVisibility() == VISIBLE) {
+				ButtonPositionSize position = updateWidgetPosition(view, entry.getValue());
+				if (position.getHeight() > 0 && position.getWidth() > 0) {
+					map.put(view, position);
+				}
+			}
+		}
+		return map;
+	}
+
+	@NonNull
+	private List<Map.Entry<View, ButtonPositionSize>> getSortedAdditionalWidgetEntries() {
+		List<Map.Entry<View, ButtonPositionSize>> list = new ArrayList<>(additionalWidgetPositions.entrySet());
+		list.sort((e1, e2) -> Integer.compare(
+				getAdditionalWidgetPriority(e1.getKey()),
+				getAdditionalWidgetPriority(e2.getKey())
+		));
+		return list;
+	}
+
+	private int getAdditionalWidgetPriority(@NonNull View view) {
+		int id = view.getId();
+		if (R.id.speedometer_widget == id) {
+			return 0;
+		} else if (R.id.map_alarm_warning == id) {
+			return 1;
+		} else if (R.id.measurement_buttons == id) {
+			return 2;
+		} else if (R.id.map_ruler_layout == id) {
+			return 3;
+		} else if (R.id.layer_param_layout == id) {
+			return 4;
+		} else if (R.id.map_transparency_layout == id) {
+			return 5;
+		}
+		return 100;
+	}
+
+	@NonNull
+	private ButtonPositionSize createWidgetPosition(@NonNull View view) {
+		int id = view.getId();
+		String name = AndroidUtils.getViewName(view);
+		ButtonPositionSize position = new ButtonPositionSize(name);
+		if (view instanceof VerticalWidgetPanel panel) {
+			position.setMoveDescendantsVertical();
+			position.setPositionVertical(panel.isTopPanel() ? POS_TOP : POS_BOTTOM);
+			position.setPositionHorizontal(shouldCenterVerticalPanels() ? POS_LEFT : POS_FULL_WIDTH);
+			position.setMoveVertical();
+		} else if (view instanceof SideWidgetsPanel panel) {
+			position.setMoveVertical();
+			position.setMoveDescendantsVertical();
+			position.setPositionVertical(POS_TOP);
+			position.setPositionHorizontal(panel.isRightSide() ? POS_RIGHT : POS_LEFT);
+		} else if (id == R.id.left_side_menu) {
+			position.setMoveDescendantsHorizontal();
+			position.setPositionVertical(POS_TOP);
+			position.setPositionHorizontal(POS_LEFT);
+			position.setNonMoveable();
+		} else if (id == R.id.widget_top_bar) {
+			position.setMoveDescendantsVertical();
+			position.setPositionVertical(POS_TOP);
+			position.setPositionHorizontal(POS_FULL_WIDTH);
+			position.setNonMoveable();
+		} else if (id == R.id.add_gpx_point_bottom_sheet || id == R.id.recording_note_layout) {
+			if (portrait) {
+				position.setMoveDescendantsVertical();
+			} else {
+				position.setMoveDescendantsHorizontal();
+			}
+			position.setPositionVertical(POS_BOTTOM);
+			position.setPositionHorizontal(portrait ? POS_FULL_WIDTH : POS_LEFT);
+			position.setNonMoveable();
+		} else if (view instanceof RulerWidget) {
+			position.setMoveHorizontal();
+			position.setPositionVertical(POS_BOTTOM);
+			position.setPositionHorizontal(POS_LEFT);
+		} else if (id == R.id.map_alarm_warning || id == R.id.speedometer_widget) {
+			position.setMoveVertical();
+			position.setPositionVertical(POS_BOTTOM);
+			position.setPositionHorizontal(POS_LEFT);
+		} else if (id == R.id.lanes_widget_special_position) {
+			position.setMoveVertical();
+			position.setPositionVertical(POS_TOP);
+			position.setPositionHorizontal(POS_LEFT);
+		} else if (id == R.id.measurement_buttons) {
+			position.setPositionVertical(POS_BOTTOM);
+			position.setPositionHorizontal(POS_LEFT);
+		} else if (id == R.id.layer_param_layout || id == R.id.map_transparency_layout) {
+			position.setMoveVertical();
+			position.setPositionVertical(POS_BOTTOM);
+			position.setPositionHorizontal(POS_LEFT);
+		}
+		return updateWidgetPosition(view, position);
+	}
+
+	@NonNull
+	private ButtonPositionSize updateWidgetPosition(@NonNull View view, @NonNull ButtonPositionSize position) {
+		if (view.getWidth() <= 0 && view.getHeight() <= 0) {
+			position.setSize(0, 0);
+			return position;
+		}
+		int id = view.getId();
+		int width = (int) AndroidUtils.pxToDpF(getContext(), view.getWidth()) / 8;
+		int height = (int) AndroidUtils.pxToDpF(getContext(), view.getHeight()) / 8;
+		position.setSize(width, height);
+
+		if (view instanceof VerticalWidgetPanel) {
+			if (shouldCenterVerticalPanels()) {
+				calcGridPositionFromPixel(view, position);
+			}
+			position.setMarginY(0);
+		} else if (view instanceof RulerWidget || id == R.id.measurement_buttons) {
+			position.setMarginX(0);
+			position.setMarginY(0);
+		} else if (view instanceof SideWidgetsPanel panel) {
+			position.setMarginX(0);
+			position.setMarginY(0);
+
+			if (!portrait && shouldMoveDescendantsAny(panel)) {
+				position.setMoveDescendantsAny();
+			} else {
+				position.setMoveDescendantsVertical();
+			}
+		} else if (id == R.id.speedometer_widget || id == R.id.map_alarm_warning) {
+			int margin = getResources().getDimensionPixelSize(R.dimen.map_alarm_bottom_margin);
+			position.setMarginX(0);
+			position.setMarginY((int) AndroidUtils.pxToDpF(getContext(), margin) / 8);
+		} else if (id == R.id.lanes_widget_special_position) {
+			calcGridPositionFromPixel(view, position);
+			position.setMarginY(0);
+		} else if (id == R.id.layer_param_layout || id == R.id.map_transparency_layout) {
+			calcGridPositionFromPixel(view, position);
+			int marginY = getResources().getDimensionPixelSize(R.dimen.map_button_size);
+			position.setMarginY((int) AndroidUtils.pxToDpF(getContext(), marginY) / 8);
+		}
+		return position;
+	}
+
+	@Nullable
+	private ButtonPositionSize updateButtonPosition(@NonNull MapButton button, @Nullable ButtonPositionSize position) {
+		if (position != null) {
+			int id = button.getId();
+			if (id == R.id.map_compass_button) {
+				ButtonPositionSize panelPosition = widgetPositions.get(leftWidgetsPanel);
+				position.setXMove(panelPosition != null && panelPosition.isMoveDescendantsAny());
+			}
+		}
+		return position;
+	}
+
+	private boolean shouldMoveDescendantsAny(@Nullable SideWidgetsPanel panel) {
+		if (panel == null || panel.getVisibility() != VISIBLE) {
+			return false;
+		}
+		float availableHeight = getContentHeight() - topButtonsMargin;
+		return panel.getHeight() > availableHeight;
+	}
+
+	private void calcGridPositionFromPixel(@NonNull View view, @NonNull ButtonPositionSize position) {
+		int width = getContentWidth();
+		int height = getContentHeight();
+		boolean top = position.isTop();
+		boolean left = position.isLeft();
+
+		int[] margins = AndroidUtils.getRelativeMargins(this, view);
+		int x = left ? margins[0] : margins[2];
+		int y = top ? margins[1] : margins[3];
+		position.calcGridPositionFromPixel(dpToPx, width, height, left, x, top, y);
+	}
+
+	public void updatePositionParams(@NonNull View view, @NonNull ButtonPositionSize position) {
+		LayoutParams params = (LayoutParams) view.getLayoutParams();
+
+		boolean changed = updateButtonParams(params, position);
+		if (changed) {
+			view.setLayoutParams(params);
+		}
+	}
+
+	public boolean updateButtonParams(@NonNull LayoutParams params, @NonNull ButtonPositionSize position) {
+		boolean changed = false;
+
+		int gravity;
+		int startMargin;
+		int topMargin;
+		int endMargin;
+		int bottomMargin;
+
+		int marginX = position.getXStartPix(dpToPx);
+		int marginY = position.getYStartPix(dpToPx);
+
+		if (shouldIgnoreEdgeMargins(position)) {
+			if (marginX == defaultMargin) {
+				marginX = 0;
+			}
+			if (marginY == defaultMargin) {
+				marginY = 0;
+			}
+		}
+		if (position.isLeft()) {
+			gravity = Gravity.START;
+			endMargin = 0;
+			startMargin = marginX;
+		} else {
+			gravity = Gravity.END;
+			startMargin = 0;
+			endMargin = marginX;
+		}
+		if (position.isTop()) {
+			gravity |= Gravity.TOP;
+			bottomMargin = 0;
+			topMargin = marginY;
+		} else {
+			gravity |= Gravity.BOTTOM;
+			topMargin = 0;
+			bottomMargin = marginY;
+		}
+		boolean verticalMarginsChanged = !shouldIgnoreVerticalMargins(position)
+				&& (topMargin != params.topMargin || bottomMargin != params.bottomMargin);
+
+		boolean horizontalMarginsChanged = !shouldIgnoreHorizontalMargins(position)
+				&& (startMargin != params.getMarginStart() || endMargin != params.getMarginEnd());
+
+		if (horizontalMarginsChanged || verticalMarginsChanged) {
+			changed = true;
+			if (verticalMarginsChanged) {
+				params.topMargin = topMargin;
+				params.bottomMargin = bottomMargin;
+			}
+			if (horizontalMarginsChanged) {
+				params.setMarginStart(startMargin);
+				params.setMarginEnd(endMargin);
+			}
+		}
+		if (!shouldIgnoreGravity(position) && params.gravity != gravity) {
+			changed = true;
+			params.gravity = gravity;
+		}
+		return changed;
+	}
+
+	public void updateButton(@NonNull MapButton button, boolean save) {
+		MapButtonState buttonState = button.getButtonState();
+		ButtonPositionSize positionSize = buttonState != null ? buttonState.getPositionSize() : null;
+		if (buttonState != null) {
+			int width = getContentWidth();
+			int height = getContentHeight();
+			LayoutParams params = (LayoutParams) button.getLayoutParams();
+
+			positionSize.calcGridPositionFromPixel(dpToPx, width, height,
+					positionSize.isLeft(), positionSize.isLeft() ? params.getMarginStart() : params.getMarginEnd(),
+					positionSize.isTop(), positionSize.isTop() ? params.topMargin : params.bottomMargin);
+		}
+		if (save) {
+			button.savePosition();
+		}
+		updateButtons(); // relayout to avoid overlap
+	}
+
+	private boolean shouldCenterVerticalPanels() {
+		return panelsLayoutMode == PanelsLayoutMode.COMPACT;
+	}
+
+	private boolean shouldIgnoreEdgeMargins(@NonNull ButtonPositionSize position) {
+		return switch (position.getId()) {
+			case "top_widgets_panel", "map_bottom_widgets_panel", "map_left_widgets_panel", "map_right_widgets_panel" -> true;
+			default -> false;
+		};
+	}
+
+	private boolean shouldIgnoreGravity(@NonNull ButtonPositionSize position) {
+		return CollectionUtils.equalsToAny(position.getId(), "lanes_widget_special_position", "layer_param_layout", "map_transparency_layout");
+
+	}
+
+	private boolean shouldIgnoreHorizontalMargins(@NonNull ButtonPositionSize position) {
+		return CollectionUtils.equalsToAny(position.getId(), "lanes_widget_special_position", "layer_param_layout", "map_transparency_layout");
+	}
+
+	private boolean shouldIgnoreVerticalMargins(@NonNull ButtonPositionSize position) {
+		return false;
+	}
+
+	@NonNull
+	private StateChangedListener<PanelsLayoutMode> getPanelsLayoutModeListener() {
+		if (panelsLayoutModeListener == null) {
+			panelsLayoutModeListener = change -> app.runInUIThread(() -> {
+				panelsLayoutMode = settings.getPanelsLayoutMode(getContext(), screenLayoutMode).get();
+				setupPositions();
+			});
+		}
+		return panelsLayoutModeListener;
+	}
+
+	@Override
+	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+		super.onSizeChanged(w, h, oldw, oldh);
+		if (w > 0 && w != oldw) {
+			refresh();
+		}
+	}
+
+	private void updateVerticalPanels() {
+		updateHorizontalMargins(topWidgetsPanel);
+		updateHorizontalMargins(bottomWidgetsPanel);
+	}
+
+	private void updateHorizontalMargins(@Nullable VerticalWidgetPanel panel) {
+		int totalWidth = getContentWidth();
+		if (panel == null || leftWidgetsPanel == null || rightWidgetsPanel == null || totalWidth <= 0) {
+			return;
+		}
+		if (panel.getLayoutParams() instanceof MarginLayoutParams params) {
+			int leftMargin = 0;
+			int rightMargin = 0;
+
+			if (shouldCenterVerticalPanels()) {
+				float percentage = portrait ? TOP_BAR_MAX_WIDTH_PERCENTAGE_PORTRAIT : TOP_BAR_MAX_WIDTH_PERCENTAGE_LANDSCAPE;
+
+				int panelsMargin = defaultMargin * 2;
+				int defaultWidth = (int) (totalWidth * percentage);
+				int defaultMargin = (totalWidth - defaultWidth) / 2;
+
+				int leftWidth = leftWidgetsPanel.getVisibility() == VISIBLE ? leftWidgetsPanel.getWidth() : 0;
+				int rightWidth = rightWidgetsPanel.getVisibility() == VISIBLE ? rightWidgetsPanel.getWidth() : 0;
+
+				if (panel.isTopPanel()) {
+					leftMargin = Math.max(defaultMargin, leftWidth > 0 ? leftWidth + panelsMargin : 0);
+					rightMargin = Math.max(defaultMargin, rightWidth > 0 ? rightWidth + panelsMargin : 0);
+
+					leftMargin = Math.max(leftMargin, topButtonsMargin);
+				} else {
+					leftMargin = Math.max(defaultMargin, bottomButtonsMargin);
+					rightMargin = Math.max(defaultMargin, bottomButtonsMargin);
+				}
+			}
+			if (params.leftMargin != leftMargin || params.rightMargin != rightMargin) {
+				params.leftMargin = leftMargin;
+				params.rightMargin = rightMargin;
+				panel.setLayoutParams(params);
+			}
+		}
+	}
+
+	@Override
+	protected void dispatchDraw(@NonNull Canvas canvas) {
+		super.dispatchDraw(canvas);
+
+		if (!DEV_GRID_LAYOUT_DRAW_CELLS && !DEV_GRID_LAYOUT_DRAW_SLOTS && !DEV_GRID_LAYOUT_DRAW_BUTTON_FRAMES) {
+			return;
+		}
+		float cellSizePx = CELL_SIZE_DP * dpToPx;
+		float marginPx = DEF_MARGIN_DP * dpToPx;
+		int width = getWidth();
+		int height = getHeight();
+
+		if (cellSizePx <= 0) {
+			return;
+		}
+		if (DEV_GRID_LAYOUT_DRAW_CELLS) {
+			float left0 = marginPx;
+			float right0 = width - marginPx;
+			float top0 = marginPx;
+			float bottom0 = height - marginPx;
+			float midX = (left0 + right0) / 2;
+			float midY = (top0 + bottom0) / 2;
+
+			// Top-Left
+			for (float x = left0; x < midX; x += cellSizePx)
+				canvas.drawLine(x, top0, x, midY, gridPaint);
+			for (float y = top0; y < midY; y += cellSizePx)
+				canvas.drawLine(left0, y, midX, y, gridPaint);
+
+			// Top-Right
+			for (float x = right0; x > midX; x -= cellSizePx)
+				canvas.drawLine(x, top0, x, midY, gridPaint);
+			for (float y = top0; y < midY; y += cellSizePx)
+				canvas.drawLine(midX, y, right0, y, gridPaint);
+
+			// Bottom-Left
+			for (float x = left0; x < midX; x += cellSizePx)
+				canvas.drawLine(x, midY, x, bottom0, gridPaint);
+			for (float y = bottom0; y > midY; y -= cellSizePx)
+				canvas.drawLine(left0, y, midX, y, gridPaint);
+
+			// Bottom-Right
+			for (float x = right0; x > midX; x -= cellSizePx)
+				canvas.drawLine(x, midY, x, bottom0, gridPaint);
+			for (float y = bottom0; y > midY; y -= cellSizePx)
+				canvas.drawLine(midX, y, right0, y, gridPaint);
+
+			// Crosshairs
+			canvas.drawLine(midX, top0, midX, bottom0, gridCrosshairPaint);
+			canvas.drawLine(left0, midY, right0, midY, gridCrosshairPaint);
+		}
+
+		if (DEV_GRID_LAYOUT_DRAW_SLOTS || DEV_GRID_LAYOUT_DRAW_BUTTON_FRAMES) {
+			Map<View, ButtonPositionSize> map = getButtonPositionSizes();
+			for (Map.Entry<View, ButtonPositionSize> entry : map.entrySet()) {
+				View view = entry.getKey();
+				ButtonPositionSize position = entry.getValue();
+
+				if (DEV_GRID_LAYOUT_DRAW_BUTTON_FRAMES) {
+					canvas.drawRect(view.getLeft(), view.getTop(), view.getRight(), view.getBottom(), framePaintStroke);
+				}
+				if (DEV_GRID_LAYOUT_DRAW_SLOTS) {
+					float left, top, right, bottom;
+					int marginX = position.getXStartPix(dpToPx);
+					int marginY = position.getYStartPix(dpToPx);
+					int viewWidth = position.getWidthPix(dpToPx);
+					int viewHeight = position.getHeightPix(dpToPx);
+
+					if (position.isLeft()) {
+						left = marginX;
+						right = left + viewWidth;
+					} else {
+						right = width - marginX;
+						left = right - viewWidth;
+					}
+					if (position.isTop()) {
+						top = marginY;
+						bottom = top + viewHeight;
+					} else {
+						bottom = height - marginY;
+						top = bottom - viewHeight;
+					}
+					canvas.drawRect(left, top, right, bottom, slotPaintFill);
+					canvas.drawRect(left, top, right, bottom, slotPaintStroke);
+				}
+			}
+		}
+	}
+}
