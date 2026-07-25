@@ -1,0 +1,223 @@
+==============================================================================
+ALPR COMMUTE EXPOSURE AND AVOIDANCE COST
+==============================================================================
+
+Sample: 15043 commute-weighted origin-destination pairs, 14 states
+Median commute: 23.8 km / 23.7 min
+
+--- RQ1: EXPOSURE ON THE UNAVOIDED COMMUTE ---
+  cameras passed (baseline)          n= 15043  median     2.00 [95% CI 2.00–2.00]  IQR 0.00–6.00  mean     4.35
+  commutes passing >=1 camera:        73.6%
+  commutes passing >=5 cameras:       32.6%
+  commutes passing >=10 cameras:      13.0%
+  90th percentile exposure:             11 cameras
+  99th percentile exposure:             29 cameras
+  exposure rate:                     0.082 cameras per km driven
+
+--- RQ2: COST OF AVOIDANCE ---
+  extra time                         n= 15043  median     1.32 min [95% CI 1.25–1.40]  IQR 0.00–4.82  mean     4.52
+  extra distance                     n= 15043  median     0.47 km [95% CI 0.43–0.50]  IQR 0.00–2.39  mean     2.16
+  cameras passed (avoided)           n= 15043  median     0.00 [95% CI 0.00–0.00]  IQR 0.00–0.00  mean     0.24
+  commutes reduced to ZERO cameras:   86.4%
+  minutes per camera evaded          n= 10884  median     0.75 min [95% CI 0.73–0.77]  IQR 0.34–1.58  mean     1.26
+  avoidance overhead                 n= 15043  median     5.22 % [95% CI 5.01–5.48]  IQR 0.00–15.86  mean    11.09
+
+--- RQ3a: BY STATE ---
+  state      n  med cams   %>=1  med +min  med +%
+  IL      1094       5.0    88%      2.84   11.7%
+  CA      1083       4.0    84%      1.91    7.1%
+  NY      1101       4.0    78%      1.94   10.2%
+  OH      1117       3.0    83%      2.30    9.4%
+  TX       960       3.0    81%      1.84    7.9%
+  MO      1088       3.0    80%      2.39    9.7%
+  FL      1098       3.0    84%      2.06    8.4%
+  CO      1034       2.0    78%      1.24    5.3%
+  AZ      1054       2.0    69%      0.71    3.2%
+  TN      1084       2.0    69%      1.23    3.7%
+  VA      1094       2.0    70%      0.67    2.4%
+  NC      1092       1.0    63%      0.56    1.8%
+  WA      1048       1.0    62%      0.51    1.5%
+  PA      1096       0.0    40%      0.00    0.0%
+
+--- RQ3b: BY ORIGIN-TRACT MEDIAN HOUSEHOLD INCOME ---
+  quartile cut-points: $59,000 / $78,750 / $106,429
+  quartile         n  med cams  mean cams  med +min   cams/km   med km
+  Q1 lowest     3761       2.0       4.36      1.16    0.0726     23.0
+  Q2            3764       2.0       4.02      1.18    0.0721     23.8
+  Q3            3759       3.0       4.47      1.48    0.0871     24.9
+  Q4 highest    3759       3.0       4.54      1.40    0.0987     23.5
+  Q1 mean 4.36 [4.16–4.54] vs Q4 mean 4.54 [4.34–4.75]
+  ratio Q1/Q4 = 0.96x  (CIs OVERLAP — not distinguishable)
+  CONTROL per-km: Q1 0.0726 [0.0692–0.0762] vs Q4 0.0987 [0.0936–0.1042] cameras/km
+    -> total exposure indistinguishable, but per-km density differs (Q4 higher): Q4 commutes are more densely watched per km, offset by length
+
+--- RQ3c: BY ORIGIN-TRACT RACIAL COMPOSITION (% non-Hispanic Black) ---
+  quartile cut-points: 1.0% / 4.2% / 13.4%
+  quartile         n  med cams  mean cams  med +min   cams/km   med km
+  Q1 least      3759       2.0       4.17      1.31    0.0706     28.4
+  Q2            3760       2.0       4.18      1.31    0.0792     23.2
+  Q3            3760       2.0       4.44      1.37    0.0844     23.7
+  Q4 most       3759       3.0       4.59      1.28    0.0944     21.0
+  Q1 mean 4.17 [3.99–4.35] vs Q4 mean 4.59 [4.39–4.78]
+  ratio Q4/Q1 = 1.10x  (CIs disjoint)
+  CONTROL per-km: Q1 0.0706 [0.0672–0.0743] vs Q4 0.0944 [0.0893–0.0993] cameras/km
+    -> total exposure AND per-km density both differ (Q4 higher on rate)
+
+--- RQ3d: BY ORIGIN-TRACT HISPANIC SHARE ---
+  quartile cut-points: 3.6% / 9.6% / 22.7%
+  quartile         n  med cams  mean cams  med +min   cams/km   med km
+  Q1 least      3759       2.0       3.84      1.33    0.0681     26.8
+  Q2            3760       2.0       4.06      1.28    0.0770     23.6
+  Q3            3760       2.0       4.54      1.30    0.0895     22.8
+  Q4 most       3759       3.0       4.94      1.39    0.0928     22.4
+  Q1 mean 3.84 [3.68–4.00] vs Q4 mean 4.94 [4.75–5.14]
+  ratio Q4/Q1 = 1.29x  (CIs disjoint)
+  CONTROL per-km: Q1 0.0681 [0.0650–0.0713] vs Q4 0.0928 [0.0880–0.0976] cameras/km
+    -> total exposure AND per-km density both differ (Q4 higher on rate)
+
+==============================================================================
+RQ4: COVERAGE-BIAS SENSITIVITY — quartiles computed WITHIN local areas
+==============================================================================
+
+--- RQ4a: INCOME, within-county quartiles ---
+  89 areas with n>=40 contribute 8991 commutes (60% of sample)
+  quartile         n  mean cams   cams/km
+  Q1            2264       4.74    0.1124
+  Q2            2285       4.67    0.1110
+  Q3            2252       4.68    0.1072
+  Q4            2190       4.36    0.1047
+  Q1 mean 4.74 [4.48–4.98] vs Q4 mean 4.36 [4.12–4.62]
+  ratio Q4/Q1 = 0.92x  (CIs OVERLAP — not distinguishable)
+
+--- RQ4b: % NON-HISPANIC BLACK, within-county quartiles ---
+  89 areas with n>=40 contribute 8988 commutes (60% of sample)
+  quartile         n  mean cams   cams/km
+  Q1            2294       4.60    0.1078
+  Q2            2257       4.47    0.1068
+  Q3            2248       4.63    0.1051
+  Q4            2189       4.75    0.1161
+  Q1 mean 4.60 [4.36–4.85] vs Q4 mean 4.75 [4.48–5.03]
+  ratio Q4/Q1 = 1.03x  (CIs OVERLAP — not distinguishable)
+
+==============================================================================
+RQ5: BY CAMERA VENDOR
+==============================================================================
+
+  union of all vendors: 65380 exposures over 801,241 km
+  vendor      exposures   share      /km  %routes>=1   med
+  flock           43920   66.6%   0.0548       63.8%   1.0
+  other           17494   26.5%   0.0218       27.2%   0.0
+  untagged         4527    6.9%   0.0056       11.1%   0.0
+  split sum 65941 vs union 65380: the difference is cameras in neither
+  named set plus cross-vendor cone overlaps merged by the union.
+
+  --- evasion under the all-vendor avoidance model ---
+  flock       43920 ->  2019    95.4% evaded
+  other       17494 ->  1503    91.4% evaded
+  untagged     4527 ->   110    97.6% evaded
+
+--- RQ5a[flock]: INCOME vs FLOCK EXPOSURE ---
+  quartile cut-points: $59,000 / $78,750 / $106,429
+  quartile         n  med cams  mean cams  med +min   cams/km   med km
+  Q1 lowest     3761       1.0       2.88      1.16    0.0479     23.0
+  Q2            3764       1.0       2.87      1.18    0.0515     23.8
+  Q3            3759       2.0       3.00      1.48    0.0585     24.9
+  Q4 highest    3759       1.0       2.93      1.40    0.0637     23.5
+  Q1 mean 2.88 [2.74–3.03] vs Q4 mean 2.93 [2.79–3.07]
+  ratio Q1/Q4 = 0.98x  (CIs OVERLAP — not distinguishable)
+  CONTROL per-km: Q1 0.0479 [0.0457–0.0502] vs Q4 0.0637 [0.0603–0.0671] cameras/km
+    -> total exposure indistinguishable, but per-km density differs (Q4 higher): Q4 commutes are more densely watched per km, offset by length
+
+--- RQ5b[flock]: % NON-HISPANIC BLACK vs FLOCK EXPOSURE ---
+  quartile cut-points: 1.0% / 4.2% / 13.4%
+  quartile         n  med cams  mean cams  med +min   cams/km   med km
+  Q1 least      3759       1.0       2.91      1.31    0.0493     28.4
+  Q2            3760       1.0       2.83      1.31    0.0536     23.2
+  Q3            3760       2.0       3.08      1.37    0.0586     23.7
+  Q4 most       3759       1.0       2.86      1.28    0.0588     21.0
+  Q1 mean 2.91 [2.78–3.05] vs Q4 mean 2.86 [2.73–3.00]
+  ratio Q4/Q1 = 0.98x  (CIs OVERLAP — not distinguishable)
+  CONTROL per-km: Q1 0.0493 [0.0470–0.0517] vs Q4 0.0588 [0.0559–0.0619] cameras/km
+    -> total exposure indistinguishable, but per-km density differs (Q4 higher): Q4 commutes are more densely watched per km, offset by length
+
+--- RQ5a[other]: INCOME vs OTHER EXPOSURE ---
+  quartile cut-points: $59,000 / $78,750 / $106,429
+  quartile         n  med cams  mean cams  med +min   cams/km   med km
+  Q1 lowest     3761       0.0       1.24      1.16    0.0206     23.0
+  Q2            3764       0.0       0.95      1.18    0.0170     23.8
+  Q3            3759       0.0       1.14      1.48    0.0223     24.9
+  Q4 highest    3759       0.0       1.32      1.40    0.0287     23.5
+  Q1 mean 1.24 [1.14–1.34] vs Q4 mean 1.32 [1.21–1.43]
+  ratio Q1/Q4 = 0.94x  (CIs OVERLAP — not distinguishable)
+  CONTROL per-km: Q1 0.0206 [0.0188–0.0226] vs Q4 0.0287 [0.0261–0.0316] cameras/km
+    -> total exposure indistinguishable, but per-km density differs (Q4 higher): Q4 commutes are more densely watched per km, offset by length
+
+--- RQ5b[other]: % NON-HISPANIC BLACK vs OTHER EXPOSURE ---
+  quartile cut-points: 1.0% / 4.2% / 13.4%
+  quartile         n  med cams  mean cams  med +min   cams/km   med km
+  Q1 least      3759       0.0       1.03      1.31    0.0174     28.4
+  Q2            3760       0.0       1.08      1.31    0.0205     23.2
+  Q3            3760       0.0       1.10      1.37    0.0210     23.7
+  Q4 most       3759       0.0       1.43      1.28    0.0294     21.0
+  Q1 mean 1.03 [0.93–1.13] vs Q4 mean 1.43 [1.30–1.55]
+  ratio Q4/Q1 = 1.39x  (CIs disjoint)
+  CONTROL per-km: Q1 0.0174 [0.0158–0.0192] vs Q4 0.0294 [0.0266–0.0324] cameras/km
+    -> total exposure AND per-km density both differ (Q4 higher on rate)
+
+--- RQ5a[untagged]: INCOME vs UNTAGGED EXPOSURE ---
+  quartile cut-points: $59,000 / $78,750 / $106,429
+  quartile         n  med cams  mean cams  med +min   cams/km   med km
+  Q1 lowest     3761       0.0       0.28      1.16    0.0046     23.0
+  Q2            3764       0.0       0.23      1.18    0.0041     23.8
+  Q3            3759       0.0       0.37      1.48    0.0072     24.9
+  Q4 highest    3759       0.0       0.33      1.40    0.0072     23.5
+  Q1 mean 0.28 [0.24–0.32] vs Q4 mean 0.33 [0.29–0.38]
+  ratio Q1/Q4 = 0.83x  (CIs OVERLAP — not distinguishable)
+  CONTROL per-km: Q1 0.0046 [0.0040–0.0052] vs Q4 0.0072 [0.0062–0.0082] cameras/km
+    -> total exposure indistinguishable, but per-km density differs (Q4 higher): Q4 commutes are more densely watched per km, offset by length
+
+--- RQ5b[untagged]: % NON-HISPANIC BLACK vs UNTAGGED EXPOSURE ---
+  quartile cut-points: 1.0% / 4.2% / 13.4%
+  quartile         n  med cams  mean cams  med +min   cams/km   med km
+  Q1 least      3759       0.0       0.26      1.31    0.0044     28.4
+  Q2            3760       0.0       0.30      1.31    0.0057     23.2
+  Q3            3760       0.0       0.31      1.37    0.0059     23.7
+  Q4 most       3759       0.0       0.33      1.28    0.0069     21.0
+  Q1 mean 0.26 [0.23–0.30] vs Q4 mean 0.33 [0.28–0.38]
+  ratio Q4/Q1 = 1.28x  (CIs OVERLAP — not distinguishable)
+  CONTROL per-km: Q1 0.0044 [0.0038–0.0051] vs Q4 0.0069 [0.0058–0.0079] cameras/km
+    -> total exposure indistinguishable, but per-km density differs (Q4 higher): Q4 commutes are more densely watched per km, offset by length
+
+------------------------------------------------------------------------------
+RQ5c: VENDOR GRADIENTS UNDER WITHIN-COUNTY RANKING
+------------------------------------------------------------------------------
+
+--- RQ5c[flock]: % NON-HISPANIC BLACK, within-county ---
+  89 areas with n>=40 contribute 8988 commutes (60% of sample)
+  quartile         n  mean cams   cams/km
+  Q1            2294       2.87    0.0672
+  Q2            2257       2.81    0.0670
+  Q3            2248       2.86    0.0648
+  Q4            2189       2.73    0.0667
+  Q1 mean 2.87 [2.71–3.04] vs Q4 mean 2.73 [2.56–2.89]
+  ratio Q4/Q1 = 0.95x  (CIs OVERLAP — not distinguishable)
+
+--- RQ5c[other]: % NON-HISPANIC BLACK, within-county ---
+  89 areas with n>=40 contribute 8988 commutes (60% of sample)
+  quartile         n  mean cams   cams/km
+  Q1            2294       1.40    0.0327
+  Q2            2257       1.39    0.0331
+  Q3            2248       1.40    0.0319
+  Q4            2189       1.64    0.0401
+  Q1 mean 1.40 [1.26–1.55] vs Q4 mean 1.64 [1.46–1.81]
+  ratio Q4/Q1 = 1.17x  (CIs OVERLAP — not distinguishable)
+
+--- RQ5c[untagged]: % NON-HISPANIC BLACK, within-county ---
+  89 areas with n>=40 contribute 8988 commutes (60% of sample)
+  quartile         n  mean cams   cams/km
+  Q1            2294       0.37    0.0086
+  Q2            2257       0.32    0.0078
+  Q3            2248       0.44    0.0099
+  Q4            2189       0.43    0.0104
+  Q1 mean 0.37 [0.32–0.43] vs Q4 mean 0.43 [0.36–0.50]
+  ratio Q4/Q1 = 1.16x  (CIs OVERLAP — not distinguishable)

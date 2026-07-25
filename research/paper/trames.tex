@@ -1,0 +1,895 @@
+%=======================================================================
+%  The Cost of Not Being Seen
+%  Automated licence-plate reader exposure on American commutes,
+%  and the price of avoiding it.
+%
+%  Build:  tectonic trames.tex
+%=======================================================================
+\documentclass[11pt,twoside]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath,amssymb}
+\usepackage{siunitx}
+\usepackage{microtype}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage[table]{xcolor}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{authblk}
+\usepackage[hidelinks,breaklinks]{hyperref}
+\usepackage[capitalise,noabbrev]{cleveref}
+
+\sisetup{group-separator={,},group-minimum-digits=4,detect-weight=true}
+\captionsetup{font=small,labelfont=bf,width=.95\linewidth}
+\captionsetup[sub]{font=small}
+\setlist{itemsep=2pt,parsep=0pt,topsep=3pt}
+
+\definecolor{codebg}{HTML}{F6F6F6}
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  backgroundcolor=\color{codebg},
+  frame=single, rulecolor=\color{gray!40},
+  breaklines=true, showstringspaces=false,
+  columns=fullflexible, xleftmargin=0pt, framexleftmargin=3pt,
+}
+
+% xspace must be loaded before the macro that uses it is expanded.
+\usepackage{xspace}
+\usepackage[super]{nth}
+\newcommand{\alpr}{ALPR\xspace}
+
+\title{\bfseries The Cost of Not Being Seen:\\[2pt]
+\large Automated Licence-Plate Reader Exposure on American Commutes\\
+and the Price of Avoiding It}
+
+\author[ ]{TRAMES Project}
+\affil[ ]{\small\texttt{kara@soulstone.org}}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent
+Automated licence-plate readers (\alpr) have moved from tollbooths to residential
+intersections, and a single vendor---Flock Safety---now accounts for
+\SI{82.5}{\percent} of the \num{120838} installations mapped in North America. Public
+argument about this technology is conducted almost entirely in the abstract. We supply a
+measurement instead: how much \alpr surveillance a typical American commuter actually
+drives through, and what it would cost them to refuse it.
+
+We build a continental routing engine that models \alpr fields of view as directional
+geometry---\SI{98.7}{\percent} of mapped cameras carry a bearing---and can be asked for
+the fastest route that crosses none of them. Routing \num{17580} real home--work commutes
+drawn from Census LEHD LODES data across 15 states, twice each, yields both quantities on
+identical road network.
+
+Three findings. First, \SI{74.8}{\percent} of commutes pass at least one \alpr, a median
+of three and a \nth{99} percentile of thirty-one. Second, refusal is far cheaper than
+expected: \SI{84.6}{\percent} of commutes can be routed to \emph{zero} \alpr exposure for
+a median of \SI{1.50}{\minute}, an overhead of \SI{5.96}{\percent}. Third, and most
+consequentially for policy, demographic gradients that appear robust nationally---origin
+tracts in the highest quartile of Black population pass \num{1.29}$\times$ as many
+cameras as the lowest, with disjoint confidence intervals---vanish entirely when tracts
+are ranked within their own county ($\num{1.02}\times$, indistinguishable). Mapped camera
+density varies \num{3.9}$\times$ per capita across the states we study. We therefore
+report the equity result as a between-county phenomenon that this design cannot
+attribute to siting, mapping effort, or urban form, and we argue that no study built on
+crowdsourced surveillance data should report such a gradient without this check.
+
+Resolving exposure by vendor sharpens the picture further: the national gradient is
+carried entirely by tolling and transport-agency cameras ($\num{1.39}\times$, disjoint),
+while Flock's own installations---five-sixths of the network---show none
+($\num{0.98}\times$). Per unit deployed, non-Flock cameras reach \num{2.60}$\times$ as
+many commuters.
+
+All code, data acquisition, and analysis are reproducible from public sources.
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+
+Automated licence-plate readers photograph every passing vehicle, resolve the plate, and
+retain the read. Unlike a traffic camera they are not triggered by an offence, and unlike
+a patrol officer they do not tire. Fixed, pole-mounted units have spread from limited-access
+highways into residential neighbourhoods, arterial roads, and the entrances of private
+subdivisions.
+
+The public debate about this expansion is conducted in the vocabulary of policy: retention
+windows, warrant requirements, audit logs, data-sharing agreements. What that vocabulary
+lacks is a measurement of the thing being regulated. How much of this does a person
+actually drive through on an ordinary Tuesday? And if they would rather not, is declining
+a practical option or a theoretical one?
+
+This paper answers both, and does so by building the instrument the question implies. We
+construct a routing engine that treats \alpr fields of view as first-class geometry and
+can be asked for the fastest route that avoids them. Running each sampled commute through
+it twice---once normally, once avoiding---yields the exposure and the price of refusing
+it, for the same trip, on the same network, under the same traffic model.
+
+The second quantity is where the paper earns its keep. A privacy protection that costs
+four minutes is a feature. One that costs forty is available only to people with forty
+minutes to spare, and a right that is priced is not evenly held. We therefore report the
+cost of refusal across origin-tract income and racial composition---subject to the
+substantial caveat developed in \Cref{sec:coverage} and quantified in
+\Cref{sec:results:coverage}, which turns out to govern how the demographic results may be
+read.
+
+\subsection{Contributions}
+
+\begin{itemize}
+  \item \textbf{A directional exposure model at continental scale.} Cameras are wedges,
+    not circles. \SI{98.7}{\percent} of mapped North American \alpr installations carry a
+    bearing tag, making this feasible nationally. Proximity-based counting inflates
+    exposure by charging drivers for cameras aimed at the opposite carriageway; we do not
+    do it.
+  \item \textbf{Avoidance routing with no forked router.} \num{114172} camera cones are
+    compiled into a stock GraphHopper spatial index at import time, so an ordinary
+    per-request custom model can reference them by name. No engine patches, no geometry in
+    the request.
+  \item \textbf{A commute-weighted rather than area-weighted sample.} \num{17580} real
+    home--work pairs drawn from LEHD LODES with probability proportional to worker count.
+  \item \textbf{A vendor-resolved account of exposure.} Flock and the DOT/tolling vendors
+    follow different deployment logics---who \emph{buys} surveillance versus where road
+    infrastructure sits. Separating them shows that the national racial gradient belongs
+    to transport infrastructure, not to the vendor that dominates the network and the
+    public argument about it.
+  \item \textbf{A coverage-bias control that changes the conclusion.} We show that the
+    national demographic gradient does not survive within-county ranking, quantify the
+    \num{3.9}$\times$ per-capita spread in mapping intensity that plausibly drives it, and
+    argue this check should be mandatory for work of this kind.
+\end{itemize}
+
+\section{System}
+\label{sec:system}
+
+\subsection{Why a fork, and of what}
+
+The measurement needs a router that treats ``avoid these \num{114172} polygons'' as a
+cost rather than a post-hoc filter, and the eventual application needs to be a real
+navigation client rather than a research script.
+
+\textbf{OsmAnd} (GPLv3) is the base: the only mature Android navigation client with
+first-class OpenStreetMap support, offline maps, and a documented online-routing extension
+point. Its \emph{code} is GPLv3; its \emph{artwork} is CC-BY-NC-ND 4.0 and must therefore
+be replaced rather than modified in a derivative.
+
+\textbf{GraphHopper 11.0} is the routing engine. Valhalla was evaluated and rejected: its
+\texttt{exclude\_polygons} support carries open correctness defects (\#3266, \#4659,
+\#5069) whose failure mode is silently routing \emph{through} the excluded region---which
+is precisely the measurement everything here depends on.
+
+One architectural property made the rest tractable. OsmAnd's online routing engines return
+\emph{geometry only}; turn instructions are re-derived client-side from offline map data.
+A custom online router therefore never has to synthesise navigation instructions.
+
+\subsection{The keystone: import-time custom areas}
+
+GraphHopper resolves \texttt{custom\_areas.directory} into a spatial index \emph{at graph
+import time}. We verified empirically---the documentation is ambiguous---that an area
+registered this way can be referenced by name from a \emph{per-request} custom model:
+
+\begin{lstlisting}[language=]
+{ "priority": [ { "if": "in_alpr", "multiply_by": 0.01 } ] }
+\end{lstlisting}
+
+\noindent
+This is what makes the design possible without forking the engine; shipping \num{114172}
+polygons in every routing request is not viable. The cost is that regenerating cones
+requires a full re-import (\SI{82}{\minute} for North America).
+
+Two further configuration decisions are load-bearing:
+
+\begin{itemize}
+  \item \textbf{Contraction Hierarchies are disabled.} CH bakes edge weights into the
+    prepared graph, which is incompatible with a per-request avoidance strength. Landmarks
+    (LM) are used instead.
+  \item \textbf{The \texttt{car\_alpr} profile shares \texttt{car}'s LM preparation.} This
+    halves preparation time and is valid \emph{only} because avoidance multiplies priority
+    strictly downward, so the borrowing profile's weights never exceed the preparation
+    profile's on any edge---the condition LM correctness requires.
+\end{itemize}
+
+\subsection{Deployment posture}
+
+The routing server binds to localhost. It has no authentication and no rate limiting and
+is not internet-facing. Any public deployment must sit behind a reverse proxy supplying
+both.
+
+\section{Data}
+\label{sec:data}
+
+All sources are public and key-free.
+
+\subsection{ALPR installations}
+\label{sec:data:alpr}
+
+Source: OpenStreetMap via the Overpass API, selecting
+\texttt{man\_made=surveillance} with \texttt{surveillance:type=ALPR}---the corpus
+surfaced by the DeFlock project, taken from the upstream rather than a mirror. Retrieved
+2026-07-24 in five regional queries (continental US, Alaska, Hawaii, Canada, Mexico) and
+deduplicated by OSM node id: \textbf{\num{120838} unique camera nodes}
+(\Cref{fig:map}).
+
+\begin{table}[t]
+\centering
+\small
+\caption{Directional and vendor tagging across \num{120838} mapped \alpr nodes. The two
+direction-key rows overlap: 392 nodes carry both.}
+\label{tab:tags}
+\begin{tabular}{lrr}
+\toprule
+Property & Count & Share \\
+\midrule
+Any direction tag              & \num{119249} & \SI{98.7}{\percent} \\
+\quad via \texttt{direction}        & \num{117356} & \SI{97.1}{\percent} \\
+\quad via \texttt{camera:direction} & \num{2285}   & \SI{1.9}{\percent} \\
+Multi-head (\texttt{;}-separated)   & \num{7014}   & \SI{5.8}{\percent} \\
+Arc-range form (\texttt{199-269})   & \num{4806}\,tokens & --- \\
+\texttt{operator} tagged            & \num{22354}  & \SI{18.5}{\percent} \\
+\midrule
+Flock Safety                   & \num{99650}  & \SI{82.5}{\percent} \\
+Motorola Solutions             & \num{5948}   & \SI{4.9}{\percent} \\
+Genetec                        & \num{2875}   & \SI{2.4}{\percent} \\
+Leonardo                       & \num{1012}   & \SI{0.8}{\percent} \\
+Axis Communications            & \num{983}    & \SI{0.8}{\percent} \\
+No vendor tag                  & \num{5811}   & \SI{4.8}{\percent} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Three tagging realities shaped the parser, each contradicting a plausible assumption:
+
+\begin{enumerate}
+  \item \textbf{\texttt{direction}, not \texttt{camera:direction}.} The OSM wiki documents
+    \texttt{camera:direction} for surveillance nodes. Mappers overwhelmingly use plain
+    \texttt{direction}, by a factor of 51. Reading only the documented key discards
+    \SI{97}{\percent} of the bearings.
+  \item \textbf{Arc ranges are real, and mostly \ang{45}.} \num{4806} values give an
+    explicit range; \num{3959} of them (\SI{82}{\percent}) span exactly \ang{45}. That is
+    what justifies \ang{45} as the default span for the \(\approx\)\SI{96}{\percent} of
+    cameras giving a bare bearing---the default is inherited from the data, not assumed.
+  \item \textbf{Multi-head units exist} (\texttt{320;190},
+    \texttt{0;72;144;216;288}, \texttt{199-269;325-35}); \num{7014} nodes. These typically
+    watch \emph{both} carriageways, so silently taking the first bearing is the worst
+    available error: it makes a camera that sees everyone look like one that sees half.
+    The parser emits one wedge per head.
+\end{enumerate}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_camera_map.pdf}
+\caption{Mapped \alpr installations in the contiguous United States. (a) By vendor: Flock
+Safety dominates by count almost everywhere, with other vendors concentrated on
+limited-access corridors. (b) Density on a log scale. The visible structure is partly
+deployment and partly \emph{mapping}: see \Cref{sec:results:coverage}.}
+\label{fig:map}
+\end{figure}
+
+\subsection{Cone construction}
+\label{sec:data:cones}
+
+Each camera head becomes a circular sector: apex at the node, bisector along the tagged
+bearing, span \ang{45} (or the tagged arc), radius \SI{60}{\metre}. The radius must reach
+across the carriageway from a set-back pole; it was chosen on that reasoning and has
+\emph{not} been swept empirically (\Cref{sec:lim:geom}).
+
+All wedges are unioned into a single MultiPolygon of \textbf{\num{114172} parts},
+published as one feature with id \texttt{alpr}. Overlapping wedges merging is correct and
+intended: the question is \emph{is this road segment observed}, not \emph{by how many
+devices}.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Vendor-split cone sets. The cones-per-camera column is itself a result: non-Flock
+installations are multi-head nearly eight times as often, consistent with tolling and DOT
+gantries covering every lane while a Flock unit watches one approach.}
+\label{tab:vendorsets}
+\begin{tabular}{lrrrr}
+\toprule
+Set & Cameras & Cones & Cones/camera & Union parts \\
+\midrule
+Flock Safety       & \num{98882} & \num{103564} & 1.05 & \num{94474} \\
+Other named vendor & \num{15135} & \num{22643}  & \textbf{1.50} & \num{15902} \\
+No vendor tag      & \num{5115}  & \num{5574}   & 1.09 & \num{4565} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Assigning vendor requires care. Vendor appears under four keys
+(\texttt{manufacturer}, \texttt{surveillance:manufacturer}, \texttt{brand},
+\texttt{surveillance:brand}) and is spelled inconsistently. An exact match on
+\texttt{manufacturer = "Flock Safety"} finds \num{95069} cameras; a case-insensitive
+substring search across all four finds \num{99650}. The \num{4581} difference is mostly
+\num{4812} nodes carrying the vendor under \texttt{brand}, plus variants (``Flock Group
+Inc.'', ``FlockSafety''). Misfiling \SI{4.6}{\percent} of Flock cameras as non-Flock is
+the one error a vendor comparison cannot absorb.
+
+Untagged cameras are held out of \emph{both} vendor sets rather than assigned to the
+complement of Flock, since an untagged camera is likelier to be an unlabelled Flock unit
+than a non-Flock one. They are reported as their own set so nothing is silently dropped,
+with the caveat that their direction coverage is lower (\SI{88.4}{\percent} against
+\SI{99.3}{\percent} for Flock and \SI{98.5}{\percent} for other named vendors).
+
+\subsection{Road network}
+
+Geofabrik North America extract, \SI{18}{\giga\byte}, retrieved 2026-07-24. Imported with
+\texttt{ignored\_highways = footway,construction,cycleway,path,steps}. \texttt{track} is
+deliberately retained: unpaved tracks are plausible avoidance routes, and excluding them
+would bias the cost estimate downward by removing options a determined driver has.
+
+\subsection{Commute sample}
+\label{sec:data:commutes}
+
+Source: LEHD \textbf{LODES8}, \texttt{od\_main\_JT00}, 2022---all jobs, both ends
+in-state, built from unemployment-insurance wage records linked to employer
+establishments. These are administrative counts of real jobs, not survey estimates.
+
+Sampling design carries more weight here than sample size. Uniform random points would
+over-represent empty rural space where nobody commutes and no cameras exist, understating
+exposure badly. Instead each origin--destination pair is drawn \textbf{with probability
+proportional to the number of workers actually making that trip}, so the distribution
+approximates what an average \emph{commuter} experiences rather than what an average
+\emph{square kilometre} contains.
+
+Block-level LODES geocodes are aggregated to \textbf{tract} (first 11 digits)---the finest
+resolution at which ACS demographics are reliable, and finer than the routing's effective
+precision. Same-tract commutes are dropped: origin and destination centroids coincide, so
+there is no route to measure. Georgia alone yields \num{1199250} distinct tract pairs
+covering \num{4190313} workers.
+
+\num{1200} pairs are requested per state; duplicate draws are collapsed, costing
+\SI{0.53}{\percent}, for \textbf{\num{17904} sampled commutes} across 15 states (AZ, CA,
+CO, FL, GA, IL, MO, NC, NY, OH, PA, TN, TX, VA, WA). Seed \texttt{20260725}; the sample is
+reproducible. The sampled pairs represent \num{600899} workers; the median pair carries 10
+and the largest \num{2832}.
+
+Because draws are taken with replacement and then deduplicated, each pair appears once and
+every row is weighted equally downstream. That is valid only while inclusion probability
+remains proportional to worker count, which decays once a pair is likely to be drawn more
+than once. Measured on Georgia, the largest state sample, the highest-flow pair has an
+expected \num{0.22} draws per \num{1200} and a median pair \num{0.0036}: the design is
+probability-proportional-to-size with distortion confined to the extreme upper tail
+(roughly \SI{11}{\percent} under-representation for the single largest pair, negligible
+below it). The \texttt{workers} and \texttt{flow\_share} columns are carried through the
+pipeline but deliberately unused---equal weighting already yields the worker-weighted
+distribution, and weighting again would apply the flow twice.
+
+\subsection{Demographics and geography}
+
+Tract centroids are 2024 Census Gazetteer internal points
+(\texttt{INTPTLAT}/\texttt{INTPTLONG}), which are guaranteed to fall inside the tract
+polygon. Income is ACS 5-year 2022 table \textbf{B19013}; race and ethnicity are table
+\textbf{B03002}, chosen over B02001 because it is Hispanic-aware, so ``non-Hispanic
+Black'' is directly available rather than reconstructed. Demographics attach to the
+\emph{origin} (home) tract: the claim under test concerns who lives where surveillance is
+dense.
+
+\section{Method}
+\label{sec:method}
+
+\subsection{Two routes per commute}
+
+Each sampled pair is routed twice against the same graph: a \textbf{baseline} with no
+custom model, and an \textbf{avoided} route applying
+\texttt{priority: [\{if: "in\_alpr", multiply\_by: 0.01\}]}. Both disable CH, which
+per-request custom models require.
+
+\num{0.01} is the \emph{maximum} avoidance strength, not a typical setting. Results
+therefore describe an \textbf{upper bound on both the benefit and the cost} of
+avoidance---the strongest available preference short of prohibition. This is deliberate:
+it establishes whether meaningful avoidance is possible at all, and what it costs at the
+limit.
+
+\subsection{Exposure is directional, not proximate}
+
+A camera counts as having seen the driver \emph{only if the route line intersects its
+cone}. Passing \SI{20}{\metre} from a camera aimed the other way is not exposure.
+Implementation is an STRtree over the \num{114172} cone parts for candidate lookup, then
+an exact intersection test.
+
+Two conservatisms remain, both understating exposure: route geometry is a polyline while a
+vehicle has width, and a cone occluded by intervening buildings is still counted as full
+sight-line.
+
+\subsection{Vendor attribution costs no additional routing}
+
+Routing does not change between vendor questions---the avoidance model targets the
+all-vendor union either way---so \Cref{sec:results:vendor} is entirely a matter of
+re-scoring existing routes against different cone sets. This is possible only because the
+experiment persists route polylines to a sidecar; keeping only counts would have made both
+the vendor split and the radius sweep of \Cref{sec:lim:geom} fresh multi-hour re-runs.
+
+As a consistency check, the three vendor sets should sum to slightly \emph{more} than the
+all-vendor union, because cones from different vendors that overlap merge into one part in
+the union and are counted once while the split sets count them separately. Measured excess
+is \SI{1.0}{\percent}: right sign, plausible magnitude.
+
+\subsection{Statistical reporting}
+\label{sec:method:stats}
+
+\begin{itemize}
+  \item \textbf{Medians lead, means accompany.} Both distributions are heavily
+    right-skewed; a minority of long commutes through dense corridors pull the mean well
+    above the typical experience.
+  \item \textbf{Bootstrap confidence intervals} (percentile, \num{2000} resamples, seed
+    \texttt{20260725}). Camera counts are discrete and zero-inflated, nowhere near normal.
+  \item \textbf{Quartile contrasts, not regressions.} With tract-level aggregates a
+    regression coefficient invites a causal reading the design cannot support.
+  \item \textbf{Total exposure and per-kilometre density are reported as peers.} A raw
+    count gap that vanishes once normalised per km is about distance, not siting. But the
+    converse is a finding, not a nuisance: a group whose commutes are \emph{shorter but
+    more densely watched} shows a rate gap and no count gap, and treating the rate purely
+    as a control would discard it. Cameras per km is a ratio of sums bootstrapped over
+    commutes; a mean of per-commute rates would let very short commutes dominate.
+  \item \textbf{Ecological inference is not attempted.} Tract composition is a property of
+    tracts, not of the individuals routed.
+\end{itemize}
+
+\subsection{Execution}
+\label{sec:method:exec}
+
+Twelve concurrent workers against the local routing server. Worker count was measured, not
+assumed: twelve completed 300 commutes in \SI{324}{\second}, while thirty-two took longer
+than \SI{576}{\second} on the identical set---past about twelve, contention outweighs added
+concurrency. Routing dominates cost overwhelmingly; the geometric exposure test is
+\SI{0.2}{\percent} of per-commute work.
+
+Failed routes are dropped rather than retried: failures are dominated by unroutable
+centroid pairs (islands, centroids landing off-network), properties of the sample rather
+than transient faults. \textbf{\num{17580} of \num{17904} commutes routed successfully
+(\SI{2.1}{\percent} dropped).}
+
+Commutes are processed in seeded random order. The sample is grouped by state and the
+executor preserves input order, so in file order results arrive one state at a time: an
+interruption would leave some states complete and others absent, and no partial output
+could support a national estimate. Shuffling makes any prefix a near-uniform sample of the
+whole. This proved material rather than hypothetical---an earlier single-state interim
+read gave a median avoidance overhead of \SI{22.7}{\percent} against the national
+\SI{5.96}{\percent}.
+
+\section{Results}
+\label{sec:results}
+
+\subsection{Exposure on the unavoided commute}
+\label{sec:results:exposure}
+
+\begin{table}[t]
+\centering
+\small
+\caption{Exposure and the cost of avoidance over \num{17580} commute-weighted
+origin--destination pairs in 15 states. Median commute \SI{24.4}{\kilo\metre} /
+\SI{24.1}{\minute}.}
+\label{tab:headline}
+\begin{tabular}{lrr}
+\toprule
+& Median [\SI{95}{\percent} CI] & Mean \\
+\midrule
+\multicolumn{3}{l}{\itshape Unavoided route} \\
+Cameras passed              & 3 [2--3]            & 4.75 \\
+Commutes passing $\geq$1    & \multicolumn{2}{r}{\SI{74.8}{\percent}} \\
+Commutes passing $\geq$5    & \multicolumn{2}{r}{\SI{34.6}{\percent}} \\
+Commutes passing $\geq$10   & \multicolumn{2}{r}{\SI{14.6}{\percent}} \\
+\nth{90} / \nth{99} percentile & \multicolumn{2}{r}{12 / 31 cameras} \\
+Exposure rate               & \multicolumn{2}{r}{\num{0.089} cameras/\si{\kilo\metre}} \\
+\midrule
+\multicolumn{3}{l}{\itshape ALPR-avoiding route} \\
+Cameras passed              & 0 [0--0]            & 0.26 \\
+\textbf{Reduced to zero}    & \multicolumn{2}{r}{\textbf{\SI{84.6}{\percent}}} \\
+Extra time (\si{\minute})   & \textbf{1.50} [1.43--1.57] & 5.01 \\
+Extra distance (\si{\kilo\metre}) & 0.54 [0.51--0.57] & 2.33 \\
+Avoidance overhead          & \SI{5.96}{\percent} [5.70--6.23] & \SI{12.14}{\percent} \\
+Minutes per camera evaded   & 0.78 [0.76--0.80]   & 1.30 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_exposure.pdf}
+\caption{Exposure before and after \alpr-avoiding routing. (a) Distributions; (b)
+cumulative, log-scaled abscissa; (c) share of commutes exceeding a threshold. The
+zero-exposure mass moves from \SI{25.2}{\percent} to \SI{84.6}{\percent}.}
+\label{fig:exposure}
+\end{figure}
+
+\textbf{\SI{74.8}{\percent} of American commutes pass at least one \alpr.} The median
+commuter is read three times each way; the \nth{90} percentile twelve times and the
+\nth{99} thirty-one. Aggregate exposure is \num{0.089} cameras per kilometre driven.
+
+\subsection{The cost of refusal}
+\label{sec:results:cost}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_cost.pdf}
+\caption{The price of complete avoidance. (a) Absolute extra time; (b) overhead as a
+percentage of baseline, by percentile; (c) marginal minutes per camera evaded. All three
+are heavily right-skewed---a small tail of commutes pays a great deal, while the typical
+commute pays almost nothing.}
+\label{fig:cost}
+\end{figure}
+
+\textbf{\SI{84.6}{\percent} of commutes can be routed to zero \alpr exposure}, at a median
+cost of \SI{1.50}{\minute} and \SI{0.54}{\kilo\metre}---an overhead of
+\SI{5.96}{\percent}. The median marginal price is \SI{0.78}{\minute} per camera evaded.
+
+For five American commuters in six, then, complete avoidance of licence-plate
+surveillance costs about ninety seconds. This is the paper's central quantitative claim,
+and it is considerably more favourable than the metropolitan spot-checks that motivated
+the study suggested.
+
+The distribution matters as much as the median. The mean overhead is \SI{12.14}{\percent}
+against a median of \SI{5.96}{\percent}, and the interquartile range runs from
+\SI{0}{\percent} to \SI{17.4}{\percent}: a quarter of commutes need no detour whatsoever,
+while a tail pays substantially. \Cref{fig:route} shows one such case.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_route_example.pdf}
+\caption{An illustrative high-exposure commute in the Chicago area---chosen for legibility,
+not typicality. (a) The fastest route crosses 35 camera fields of view; the avoiding route
+crosses none, for \SI{+10.2}{\minute} (\SI{29.1}{\percent}). (b) At street scale the
+directional model is visible: cones the fast route crosses are dark, cones aimed elsewhere
+are grey and cost nothing.}
+\label{fig:route}
+\end{figure}
+
+\subsection{Geographic variation}
+\label{sec:results:geo}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_states.pdf}
+\caption{(a) Mean exposure by state with median avoidance overhead overlaid. (b) State
+exposure against mapped cameras per \num{100000} residents. The relationship is close to
+linear, which is the central interpretive problem of \Cref{sec:results:coverage}: we
+cannot separate ``more cameras'' from ``more mappers''.}
+\label{fig:states}
+\end{figure}
+
+State-level variation is extreme. Georgia commuters pass a median of six cameras and pay
+\SI{22.6}{\percent} overhead to avoid them; Pennsylvania commuters pass a median of zero
+and pay nothing, with only \SI{41}{\percent} passing any camera at all.
+
+A robust secondary finding: \textbf{avoidance is cheapest where cameras are densest}.
+Dense metropolitan grids offer a parallel street one block over, so the detour is short;
+rural and intercity routes often have one viable road, so avoidance means a genuine
+detour. The burden of refusal therefore falls hardest on drivers who have the fewest
+cameras to refuse---the reverse of the natural guess.
+
+\subsection{Demographic contrasts}
+\label{sec:results:demo}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_demographics.pdf}
+\caption{Origin-tract quartile contrasts, \SI{95}{\percent} bootstrap CIs. Top row: mean
+cameras passed. Bottom row: cameras per kilometre driven. Income shows a per-km gradient
+with no count gradient---higher-income origins have denser but shorter commutes.}
+\label{fig:demo}
+\end{figure}
+
+\begin{table}[t]
+\centering
+\small
+\caption{National quartile contrasts. ``Disjoint'' marks non-overlapping
+\SI{95}{\percent} bootstrap CIs.}
+\label{tab:demo}
+\begin{tabular}{lrrl}
+\toprule
+Contrast & Ratio & Cameras/\si{\kilo\metre} (Q1 vs Q4) & Verdict \\
+\midrule
+Income Q1/Q4          & 0.97 & \num{0.0776} vs \num{0.1064} & count overlaps; rate disjoint \\
+\% non-Hisp.\ Black Q4/Q1 & \textbf{1.29} & \num{0.0729} vs \num{0.1140} & both disjoint \\
+\% Hispanic Q4/Q1     & \textbf{1.18} & \num{0.0776} vs \num{0.0949} & both disjoint \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Both racial contrasts are statistically distinguishable nationally. Income is not, in
+counts---but higher-income origin tracts show materially \emph{denser} per-kilometre
+exposure (\num{0.1064} against \num{0.0776}) offset by shorter commutes. Only reporting
+count and rate as peers surfaces that; a design treating the rate as a mere control would
+have discarded it.
+
+\subsection{Coverage-bias sensitivity, and why it governs the reading}
+\label{sec:results:coverage}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_within_county.pdf}
+\caption{The central negative result. Ranking origin tracts within their own county rather
+than nationally collapses both demographic gradients to indistinguishability. \num{100}
+counties with $n\geq40$ contribute \SI{60}{\percent} of the sample.}
+\label{fig:within}
+\end{figure}
+
+\Cref{fig:within} is the most consequential figure in the paper. Recomputing quartiles
+\emph{within each county} and pooling---so tracts are ranked only against neighbours
+subject to the same local mapping effort and broadly the same urban form---collapses the
+racial gradient from \num{1.29}$\times$ (disjoint CIs) to \num{1.02}$\times$
+(indistinguishable), and leaves income at \num{0.93}$\times$ (indistinguishable).
+Within-county per-kilometre rates are nearly flat: \num{0.1124} against \num{0.1196}.
+
+The demographic gradients are therefore \textbf{entirely a between-county phenomenon}.
+
+Mapped camera density varies enormously across the states studied---from roughly 89 per
+\num{100000} residents in Georgia to 23 in Pennsylvania, a \textbf{\num{3.9}$\times$
+spread}---and state mean exposure tracks it closely (\Cref{fig:states}b). We cannot
+distinguish ``Pennsylvania has few cameras'' from ``Pennsylvania has few mappers''.
+
+Three explanations remain consistent with these data, and this design separates none of
+them:
+\begin{enumerate}
+  \item \textbf{Differential mapping effort.} Volunteer contributors are unevenly
+    distributed, and where they are absent cameras are absent from the map but present on
+    the pole.
+  \item \textbf{Urban form.} High-\%Black tracts are disproportionately urban and urban
+    roads carry more cameras per kilometre, so the national contrast is substantially an
+    urban/rural contrast.
+  \item \textbf{Genuine between-jurisdiction procurement differences.} Municipalities
+    really do differ in what they buy.
+\end{enumerate}
+
+We therefore decline to report a national demographic finding as a finding about
+surveillance siting. What we report is narrower and defensible: a gradient exists in the
+observable data, it is between-county, and it does not survive local ranking.
+
+\subsection{By camera vendor}
+\label{sec:results:vendor}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_vendor.pdf}
+\caption{Vendor-resolved exposure. (a) Flock's share of exposure falls well below its share
+of installations. (b) Per unit deployed, non-Flock cameras reach far more commuters. (c)
+Both are avoided at comparable rates under the all-vendor model.}
+\label{fig:vendor}
+\end{figure}
+
+\begin{table}[t]
+\centering
+\small
+\caption{Vendor-resolved exposure over \num{15043} routes with saved geometry
+(\num{65380} total camera encounters). Installation shares are of the \num{119132}
+cameras that contribute cones, so they differ slightly from the \num{120838}-node
+denominator of \Cref{tab:tags}; the \num{1706} difference is nodes whose direction value
+did not parse. Flock holds five-sixths of installations and supplies two-thirds of
+exposure; per unit deployed, non-Flock cameras reach \num{2.60}$\times$ as many
+commuters.}
+\label{tab:vendorexp}
+\begin{tabular}{lrrrrr}
+\toprule
+Set & Installations & Exposures & Exposures/\num{1000} cameras & Routes $\geq$1 & Evaded \\
+\midrule
+Flock Safety  & \SI{83.0}{\percent} & \SI{66.6}{\percent} & \num{444}  & \SI{63.8}{\percent} & \SI{95.4}{\percent} \\
+Other vendor  & \SI{12.7}{\percent} & \SI{26.5}{\percent} & \textbf{\num{1156}} & \SI{27.2}{\percent} & \SI{91.4}{\percent} \\
+No vendor tag & \SI{4.3}{\percent}  & \SI{6.9}{\percent}  & \num{885}  & \SI{11.1}{\percent} & \SI{97.6}{\percent} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Flock Safety holds \SI{83.0}{\percent} of mapped installations but supplies only
+\SI{66.6}{\percent} of measured commute exposure. Per unit deployed, non-Flock cameras
+generate \textbf{\num{2.60}$\times$} more exposure (\Cref{tab:vendorexp}). The mechanism
+is visible in the cone geometry of \Cref{tab:vendorsets}: non-Flock units are multi-head
+nearly eight times as often, and DOT and tolling installations sit on the limited-access
+corridors commuters actually use, while a Flock unit watches one residential approach that
+fewer commutes cross.
+
+This reframes the vendor's dominance. Flock wins on count and loses on reach: its
+deployment model puts many cameras where comparatively few commuters pass, consistent with
+a product sold to municipalities and homeowners' associations for neighbourhood coverage
+rather than to transport agencies for corridor coverage.
+
+\subsubsection*{The demographic gradient is not Flock's}
+
+Splitting \Cref{sec:results:demo} by vendor produces the sharpest result in this study.
+
+\begin{table}[h]
+\centering
+\small
+\caption{Racial composition contrast (\% non-Hispanic Black, Q4/Q1) resolved by vendor and
+then subjected to the within-county control of \Cref{sec:results:coverage}.}
+\label{tab:vendordemo}
+\begin{tabular}{lccl}
+\toprule
+Camera set & National & Within-county & National verdict \\
+\midrule
+Flock Safety  & \num{0.98} & \num{0.95} & indistinguishable \\
+Other vendor  & \textbf{\num{1.39}} & \num{1.17} & \textbf{CIs disjoint} \\
+No vendor tag & \num{1.28} & \num{1.16} & indistinguishable \\
+\midrule
+All vendors   & \textbf{\num{1.29}} & \num{1.02} & \textbf{CIs disjoint} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Flock exposure shows no racial gradient whatsoever}---\num{0.98}$\times$
+nationally, with overlapping intervals. The entire all-vendor gradient of
+\num{1.29}$\times$ is carried by the \emph{other} vendors: DOT, tolling, and
+large-agency installations, at \num{1.39}$\times$ with disjoint intervals.
+
+This is worth stating plainly because it inverts the intuition that motivates most public
+attention. Flock is the vendor named in municipal debates, and it holds five-sixths of the
+cameras---yet on this measure its installations reach Black and non-Black commuters at
+indistinguishable rates. The measured disparity attaches to highway and tolling
+infrastructure instead.
+
+A historical reading suggests itself: mid-century urban highway construction routed
+limited-access corridors through Black neighbourhoods on a scale that is extensively
+documented, and tolling and DOT camera infrastructure sits on exactly those corridors. On
+that account the gradient would be a sixty-year-old artefact of road building rather than a
+contemporary artefact of camera procurement. We note the hypothesis; this design cannot
+test it.
+
+And the same discipline applied in \Cref{sec:results:coverage} applies here. Under
+within-county ranking the non-Flock gradient attenuates from \num{1.39}$\times$ to
+\num{1.17}$\times$ and its intervals overlap. It is directionally persistent---the Q4
+per-kilometre rate remains about \SI{22}{\percent} above Q1---but it is no longer
+distinguishable, so it too must be reported as a between-county phenomenon. Holding RQ5 to
+a weaker evidentiary standard than RQ3 would have let a between-county artefact return
+wearing a vendor label.
+
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Refusal is cheap, and that is the policy-relevant fact}
+
+The strongest result here is also the simplest: for \SI{84.6}{\percent} of American
+commuters, complete avoidance of licence-plate surveillance costs a median of
+\SI{1.50}{\minute}. Arguments for \alpr deployment often rest implicitly on ubiquity---the
+idea that the network is comprehensive enough that avoidance is futile and therefore the
+privacy loss is unavoidable rather than chosen. At current mapped density that premise is
+false for five commuters in six.
+
+The corollary cuts the other way. If avoidance is this cheap, it is also cheap for people
+with reason to evade legitimate investigation, which bounds how much investigative value a
+fixed-camera network can deliver against a motivated subject while it continues to read
+every unmotivated one.
+
+\subsection{The equity question is not answerable from crowdsourced data}
+
+We set out to measure whether surveillance burden falls unevenly, and we can report only
+that the question is harder than it appears. The national gradient is real in the data,
+substantial (\num{1.29}$\times$), and statistically clean---and it evaporates under a
+control that any careful reviewer would demand.
+
+We think this generalises. A considerable amount of accessible research on surveillance
+infrastructure necessarily rests on volunteer-mapped data, because no authoritative
+national inventory exists. Any such study that reports a demographic correlation without
+a within-locality control is at serious risk of reporting the demography of \emph{mappers}
+rather than of the surveilled. We would encourage that control to become routine.
+
+\subsection{Attention and exposure are pointed at different vendors}
+
+Flock Safety is the name in municipal council debates, in local journalism, and in the
+activist mapping effort that produced the data underlying this paper. It holds five-sixths
+of mapped installations. Yet its cameras show no measurable racial gradient in commute
+exposure, and per unit deployed they reach less than half as many commuters as a tolling or
+transport-agency camera.
+
+We do not read this as exonerating. A camera at the entrance of a residential subdivision
+is doing something qualitatively different from a camera on a toll gantry: it observes a
+small population repeatedly rather than a large population once, and repeated observation
+of a known small set is precisely what makes pattern-of-life inference possible. Commute
+exposure measures breadth, not depth, and Flock's model appears optimised for depth. A
+study designed around repeat observation of the same vehicle would likely reverse the
+ordering reported here, and we would expect it to.
+
+What the result does establish is that the public conversation has attached a distributional
+concern to the wrong infrastructure. If the question is which cameras disproportionately
+watch Black commuters on their way to work, the measured answer is highway and tolling
+cameras---installed by transport agencies, largely absent from the municipal debate, and
+sited on corridors laid down decades before \alpr existed.
+
+\subsection{Where the burden actually concentrates}
+
+The one distributional finding that does survive is geographic rather than demographic,
+and it is counter-intuitive: avoidance is cheapest in dense metropolitan grids and
+expensive in rural and intercity travel. Network topology, not camera count, sets the
+price of refusal. This is robust to the coverage critique in a way the demographic results
+are not, because it depends on road-network structure---which OSM maps close to
+completely---rather than on camera counts, which it does not.
+
+\section{Limitations}
+\label{sec:limitations}
+
+\subsection{Tract centroids are not addresses}
+
+Every route runs centroid to centroid; real commutes begin in a driveway. In large or
+irregular tracts the centroid can sit far from any residence. This adds noise in both
+directions and is the main reason we report distributions rather than point estimates.
+
+The stricter caution: tract demographics describe tracts, not the people routed.
+``Commutes originating in high-poverty tracts pass more cameras'' is supportable; ``poor
+people pass more cameras'' is not.
+
+\subsection{Crowdsourced camera data is non-randomly missing}
+\label{sec:coverage}
+
+Absolute exposure figures are a \textbf{lower bound}: where contributors are absent,
+cameras are absent from the map but present on the pole. The hazard is not undercounting
+but its correlation with the variables of interest, quantified in
+\Cref{sec:results:coverage}. Every demographic statement in this paper is conditional on
+that, and the condition is not a formality.
+
+\subsection{Unswept geometric parameters}
+\label{sec:lim:geom}
+
+The \SI{60}{\metre} cone radius and \ang{45} default span were chosen by reasoning---pole
+set-back, and the \SI{82}{\percent} of explicit arcs that span \ang{45}---rather than
+sensitivity analysis. Exposure counts scale with both. A sweep over radius
+$\in\{30,45,60,90\}\,\si{\metre}$ would establish how much the headline numbers depend on
+the choice. The saved route geometry makes this cheap to run; it has not been run.
+
+\subsection{A single avoidance strength}
+
+All results use the maximum strength. Intermediate settings are the practically
+interesting ones for a shipped application and they behave badly: the usable range is
+roughly $0.3\rightarrow0.01$ and the dead zone is \emph{density-dependent}. A setting of
+\num{0.3} does nothing in Delaware while avoiding \SI{62.5}{\percent} of cameras in
+Atlanta. A single fixed slider-to-multiplier mapping is therefore not viable; the mapping
+must adapt to local density. This is an open problem for the application and an unmeasured
+dimension of this paper.
+
+\subsection{Sample scope}
+
+Fifteen states, not fifty. Within-state commutes only (\texttt{od\_main}), so cross-border
+metropolitan areas---New York/New Jersey, Philadelphia, Washington DC, Kansas City, St
+Louis, Portland---are systematically truncated at the state line. Several are exactly the
+dense multi-jurisdiction areas where the question is most pointed.
+
+\subsection{Static snapshot; no temporal dimension}
+
+One 2026-07-24 snapshot of a rapidly expanding network; results date quickly. Routing uses
+free-flow speeds with no traffic, time-of-day, or turn-restriction penalties, so both
+travel times are optimistic. The \emph{difference} between them---the quantity actually
+reported---is more robust than either absolute, since both share the bias.
+
+\subsection{Avoidance is a preference, not a guarantee}
+
+\texttt{multiply\_by: 0.01} makes observed roads expensive, not impassable. Where no
+alternative exists the router correctly uses the watched road. ``Zero cameras'' means the
+optimiser found a clean path, not that one was guaranteed to exist.
+
+\section{Reproducibility}
+
+Fixed seed \texttt{20260725} throughout, for both sampling and bootstrap. All external
+data sources are public and require no API key.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{ll}
+\toprule
+Component & Path \\
+\midrule
+Data acquisition            & \texttt{research/data/fetch.sh} \\
+Camera fetch (continental)  & \texttt{server/alpr/fetch-na-cones.sh} \\
+Cone construction           & \texttt{server/alpr/build\_cones.py} \\
+Routing configuration       & \texttt{server/graphhopper/config/trames.yml} \\
+Graph build                 & \texttt{server/graphhopper/rebuild-with-cones.sh} \\
+Commute sampling            & \texttt{research/scripts/build\_sample.py} \\
+Experiment                  & \texttt{research/scripts/run\_experiment.py} \\
+Geometry backfill           & \texttt{research/scripts/backfill\_geometry.py} \\
+Vendor rescoring            & \texttt{research/scripts/vendor\_exposure.py} \\
+Analysis                    & \texttt{research/scripts/analyze.py} \\
+Figures                     & \texttt{research/paper/make\_figures.py} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+The \SI{18}{\giga\byte} OSM extract and \SI{14}{\giga\byte} graph cache are not
+redistributed; the acquisition and import scripts rebuild both.
+
+\end{document}
