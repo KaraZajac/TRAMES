@@ -277,8 +277,9 @@ deployment and partly \emph{mapping}: see \Cref{sec:results:coverage}.}
 
 Each camera head becomes a circular sector: apex at the node, bisector along the tagged
 bearing, span \ang{45} (or the tagged arc), radius \SI{60}{\metre}. The radius must reach
-across the carriageway from a set-back pole; it was chosen on that reasoning and has
-\emph{not} been swept empirically (\Cref{sec:lim:geom}).
+across the carriageway from a set-back pole; it was chosen on that reasoning and then swept
+over $\{30,45,60,90\}\,\si{\metre}$ (\Cref{sec:lim:geom}). Measured exposure is only mildly
+sensitive to it, but the avoidance result is not robust above the assumed value.
 
 All wedges are unioned into a single MultiPolygon of \textbf{\num{114172} parts},
 published as one feature with id \texttt{alpr}. Overlapping wedges merging is correct and
@@ -522,7 +523,9 @@ cost of \SI{1.50}{\minute} and \SI{0.54}{\kilo\metre}---an overhead of
 \SI{5.96}{\percent}. The median marginal price is \SI{0.78}{\minute} per camera evaded.
 
 For five American commuters in six, then, complete avoidance of licence-plate
-surveillance costs about ninety seconds. This is the paper's central quantitative claim,
+surveillance costs about ninety seconds. This figure is conditional on the assumed camera
+field of view: it is stable if the true radius is smaller than the \SI{60}{\metre} assumed
+here and degrades if it is substantially larger, which \Cref{sec:lim:geom} quantifies. This is the paper's central quantitative claim,
 and it is considerably more favourable than the metropolitan spot-checks that motivated
 the study suggested.
 
@@ -828,14 +831,65 @@ but its correlation with the variables of interest, quantified in
 \Cref{sec:results:coverage}. Every demographic statement in this paper is conditional on
 that, and the condition is not a formality.
 
-\subsection{Unswept geometric parameters}
+\subsection{Cone geometry: swept, and one result depends on it}
 \label{sec:lim:geom}
 
-The \SI{60}{\metre} cone radius and \ang{45} default span were chosen by reasoning---pole
-set-back, and the \SI{82}{\percent} of explicit arcs that span \ang{45}---rather than
-sensitivity analysis. Exposure counts scale with both. A sweep over radius
-$\in\{30,45,60,90\}\,\si{\metre}$ would establish how much the headline numbers depend on
-the choice. The saved route geometry makes this cheap to run; it has not been run.
+The \SI{60}{\metre} radius was chosen by reasoning---a pole set back from the kerb needs a
+cone long enough to reach the carriageway it watches---and the \ang{45} default span from
+the \SI{82}{\percent} of explicit arcs that span exactly that. Neither was measured. We
+therefore swept the radius over $\{30, 45, 60, 90\}\,\si{\metre}$, rebuilding the cone
+geometry at each and re-scoring all \num{17580} routes (\Cref{fig:radius}).
+
+\begin{table}[h]
+\centering
+\small
+\caption{Cone-radius sensitivity. Exposure is mildly sensitive to the assumption; the
+avoidance result is not, until the radius grows by half.}
+\label{tab:radius}
+\begin{tabular}{lrrrr}
+\toprule
+Radius & Mean cameras & vs \SI{60}{\metre} & Avoided routes still clean & Residual \\
+\midrule
+\SI{30}{\metre} & \num{3.57} & \num{0.75}$\times$ & \SI{87.0}{\percent} & \SI{5.8}{\percent} \\
+\SI{45}{\metre} & \num{4.31} & \num{0.91}$\times$ & \SI{85.6}{\percent} & \SI{5.6}{\percent} \\
+\SI{60}{\metre} & \num{4.75} & assumed            & \SI{84.3}{\percent} & \SI{5.6}{\percent} \\
+\SI{90}{\metre} & \num{5.32} & \num{1.12}$\times$ & \textbf{\SI{56.5}{\percent}} & \SI{21.0}{\percent} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_radius.pdf}
+\caption{Sensitivity to the assumed cone radius. (a) Measured exposure scales gently---
+halving the radius removes only a quarter of it. (b) The share of commutes reaching zero
+exposure is flat below the assumed value and falls sharply above it. (c) Residual exposure
+as a fraction of unavoided, by radius.}
+\label{fig:radius}
+\end{figure}
+
+Two things follow, and they point in opposite directions.
+
+\textbf{Exposure is robust.} Halving the radius removes only a quarter of the measured
+exposure, and \SI{90}{\metre} adds \SI{12}{\percent}. Cones are small relative to the road
+network at any of these values, so \Cref{sec:results:exposure} does not rest on the choice.
+
+\textbf{The avoidance headline does depend on it.} Routes planned against \SI{60}{\metre}
+cones remain clean when re-scored at \SI{45}{\metre} and \SI{30}{\metre}---avoidance is not
+finely tuned to the assumption from below. But at \SI{90}{\metre} the share reaching zero
+falls from \SI{84.3}{\percent} to \SI{56.5}{\percent}, a drop of \num{27.8} points
+(\SI{95}{\percent} CI $[-28.5, -27.1]$), and residual exposure quadruples from
+\SI{5.6}{\percent} to \SI{21.0}{\percent} of baseline. If real fields of view are half again
+as long as we assume, roughly a third of the routes this paper counts as clean are not.
+
+That figure is nonetheless a \emph{lower} bound rather than an estimate, for a reason worth
+being precise about. These routes were \emph{planned} against \SI{60}{\metre} cones and only
+\emph{re-scored} at \SI{90}{\metre}; a router given \SI{90}{\metre} cones would find
+different clean routes, and the denser the network the more of them there are. Measuring
+the true value requires a fresh graph import and a complete re-route at each radius---about
+nine hours apiece---which we have not done. What the sweep establishes is that the
+avoidance claim is conditional on the radius in a way the exposure claim is not, and that
+the conditionality bites only above the assumed value.
 
 \subsection{A single avoidance strength}
 

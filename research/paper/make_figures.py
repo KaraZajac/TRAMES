@@ -642,6 +642,67 @@ def fig_route_example(lon, lat, rows):
     save(fig, "fig_route_example")
 
 
+
+def fig_radius(path):
+    """Sensitivity of exposure and of the avoidance result to the assumed cone radius."""
+    import csv as _csv
+    if not os.path.exists(path):
+        print("  (no radius sweep yet)")
+        return
+    rows = list(_csv.DictReader(open(path)))
+    radii = sorted(int(k[len("base_r"):]) for k in rows[0] if k.startswith("base_r"))
+    for r in rows:
+        for k in list(r):
+            if k.startswith(("base_r", "avoid_r")):
+                r[k] = int(r[k])
+
+    fig, axes = plt.subplots(1, 3, figsize=(11, 3.2))
+
+    ax = axes[0]
+    means = [np.mean([x[f"base_r{r}"] for x in rows]) for r in radii]
+    los, his = [], []
+    for r in radii:
+        m, lo, hi = boot_mean_ci([x[f"base_r{r}"] for x in rows])
+        los.append(m - lo); his.append(hi - m)
+    ax.errorbar(radii, means, yerr=[los, his], marker="o", ms=5, lw=1.6,
+                color=C_BASE, capsize=3)
+    ax.axvline(60, color=C_NEUT, ls=":", lw=1)
+    ax.annotate("assumed", xy=(60, ax.get_ylim()[0]), fontsize=7.5,
+                xytext=(3, 4), textcoords="offset points", color=C_NEUT)
+    ax.set_xlabel("assumed cone radius (m)")
+    ax.set_ylabel("mean cameras passed")
+    ax.set_title("(a) Exposure scales with the assumption")
+
+    ax = axes[1]
+    clean = [100 * np.mean([1 if x[f"avoid_r{r}"] == 0 else 0 for x in rows]) for r in radii]
+    ax.plot(radii, clean, marker="o", ms=5, lw=1.8, color=C_AVOID)
+    for r, c in zip(radii, clean):
+        ax.annotate(f"{c:.1f}%", (r, c), fontsize=7.5, xytext=(0, 7),
+                    textcoords="offset points", ha="center")
+    ax.axvline(60, color=C_NEUT, ls=":", lw=1)
+    ax.set_ylim(0, 105)
+    ax.set_xlabel("radius at which the route is scored (m)")
+    ax.set_ylabel("% of commutes with zero exposure")
+    ax.set_title("(b) Avoidance planned at 60 m, re-scored")
+
+    ax = axes[2]
+    w = 0.38
+    xx = np.arange(len(radii))
+    bmean = [np.mean([x[f"base_r{r}"] for x in rows]) for r in radii]
+    amean = [np.mean([x[f"avoid_r{r}"] for x in rows]) for r in radii]
+    ax.bar(xx - w/2, bmean, width=w, color=C_BASE, label="unavoided")
+    ax.bar(xx + w/2, amean, width=w, color=C_AVOID, label="ALPR-avoiding")
+    for i, (b, a) in enumerate(zip(bmean, amean)):
+        ax.text(i + w/2, a + max(bmean)*0.02, f"{100*a/max(b,1e-9):.0f}%",
+                ha="center", fontsize=7.5)
+    ax.set_xticks(xx, [f"{r} m" for r in radii])
+    ax.set_ylabel("mean cameras passed")
+    ax.set_title("(c) Residual exposure as % of unavoided")
+    ax.legend(fontsize=8)
+    fig.tight_layout()
+    save(fig, "fig_radius")
+
+
 def main():
     print("loading cameras...")
     lon, lat, cls = load_cameras()
@@ -676,6 +737,8 @@ def main():
     fig_demographics(rows)
     fig_within_county(rows)
     fig_route_example(lon, lat, rows)
+
+    fig_radius(os.path.join(ROOT, "out", "radius_sweep.csv"))
 
     vpath = os.path.join(ROOT, "out", "vendor.csv")
     if os.path.exists(vpath):
