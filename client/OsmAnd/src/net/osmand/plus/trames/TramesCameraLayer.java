@@ -12,6 +12,12 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
 
 import net.osmand.Location;
+import net.osmand.core.android.MapRendererView;
+import net.osmand.core.jni.MapMarker;
+import net.osmand.core.jni.MapMarkerBuilder;
+import net.osmand.core.jni.MapMarkersCollection;
+import net.osmand.core.jni.PointI;
+import net.osmand.core.jni.SwigUtilities;
 import net.osmand.data.QuadRect;
 import net.osmand.data.RotatedTileBox;
 import net.osmand.plus.OsmandApplication;
@@ -19,8 +25,11 @@ import net.osmand.plus.R;
 import net.osmand.plus.routing.IRouteInformationListener;
 import net.osmand.plus.routing.RoutingHelper;
 import net.osmand.data.ValueHolder;
+import net.osmand.plus.utils.NativeUtilities;
 import net.osmand.plus.views.OsmandMapTileView;
 import net.osmand.plus.views.layers.base.OsmandMapLayer;
+
+import net.osmand.util.MapUtils;
 
 import java.util.List;
 
@@ -58,11 +67,17 @@ public class TramesCameraLayer extends OsmandMapLayer implements IRouteInformati
 	private static final float CONE_SPAN_DEG = 45f;
 	private static final float ICON_DP = 26f;
 
+	/** Surface-icon keys are a limited resource per marker; 4 covers every real unit. */
+	private static final int MAX_CONES = 4;
+
 	private final TramesCameraSource source = new TramesCameraSource();
 
 	private Paint conePaint;
 	private Paint bitmapPaint;
 	private Bitmap icon;
+	private Bitmap coneBitmap;
+	/** Identity of the marker set currently pushed to the GL renderer, to detect staleness. */
+	private int builtForCameras = -1;
 	private final Path conePath = new Path();
 
 	private boolean enabled = true;
@@ -100,6 +115,103 @@ public class TramesCameraLayer extends OsmandMapLayer implements IRouteInformati
 		conePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		conePaint.setStyle(Paint.Style.FILL);
 		conePaint.setColor(COLOR_CONE);
+
+		coneBitmap = buildConeBitmap((int) (CONE_DP * density * 2));
+	}
+
+	/**
+	 * A wedge pointing north (up), for use as an on-map-surface icon.
+	 *
+	 * The GL renderer rotates this to each camera's bearing and projects it onto the
+	 * ground plane, so it stays glued to the map and lies flat when the view is tilted —
+	 * which a canvas-drawn wedge cannot do.
+	 */
+	@NonNull
+	private Bitmap buildConeBitmap(int size) {
+		Bitmap bmp = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+		Canvas c = new Canvas(bmp);
+		float cx = size / 2f;
+		float cy = size / 2f;
+		float len = size / 2f;
+		Path p = new Path();
+		p.moveTo(cx, cy);
+		int steps = 10;
+		float start = -CONE_SPAN_DEG / 2f;
+		for (int i = 0; i <= steps; i++) {
+			double rad = Math.toRadians(start + (CONE_SPAN_DEG * i / steps));
+			p.lineTo(cx + (float) (len * Math.sin(rad)), cy - (float) (len * Math.cos(rad)));
+		}
+		p.close();
+		c.drawPath(p, conePaint);
+		return bmp;
+	}
+
+	/**
+	 * OpenGL path. Markers are placed by the renderer itself, so they stay glued to the
+	 * map and behave correctly when tilted into 3D.
+	 *
+	 * The canvas path below is kept for the legacy (non-GL) renderer, but it is a 2D
+	 * approximation: it cannot place icons correctly under perspective, which is exactly
+	 * why icons drifted and cones looked wrong in 3D before this existed.
+	 */
+	@Override
+	public void onPrepareBufferImage(Canvas canvas, RotatedTileBox tileBox, DrawSettings settings) {
+		super.onPrepareBufferImage(canvas, tileBox, settings);
+		MapRendererView mapRenderer = getMapRenderer();
+		if (mapRenderer == null) {
+			return;
+		}
+		if (!enabled || tileBox.getZoom() < TramesCameraSource.MIN_ZOOM) {
+			clearMapMarkersCollections();
+			builtForCameras = -1;
+			return;
+		}
+		source.ensureLoaded(tileBox.getLatLonBounds(), tileBox.getZoom(), () -> {
+			if (view != null) {
+				view.refreshMap();
+			}
+		});
+		List<TramesCameraSource.Camera> cameras = source.getCameras();
+		int identity = cameras.hashCode();
+		if (identity != builtForCameras) {
+			clearMapMarkersCollections();
+			buildMarkers(mapRenderer, cameras);
+			builtForCameras = identity;
+		}
+	}
+
+	private void buildMarkers(@NonNull MapRendererView mapRenderer,
+	                          @NonNull List<TramesCameraSource.Camera> cameras) {
+		if (icon == null || coneBitmap == null || cameras.isEmpty()) {
+			return;
+		}
+		mapMarkersCollection = new MapMarkersCollection();
+		for (TramesCameraSource.Camera cam : cameras) {
+			MapMarkerBuilder b = new MapMarkerBuilder();
+			b.setPosition(new PointI(MapUtils.get31TileNumberX(cam.lon),
+							MapUtils.get31TileNumberY(cam.lat)))
+					.setIsAccuracyCircleSupported(false)
+					.setBaseOrder(getPointsOrder())
+					// Billboard pin: always faces the viewer, so the icon stays legible
+					// however the map is rotated or tilted.
+					.setPinIcon(NativeUtilities.createSkImageFromBitmap(icon))
+					.setPinIconHorisontalAlignment(MapMarker.PinIconHorisontalAlignment.CenterHorizontal)
+					.setPinIconVerticalAlignment(MapMarker.PinIconVerticalAlignment.CenterVertical);
+
+			// One surface cone per head, so multi-head units show every direction they
+			// actually watch rather than just the first.
+			int heads = Math.min(cam.directions.length, MAX_CONES);
+			for (int i = 0; i < heads; i++) {
+				b.addOnMapSurfaceIcon(SwigUtilities.getOnSurfaceIconKey(i + 1),
+						NativeUtilities.createSkImageFromBitmap(coneBitmap));
+			}
+			MapMarker marker = b.buildAndAddToCollection(mapMarkersCollection);
+			for (int i = 0; i < heads; i++) {
+				marker.setOnMapSurfaceIconDirection(
+						SwigUtilities.getOnSurfaceIconKey(i + 1), cam.directions[i]);
+			}
+		}
+		mapRenderer.addSymbolsProvider(mapMarkersCollection);
 	}
 
 	public void setEnabled(boolean enabled) {
@@ -118,6 +230,11 @@ public class TramesCameraLayer extends OsmandMapLayer implements IRouteInformati
 	@Override
 	public void onDraw(Canvas canvas, RotatedTileBox tileBox, DrawSettings settings) {
 		if (!enabled || bitmapPaint == null) {
+			return;
+		}
+		// In OpenGL mode the markers are drawn by onPrepareBufferImage via the renderer;
+		// drawing here as well would double them up and misplace the copies in 3D.
+		if (getMapRenderer() != null) {
 			return;
 		}
 		int zoom = tileBox.getZoom();
@@ -220,6 +337,7 @@ public class TramesCameraLayer extends OsmandMapLayer implements IRouteInformati
 
 	@Override
 	public void destroyLayer() {
+		clearMapMarkersCollections();
 		if (routingHelper != null) {
 			routingHelper.removeListener(this);
 		}
