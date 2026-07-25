@@ -77,7 +77,33 @@ public class TramesEngine extends GraphhopperEngine {
 			"0.01"     // MAXIMUM  — avoids every camera it can reach an alternative around
 	};
 
+	/**
+	 * On-screen labels, index-aligned with {@link #BERTH_MULTIPLIERS}. Deliberately named
+	 * rather than numeric: the multipliers are non-linear and density-dependent, so a raw
+	 * "0.05" tells a user nothing useful about what they'll get.
+	 */
+	public static final int[] BERTH_LABEL_RES = {
+			R.string.trames_berth_off,
+			R.string.trames_berth_light,
+			R.string.trames_berth_moderate,
+			R.string.trames_berth_strong,
+			R.string.trames_berth_maximum
+	};
+
 	private static final int DEFAULT_BERTH = 3;   // STRONG
+
+	/** Default avoidance level, used when nothing has been stored yet. */
+	public static int getDefaultBerthLevel() {
+		return DEFAULT_BERTH;
+	}
+
+	/** Clamp an arbitrary stored value to a valid level index. */
+	public static int clampBerthLevel(int level) {
+		if (level < 0) {
+			return 0;
+		}
+		return level >= BERTH_MULTIPLIERS.length ? BERTH_MULTIPLIERS.length - 1 : level;
+	}
 
 	public TramesEngine(@Nullable Map<String, String> params) {
 		super(params);
@@ -101,10 +127,15 @@ public class TramesEngine extends GraphhopperEngine {
 		return "TRAMES";
 	}
 
+	/**
+	 * Public TRAMES routing endpoint. Token-gated — an unauthenticated request gets 403,
+	 * so the API key field is not optional. Self-hosters override this with a custom URL;
+	 * see https://github.com/KaraZajac/TRAMES-server.
+	 */
 	@NonNull
 	@Override
 	public String getStandardUrl() {
-		return "https://api.blackflagintel.com/gh/route";
+		return "https://routing.blackflagintel.com/route";
 	}
 
 	@Override

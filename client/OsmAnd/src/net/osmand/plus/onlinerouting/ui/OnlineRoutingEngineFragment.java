@@ -38,6 +38,7 @@ import net.osmand.plus.onlinerouting.OnlineRoutingUtils;
 import net.osmand.plus.onlinerouting.VehicleType;
 import net.osmand.plus.onlinerouting.engine.EngineType;
 import net.osmand.plus.onlinerouting.engine.OnlineRoutingEngine;
+import net.osmand.plus.onlinerouting.engine.TramesEngine;
 import net.osmand.plus.profiles.SelectOnlineApproxProfileBottomSheet;
 import net.osmand.plus.routepreparationmenu.cards.BaseCard;
 import net.osmand.plus.settings.backend.ApplicationMode;
@@ -82,6 +83,7 @@ public class OnlineRoutingEngineFragment extends BaseFullScreenFragment implemen
 	private OnlineRoutingCard approximateCard;
 	private OnlineRoutingCard useExternalTimestampsCard;
 	private OnlineRoutingCard routingFallbackCard;
+	private OnlineRoutingCard berthCard;
 	private OnlineRoutingCard exampleCard;
 	private View testResultsContainer;
 	private DialogButton saveButton;
@@ -138,6 +140,7 @@ public class OnlineRoutingEngineFragment extends BaseFullScreenFragment implemen
 		setupExternalTimestampsCard();
 		setupRoutingFallbackCard();
 		setupApiKeyCard();
+		setupBerthCard();
 		setupExampleCard();
 		setupResultsContainer();
 		setupButtons();
@@ -339,6 +342,49 @@ public class OnlineRoutingEngineFragment extends BaseFullScreenFragment implemen
 		segmentsContainer.addView(apiKeyCard.getView());
 	}
 
+
+	/**
+	 * TRAMES: how hard to avoid roads watched by licence-plate readers.
+	 *
+	 * Built entirely in Java and added to segmentsContainer, deliberately — OsmAnd's
+	 * res/ is CC-BY-NC-ND (No Derivatives), so TRAMES adds no layout XML and edits none
+	 * of theirs. The card auto-hides for other engines via isParameterAllowed().
+	 */
+	private void setupBerthCard() {
+		berthCard = new OnlineRoutingCard(mapActivity, isNightMode(), appMode);
+		berthCard.build(mapActivity);
+		berthCard.setHeaderTitle(getString(R.string.trames_berth_title));
+
+		int current = TramesEngine.getDefaultBerthLevel();
+		String stored = engine.get(EngineParameter.TRAMES_BERTH);
+		if (!Algorithms.isEmpty(stored)) {
+			try {
+				current = TramesEngine.clampBerthLevel(Integer.parseInt(stored));
+			} catch (NumberFormatException e) {
+				// keep the default; a corrupt preference shouldn't break the screen
+			}
+		}
+
+		List<ChipItem> items = new ArrayList<>();
+		for (int i = 0; i < TramesEngine.BERTH_LABEL_RES.length; i++) {
+			String title = getString(TramesEngine.BERTH_LABEL_RES[i]);
+			ChipItem item = new ChipItem(title);
+			item.title = title;
+			item.contentDescription = title;
+			item.tag = i;
+			items.add(item);
+		}
+		berthCard.setSelectionMenu(items, getString(TramesEngine.BERTH_LABEL_RES[current]),
+				result -> {
+					engine.put(EngineParameter.TRAMES_BERTH, String.valueOf((Integer) result.tag));
+					updateCardViews(exampleCard);
+					return true;
+				});
+		berthCard.setDescription(getString(R.string.trames_berth_descr));
+		berthCard.showDivider();
+		segmentsContainer.addView(berthCard.getView());
+	}
+
 	private void setupExampleCard() {
 		exampleCard = new OnlineRoutingCard(mapActivity, isNightMode(), appMode);
 		exampleCard.build(mapActivity);
@@ -535,6 +581,7 @@ public class OnlineRoutingEngineFragment extends BaseFullScreenFragment implemen
 				updateCardVisibility(approximateCard, EngineParameter.APPROXIMATION_ROUTING_PROFILE);
 				updateCardVisibility(useExternalTimestampsCard, EngineParameter.USE_EXTERNAL_TIMESTAMPS);
 				updateCardVisibility(routingFallbackCard, EngineParameter.USE_ROUTING_FALLBACK);
+				updateCardVisibility(berthCard, EngineParameter.TRAMES_BERTH);
 
 			} else if (vehicleCard.equals(card)) {
 				VehicleType vt = engine.getSelectedVehicleType();

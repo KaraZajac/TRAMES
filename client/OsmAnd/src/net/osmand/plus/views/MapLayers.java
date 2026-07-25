@@ -20,6 +20,7 @@ import net.osmand.core.android.MapRendererView;
 import net.osmand.map.ITileSource;
 import net.osmand.map.TileSourceManager.TileSourceTemplate;
 import net.osmand.plus.OsmandApplication;
+import net.osmand.plus.trames.TramesCameraLayer;
 import net.osmand.plus.R;
 import net.osmand.plus.activities.MapActivity;
 import net.osmand.plus.measurementtool.MeasurementToolLayer;
@@ -76,6 +77,7 @@ public class MapLayers {
 	private GPXLayer gpxLayer;
 	private RouteLayer routeLayer;
 	private PreviewRouteLineLayer previewRouteLineLayer;
+	private TramesCameraLayer tramesCameraLayer;
 	private POIMapLayer poiMapLayer;
 	private FavouritesLayer mFavouritesLayer;
 	private TransportStopsLayer transportStopsLayer;
@@ -145,6 +147,11 @@ public class MapLayers {
 		// 1.5 preview route line layer
 		previewRouteLineLayer = new PreviewRouteLineLayer(app);
 		mapView.addLayer(previewRouteLineLayer, 1.5f);
+
+		// TRAMES: ALPR cameras. Ordered just above the route line so the cones read as
+		// context for the route rather than obscuring it.
+		tramesCameraLayer = new TramesCameraLayer(app);
+		mapView.addLayer(tramesCameraLayer, 1.6f);
 
 		// 2. osm bugs layer
 		// 3. poi layer
@@ -605,6 +612,10 @@ public class MapLayers {
 
 	public RouteLayer getRouteLayer() {
 		return routeLayer;
+	}
+
+	public TramesCameraLayer getTramesCameraLayer() {
+		return tramesCameraLayer;
 	}
 
 	public PreviewRouteLineLayer getPreviewRouteLineLayer() {
