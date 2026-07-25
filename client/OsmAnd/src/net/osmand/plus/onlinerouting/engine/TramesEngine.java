@@ -128,9 +128,13 @@ public class TramesEngine extends GraphhopperEngine {
 	}
 
 	/**
-	 * Public TRAMES routing endpoint. Token-gated — an unauthenticated request gets 403,
-	 * so the API key field is not optional. Self-hosters override this with a custom URL;
-	 * see https://github.com/KaraZajac/TRAMES-server.
+	 * Public TRAMES routing endpoint. Open — no key required.
+	 *
+	 * It is not token-gated because a token shipped in a public APK is extractable in
+	 * seconds and was never real security. The server is protected instead by a systemd
+	 * cgroup cap so routing load cannot starve the other services on that host.
+	 * Self-hosters override this with a custom URL; see
+	 * https://github.com/KaraZajac/TRAMES-server.
 	 */
 	@NonNull
 	@Override
@@ -150,7 +154,10 @@ public class TramesEngine extends GraphhopperEngine {
 		params.add(EngineParameter.CUSTOM_NAME);
 		params.add(EngineParameter.NAME_INDEX);
 		params.add(EngineParameter.CUSTOM_URL);
-		params.add(EngineParameter.API_KEY);
+		// API_KEY deliberately NOT offered. The public endpoint is open, so an API key
+		// field would imply a setup step that doesn't exist. Self-hosters who put their
+		// own auth in front of GraphHopper can still have a token sent — see
+		// getRequestHeaders() — it just isn't surfaced in the UI.
 		params.add(EngineParameter.TRAMES_BERTH);
 	}
 
@@ -172,9 +179,9 @@ public class TramesEngine extends GraphhopperEngine {
 	public Map<String, String> getRequestHeaders() {
 		Map<String, String> headers = new HashMap<>();
 		headers.put("Content-Type", "application/json");
-		// The proxy in front of GraphHopper authenticates with a scoped, revocable
-		// token. Same arrangement OVERWATCH uses for its Waze feed: the token is entered
-		// in settings and stored on-device, never baked into the APK.
+		// Kept for self-hosters who put their own auth in front of GraphHopper. Not
+		// surfaced in the UI (see collectAllowedParameters) because the public endpoint
+		// needs no key, but honoured if a stored config carries one.
 		String apiKey = get(EngineParameter.API_KEY);
 		if (!isEmpty(apiKey)) {
 			headers.put("X-App-Token", apiKey);
