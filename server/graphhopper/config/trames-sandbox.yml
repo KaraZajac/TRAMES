@@ -1,0 +1,114 @@
+# TRAMES routing backend — GraphHopper 11.0
+#
+# Phase 1: plain `car` profile, no ALPR awareness yet. The point of this config is
+# to prove the pipe end-to-end (OSM extract -> graph -> /route -> stock OsmAnd).
+#
+# Phase 2 will add:
+#   - `alpr_exposure` to graph.encoded_values (a custom TagParser writes it at import
+#     after cone-snapping DeFlock/OSM ALPR points onto the ways they actually watch)
+#   - a `car_alpr` profile whose custom model multiplies priority down on those edges
+#
+# Run:
+#   import:  java -Xmx24g -jar graphhopper-web-11.0.jar import config/trames.yml
+#   serve:   java -Xmx8g  -jar graphhopper-web-11.0.jar server config/trames.yml
+# The PBF is passed via -Ddw.graphhopper.datareader.file=... (see scripts/).
+
+graphhopper:
+  datareader.file: ""
+  graph.location: test-sandbox/graph-cache
+
+  custom_models.directory: custom_models
+  custom_areas.directory: custom_areas
+
+  profiles:
+    - name: car
+      custom_model_files: [car.json]
+
+
+  # Speed mode (Contraction Hierarchies) is DISABLED for now.
+  #
+  # CH is the most expensive stage of a continental import in both peak memory and
+  # wall-clock, and it buys us nothing through phase 2: the profile that actually
+  # matters (car_alpr) is LM-only by design, because CH would bake the avoidance
+  # weighting into the graph and make the berth strength fixed at import time.
+  # Serving `car` from LM as well is slower but perfectly adequate for a baseline
+  # comparison, and it keeps the latency benchmark measuring the same engine that
+  # production avoidance will actually use.
+  #
+  # Re-enable once the ALPR model is settled and we want a fast "fastest route".
+  # profiles_ch:
+  #   - profile: car
+  profiles_ch: []
+
+  # Hybrid mode (Landmarks). REQUIRED for TRAMES's actual feature: a per-request
+  # `custom_model` needs `ch.disable=true`, which drops out of speed mode. Without an
+  # LM preparation that falls all the way back to flexible mode (Dijkstra-ish, slow on
+  # long routes). With LM it stays usable, and the avoidance strength can be a
+  # continuous slider instead of a handful of pre-baked CH profiles.
+  #
+  # NOTE: LM preparation is the expensive part of a North America import — budget RAM
+  # and time accordingly. Delaware is instant; NA is not.
+  profiles_lm:
+    - profile: car
+    # Reuse car's landmark preparation instead of computing a second one. GraphHopper
+    # allows this only when the borrowing profile's weights are >= the preparation
+    # profile's on EVERY edge. That holds here by construction: car_alpr is car.json
+    # plus priority multipliers that are always <= 1, and lower priority means higher
+    # weight. So car's landmarks stay an admissible (never-overestimating) heuristic.
+    #
+    # This halves LM preparation on a North America import. If a future custom model
+    # ever *raises* priority above 1.0 on any edge, this becomes incorrect and must be
+    # split back into its own preparation.
+
+  # car.json (in-built) needs car_access + car_average_speed + road_access.
+  # road_class and osm_way_id are ours: road_class for sanity-checking which road
+  # classes cameras land on, osm_way_id so phase 2 can join camera->way deterministically.
+  graph.encoded_values: car_access, car_average_speed, road_access, road_class, osm_way_id
+
+  # Hybrid/flexible queries visit more nodes than CH. The default cap can abort long
+  # avoidance routes with "connection not found", which would look like a routing bug.
+  routing.max_visited_nodes: 5000000
+
+  routing.snap_preventions_default: tunnel, bridge, ferry
+
+  # Straight-line cap between consecutive waypoints in non-CH (hybrid/flexible) mode.
+  # The example config's 1,000 km rejects any transcontinental route — NYC->LA is
+  # ~3,900 km and failed with "Point 1 is too far from Point 0". Since CH is disabled
+  # every request goes through this path, so it has to cover the graph's full extent.
+  routing.non_ch.max_waypoint_distance: 10000000
+
+  # Mandatory in GH 11. Motorized-only set — drops footways/cycleways/paths/steps, which
+  # shrinks the graph and (more importantly) removes junctions cars can't use anyway.
+  # Keep `track` in the graph: rural ALPR detours legitimately use tracks sometimes.
+  import.osm.ignored_highways: footway,construction,cycleway,path,steps
+
+  graph.dataaccess.default_type: RAM_STORE
+
+server:
+  application_connectors:
+    - type: http
+      port: 8999
+      # Bind to localhost — Caddy on api.blackflagintel.com will front this when we
+      # deploy. Never expose GraphHopper directly; it has no auth or rate limiting.
+      bind_host: localhost
+      max_request_header_size: 50k
+  request_log:
+    appenders: []
+  admin_connectors:
+    - type: http
+      port: 9000
+      bind_host: localhost
+
+logging:
+  appenders:
+    - type: file
+      time_zone: UTC
+      current_log_filename: logs/graphhopper.log
+      log_format: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+      archive: true
+      archived_log_filename_pattern: ./logs/graphhopper-%d.log.gz
+      archived_file_count: 30
+      never_block: true
+    - type: console
+      time_zone: UTC
+      log_format: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"

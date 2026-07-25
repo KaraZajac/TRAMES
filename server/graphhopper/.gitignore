@@ -1,0 +1,5 @@
+data/*.pbf
+data/graph-cache/
+logs/
+graphhopper-web-*.jar
+config/config-example.yml

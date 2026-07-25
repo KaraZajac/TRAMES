@@ -1,0 +1,17 @@
+{
+  "priority": [
+    { "if": "in_alpr_zone", "multiply_by": "0.05" }
+  ],
+  "areas": {
+    "type": "FeatureCollection",
+    "features": [{
+      "type": "Feature",
+      "id": "alpr_zone",
+      "properties": {},
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-75.70,39.15],[-75.50,39.15],[-75.50,39.40],[-75.70,39.40],[-75.70,39.15]]]
+      }
+    }]
+  }
+}

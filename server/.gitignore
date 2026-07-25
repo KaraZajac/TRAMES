@@ -1,0 +1,19 @@
+# Large derived/downloaded artifacts — regenerate, don't commit
+*.pbf
+graph-cache/
+test-sandbox/
+logs/
+graphhopper-web-*.jar
+.venv/
+
+# Overpass responses and generated cone geometry (55 MB) — rebuild with build_cones.py
+region_cache/
+tile_cache/
+alpr/tile_cache/
+# NOTE: a pattern containing a slash is anchored to this file's directory,
+# so it needs the ** prefix to match graphhopper/custom_areas/.
+**/custom_areas/alpr.geojson
+config/config-example.yml
+
+__pycache__/
+*.pyc
