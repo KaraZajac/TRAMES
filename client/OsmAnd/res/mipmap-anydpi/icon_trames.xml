@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  TRAMES launcher icon — pre-API-26 fallback.
+
+  minSdk is 24, and <adaptive-icon> only exists from API 26. Without this file
+  @mipmap/icon_trames would fail to resolve on API 24-25: the -v26 qualifier simply
+  doesn't match, so the reference dangles. This is the same mark drawn as a single
+  flat VectorDrawable, with the background baked in as a rounded tile since there is
+  no separate background layer pre-26.
+
+  Original work for TRAMES — see ic_trames_foreground.xml on why branding is new files
+  rather than edits of OsmAnd's CC-BY-NC-ND artwork.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- rounded tile stands in for the adaptive background layer -->
+    <path
+        android:fillColor="#161A20"
+        android:pathData="M22,4 L86,4 A18,18 0 0,1 104,22 L104,86 A18,18 0 0,1 86,104
+                          L22,104 A18,18 0 0,1 4,86 L4,22 A18,18 0 0,1 22,4 z" />
+
+    <path
+        android:pathData="M54,86 L54,62"
+        android:strokeColor="#E8EDF2"
+        android:strokeWidth="8"
+        android:strokeLineCap="round" />
+
+    <path
+        android:pathData="M54,62 L54,40"
+        android:strokeColor="#5A6472"
+        android:strokeWidth="8"
+        android:strokeLineCap="round" />
+
+    <path
+        android:pathData="M54,62 C54,48 44,38 30,33"
+        android:strokeColor="#E8EDF2"
+        android:strokeWidth="8"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <path
+        android:fillColor="#D9584B"
+        android:pathData="M54,27 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0" />
+</vector>

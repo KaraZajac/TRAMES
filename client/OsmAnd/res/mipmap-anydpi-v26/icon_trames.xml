@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  TRAMES adaptive launcher icon.
+
+  A new file rather than an edit of OsmAnd's icon.xml — their res/ is CC-BY-NC-ND 4.0
+  (No Derivatives), so we add our own and point the manifest here, leaving theirs
+  untouched on disk.
+-->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/ic_trames_background" />
+    <foreground android:drawable="@drawable/ic_trames_foreground" />
+    <monochrome android:drawable="@drawable/ic_trames_monochrome" />
+</adaptive-icon>

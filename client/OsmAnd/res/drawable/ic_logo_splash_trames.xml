@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  TRAMES splash logo. Original work for TRAMES.
+
+  Replaces ic_logo_splash_osmand on the launch screen. An app named TRAMES showing
+  OsmAnd's logo at startup would imply endorsement that doesn't exist — the single most
+  visible piece of branding in the app, and the first thing a user sees.
+
+  Same mark as the launcher icon, drawn larger: a route forks, one branch continues into
+  a camera's view, the other veers clear.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="180dp"
+    android:height="180dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <path
+        android:pathData="M54,92 L54,64"
+        android:strokeColor="#E8EDF2"
+        android:strokeWidth="7"
+        android:strokeLineCap="round" />
+
+    <path
+        android:pathData="M54,64 L54,38"
+        android:strokeColor="#5A6472"
+        android:strokeWidth="7"
+        android:strokeLineCap="round" />
+
+    <path
+        android:pathData="M54,64 C54,49 43,38 26,32"
+        android:strokeColor="#E8EDF2"
+        android:strokeWidth="7"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <path
+        android:fillColor="#D9584B"
+        android:pathData="M54,24 m-7,0 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0" />
+</vector>

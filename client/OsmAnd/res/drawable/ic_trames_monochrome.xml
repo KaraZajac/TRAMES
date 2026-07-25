@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  TRAMES launcher icon — monochrome layer for Android 13+ themed icons.
+
+  Original work for TRAMES; see ic_trames_foreground.xml for why branding is new files
+  rather than edits of OsmAnd's CC-BY-NC-ND artwork.
+
+  Themed icons are tinted by the system to a single colour, so the two-tone contrast
+  that distinguishes the watched road from the byway is unavailable here. The camera
+  dot is therefore drawn hollow — a ring reads as a distinct object under a flat tint,
+  where a filled dot would merge into the stroke it sits on.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <path
+        android:pathData="M54,90 L54,64"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="8"
+        android:strokeLineCap="round" />
+
+    <path
+        android:pathData="M54,64 L54,40"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="4"
+        android:strokeLineCap="round" />
+
+    <path
+        android:pathData="M54,64 C54,50 44,40 28,34"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="8"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <path
+        android:pathData="M54,26 m-7,0 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="4" />
+</vector>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  TRAMES-owned resources.
+
+  A NEW values file rather than additions to OsmAnd's strings.xml / styles.xml /
+  colors.xml. OsmAnd's res/ is CC-BY-NC-ND 4.0 (No Derivatives), so everything TRAMES
+  adds lives in its own files; theirs are used unmodified or replaced wholesale, never
+  edited in place. Keeping all TRAMES resources here also means the fork's additions
+  are trivially auditable and don't conflict on upstream rebases.
+-->
+<resources>
+
+    <!-- ── branding ─────────────────────────────────────────────────────────── -->
+    <color name="trames_splash_background">#161A20</color>
+
+    <style name="FirstSplashScreenTrames" parent="SplashScreenBaseTheme">
+        <item name="android:windowBackground">@drawable/trames_splash_screen</item>
+    </style>
+
+    <!-- ── ALPR avoidance routing ───────────────────────────────────────────── -->
+    <string name="trames_routing_engine_title">TRAMES (ALPR avoidance)</string>
+    <string name="trames_berth_title">Camera avoidance</string>
+    <string name="trames_berth_descr">How hard to avoid roads watched by licence-plate readers. Stronger settings take longer routes.</string>
+
+    <!--
+      Slider labels. The underlying GraphHopper priority multiplier is NOT linear and
+      its useful range is roughly 0.3 down to 0.01 — measured on the continental graph,
+      everything from 1.0 to 0.3 changes nothing on most routes. Exposing raw numbers
+      would give the user a control that appears dead for two thirds of its travel, so
+      the UI offers named steps mapped onto the range that actually does something.
+    -->
+    <string name="trames_berth_off">Off — fastest route</string>
+    <string name="trames_berth_light">Light — avoid where it\'s cheap</string>
+    <string name="trames_berth_moderate">Moderate</string>
+    <string name="trames_berth_strong">Strong</string>
+    <string name="trames_berth_maximum">Maximum — avoid all cameras</string>
+
+</resources>

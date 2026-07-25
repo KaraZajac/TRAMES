@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  TRAMES launcher icon — foreground layer.
+
+  Original work for TRAMES. Not derived from OsmAnd artwork (their res/ is
+  CC-BY-NC-ND 4.0, No Derivatives), so branding is new files, never edits of theirs.
+
+  The glyph is the product in one mark: a route reaches a fork. One branch runs
+  straight on into a camera's view (the dot). The other — the trames, the byway —
+  veers off and misses it.
+
+  Kept to three strokes and one dot deliberately: at 48dp in a launcher, anything
+  finer turns to mush. Content sits inside the centre 72x72 safe zone (roughly
+  x,y 18..90) so no part of the mark is clipped by a circular or squircle mask.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- shared stem, entering from the bottom -->
+    <path
+        android:pathData="M54,90 L54,64"
+        android:strokeColor="#E8EDF2"
+        android:strokeWidth="8"
+        android:strokeLineCap="round" />
+
+    <!-- the watched road: continues straight, into the camera -->
+    <path
+        android:pathData="M54,64 L54,40"
+        android:strokeColor="#5A6472"
+        android:strokeWidth="8"
+        android:strokeLineCap="round" />
+
+    <!-- the byway: veers away and clears the cone -->
+    <path
+        android:pathData="M54,64 C54,50 44,40 28,34"
+        android:strokeColor="#E8EDF2"
+        android:strokeWidth="8"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- the camera, sitting on the road nobody should take -->
+    <path
+        android:fillColor="#D9584B"
+        android:pathData="M54,26 m-8,0 a8,8 0 1,0 16,0 a8,8 0 1,0 -16,0" />
+</vector>

@@ -3,16 +3,24 @@
           xmlns:tools="http://schemas.android.com/tools">
 	
     <application
-        android:icon="@mipmap/icon_nightly"
+        android:icon="@mipmap/icon_trames"
         tools:replace="android:icon">
         <activity
             android:name="net.osmand.plus.activities.MapActivity"
-            android:theme="@style/FirstSplashScreenNightlyFree"
+            android:theme="@style/FirstSplashScreenTrames"
             tools:replace="android:theme"/>
 
+        <!--
+            Authority MUST track applicationId. AndroidUtils.getUriForFile() asks for
+            `context.getPackageName() + ".fileprovider"`, so a hardcoded authority that
+            doesn't match the applicationId makes every file share (GPX export, track
+            sharing) throw IllegalArgumentException at runtime — and blocks installing
+            alongside a real OsmAnd, since two apps cannot declare the same authority.
+            Using ${applicationId} keeps them in lockstep across flavours and renames.
+        -->
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="net.osmand.dev.fileprovider"
+            android:authorities="${applicationId}.fileprovider"
             tools:replace="android:authorities"/>
     </application>
 </manifest> 

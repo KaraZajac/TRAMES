@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  TRAMES launch screen. New file, not an edit of first_splash_screen_free_dev.xml —
+  OsmAnd's res/ is CC-BY-NC-ND (No Derivatives), so we add our own and point the
+  manifest at it, leaving theirs untouched on disk.
+
+  Referencing OsmAnd's @dimen/splash_screen_logo_top is deliberate: using a resource
+  unmodified is permitted, and matching their vertical placement keeps the launch
+  transition from jumping.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:opacity="opaque">
+    <item android:drawable="@color/trames_splash_background" />
+    <item android:top="@dimen/splash_screen_logo_top">
+        <bitmap
+            android:gravity="center_horizontal|top"
+            android:src="@drawable/ic_logo_splash_trames" />
+    </item>
+</layer-list>

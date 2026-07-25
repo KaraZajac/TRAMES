@@ -6,6 +6,7 @@ import net.osmand.util.Algorithms;
 
 public class EngineType {
 
+	public static final OnlineRoutingEngine TRAMES_TYPE = new TramesEngine(null);
 	public static final OnlineRoutingEngine GRAPHHOPPER_TYPE = new GraphhopperEngine(null);
 	public static final OnlineRoutingEngine OSRM_TYPE = new OsrmEngine(null);
 	public static final OnlineRoutingEngine ORS_TYPE = new OrsEngine(null);
@@ -16,6 +17,7 @@ public class EngineType {
 	public static OnlineRoutingEngine[] values() {
 		if (enginesTypes == null) {
 			enginesTypes = new OnlineRoutingEngine[]{
+					TRAMES_TYPE,
 					GRAPHHOPPER_TYPE,
 					OSRM_TYPE,
 					ORS_TYPE,
