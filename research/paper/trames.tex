@@ -83,11 +83,11 @@ report the equity result as a between-county phenomenon that this design cannot
 attribute to siting, mapping effort, or urban form, and we argue that no study built on
 crowdsourced surveillance data should report such a gradient without this check.
 
-Resolving exposure by vendor sharpens the picture further: the national gradient is
-carried entirely by tolling and transport-agency cameras ($\num{1.39}\times$, disjoint),
-while Flock's own installations---five-sixths of the network---show none
-($\num{0.98}\times$). Per unit deployed, non-Flock cameras reach \num{2.60}$\times$ as
-many commuters.
+Resolving exposure by vendor locates the disparity: tolling and transport-agency cameras
+show a gradient of $\num{1.61}\times$ against $\num{1.20}\times$ for Flock, whose
+installations are five-sixths of the network. Per unit deployed, non-Flock cameras reach
+\num{2.46}$\times$ as many commuters. Every vendor-resolved gradient likewise dissolves
+under within-county ranking.
 
 All code, data acquisition, and analysis are reproducible from public sources.
 \end{abstract}
@@ -137,9 +137,9 @@ read.
     home--work pairs drawn from LEHD LODES with probability proportional to worker count.
   \item \textbf{A vendor-resolved account of exposure.} Flock and the DOT/tolling vendors
     follow different deployment logics---who \emph{buys} surveillance versus where road
-    infrastructure sits. Separating them shows that the national racial gradient belongs
-    to transport infrastructure, not to the vendor that dominates the network and the
-    public argument about it.
+    infrastructure sits. Separating them shows the national racial gradient is
+    substantially stronger in transport infrastructure than in the vendor that dominates
+    both the network and the public argument about it.
   \item \textbf{A coverage-bias control that changes the conclusion.} We show that the
     national demographic gradient does not survive within-county ranking, quantify the
     \num{3.9}$\times$ per-capita spread in mapping intensity that plausibly drives it, and
@@ -658,28 +658,26 @@ Both are avoided at comparable rates under the all-vendor model.}
 \begin{table}[t]
 \centering
 \small
-\caption{Vendor-resolved exposure over \num{15043} routes with saved geometry
-(\num{65380} total camera encounters). Installation shares are of the \num{119132}
-cameras that contribute cones, so they differ slightly from the \num{120838}-node
-denominator of \Cref{tab:tags}; the \num{1706} difference is nodes whose direction value
-did not parse. Flock holds five-sixths of installations and supplies two-thirds of
-exposure; per unit deployed, non-Flock cameras reach \num{2.60}$\times$ as many
-commuters.}
+\caption{Vendor-resolved exposure over all \num{17580} routes (\num{83565} camera
+encounters). Installation shares are of the \num{119132} cameras that contribute cones,
+so they differ slightly from the \num{120838}-node denominator of \Cref{tab:tags}. Flock
+holds five-sixths of installations and supplies two-thirds of exposure; per unit deployed,
+non-Flock cameras reach \num{2.46}$\times$ as many commuters.}
 \label{tab:vendorexp}
 \begin{tabular}{lrrrrr}
 \toprule
 Set & Installations & Exposures & Exposures/\num{1000} cameras & Routes $\geq$1 & Evaded \\
 \midrule
-Flock Safety  & \SI{83.0}{\percent} & \SI{66.6}{\percent} & \num{444}  & \SI{63.8}{\percent} & \SI{95.4}{\percent} \\
-Other vendor  & \SI{12.7}{\percent} & \SI{26.5}{\percent} & \textbf{\num{1156}} & \SI{27.2}{\percent} & \SI{91.4}{\percent} \\
-No vendor tag & \SI{4.3}{\percent}  & \SI{6.9}{\percent}  & \num{885}  & \SI{11.1}{\percent} & \SI{97.6}{\percent} \\
+Flock Safety  & \SI{83.0}{\percent} & \SI{67.9}{\percent} & \num{579}  & \SI{65.6}{\percent} & \SI{95.0}{\percent} \\
+Other vendor  & \SI{12.7}{\percent} & \SI{25.6}{\percent} & \textbf{\num{1423}} & \SI{27.4}{\percent} & \SI{92.1}{\percent} \\
+No vendor tag & \SI{4.3}{\percent}  & \SI{6.5}{\percent}  & \num{1078} & \SI{11.6}{\percent} & \SI{97.1}{\percent} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 Flock Safety holds \SI{83.0}{\percent} of mapped installations but supplies only
-\SI{66.6}{\percent} of measured commute exposure. Per unit deployed, non-Flock cameras
-generate \textbf{\num{2.60}$\times$} more exposure (\Cref{tab:vendorexp}). The mechanism
+\SI{67.9}{\percent} of measured commute exposure. Per unit deployed, non-Flock cameras
+generate \textbf{\num{2.46}$\times$} more exposure (\Cref{tab:vendorexp}). The mechanism
 is visible in the cone geometry of \Cref{tab:vendorsets}: non-Flock units are multi-head
 nearly eight times as often, and DOT and tolling installations sit on the limited-access
 corridors commuters actually use, while a Flock unit watches one residential approach that
@@ -690,9 +688,9 @@ deployment model puts many cameras where comparatively few commuters pass, consi
 a product sold to municipalities and homeowners' associations for neighbourhood coverage
 rather than to transport agencies for corridor coverage.
 
-\subsubsection*{The demographic gradient is not Flock's}
+\subsubsection*{The gradient is stronger in transport infrastructure}
 
-Splitting \Cref{sec:results:demo} by vendor produces the sharpest result in this study.
+Splitting \Cref{sec:results:demo} by vendor locates where the national disparity lives.
 
 \begin{table}[h]
 \centering
@@ -704,40 +702,47 @@ then subjected to the within-county control of \Cref{sec:results:coverage}.}
 \toprule
 Camera set & National & Within-county & National verdict \\
 \midrule
-Flock Safety  & \num{0.98} & \num{0.95} & indistinguishable \\
-Other vendor  & \textbf{\num{1.39}} & \num{1.17} & \textbf{CIs disjoint} \\
-No vendor tag & \num{1.28} & \num{1.16} & indistinguishable \\
+Flock Safety  & \num{1.20} & \num{0.95} & CIs disjoint \\
+Other vendor  & \textbf{\num{1.61}} & \num{1.18} & \textbf{CIs disjoint} \\
+No vendor tag & \num{1.18} & \num{1.10} & indistinguishable \\
 \midrule
-All vendors   & \textbf{\num{1.29}} & \num{1.02} & \textbf{CIs disjoint} \\
+All vendors   & \num{1.29} & \num{1.02} & CIs disjoint \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\textbf{Flock exposure shows no racial gradient whatsoever}---\num{0.98}$\times$
-nationally, with overlapping intervals. The entire all-vendor gradient of
-\num{1.29}$\times$ is carried by the \emph{other} vendors: DOT, tolling, and
-large-agency installations, at \num{1.39}$\times$ with disjoint intervals.
+Both major camera populations show a statistically distinguishable national gradient, but
+they are not equal: transport-agency and tolling cameras reach commuters from the highest
+quartile of Black population at \num{1.61}$\times$ the rate of the lowest, against
+\num{1.20}$\times$ for Flock. The disparity is roughly a third larger in infrastructure
+that no municipal council votes on.
 
-This is worth stating plainly because it inverts the intuition that motivates most public
-attention. Flock is the vendor named in municipal debates, and it holds five-sixths of the
-cameras---yet on this measure its installations reach Black and non-Black commuters at
-indistinguishable rates. The measured disparity attaches to highway and tolling
-infrastructure instead.
-
-A historical reading suggests itself: mid-century urban highway construction routed
+A historical reading suggests itself. Mid-century urban highway construction routed
 limited-access corridors through Black neighbourhoods on a scale that is extensively
 documented, and tolling and DOT camera infrastructure sits on exactly those corridors. On
-that account the gradient would be a sixty-year-old artefact of road building rather than a
-contemporary artefact of camera procurement. We note the hypothesis; this design cannot
-test it.
+that account the stronger gradient would be a decades-old artefact of road building rather
+than a contemporary artefact of camera procurement. We note the hypothesis; this design
+cannot test it.
 
-And the same discipline applied in \Cref{sec:results:coverage} applies here. Under
-within-county ranking the non-Flock gradient attenuates from \num{1.39}$\times$ to
-\num{1.17}$\times$ and its intervals overlap. It is directionally persistent---the Q4
-per-kilometre rate remains about \SI{22}{\percent} above Q1---but it is no longer
-distinguishable, so it too must be reported as a between-county phenomenon. Holding RQ5 to
-a weaker evidentiary standard than RQ3 would have let a between-county artefact return
-wearing a vendor label.
+And the discipline of \Cref{sec:results:coverage} applies here without exception. Under
+within-county ranking every vendor-resolved gradient loses significance---Flock to
+\num{0.95}$\times$, other vendors to \num{1.18}$\times$, untagged to \num{1.10}$\times$,
+all with overlapping intervals. The non-Flock figure remains directionally positive but is
+no longer distinguishable. These are between-county phenomena exactly as the pooled result
+was. Holding RQ5 to a weaker evidentiary standard than RQ3 would have let a between-county
+artefact return wearing a vendor label.
+
+\paragraph{A correction, and what it cost.}
+An earlier pass of this analysis ran on \num{15043} of the \num{17580} routes and reported
+that Flock exposure showed \emph{no} racial gradient at all ($\num{0.98}\times$,
+overlapping). That was wrong, and the error is instructive. The route-geometry sidecar is
+a gzip file appended to by more than one process, which makes it several concatenated gzip
+members; the reader used a single decompressor, which stops at the end of the first member
+and returns \emph{successfully}. The missing \SI{14}{\percent} was not merely noise---it
+moved Flock from ``no gradient'' to a disjoint \num{1.20}$\times$ and would have supported
+a considerably stronger and more quotable claim than the data sustain. We record it
+because a silent truncation that returns success is the failure mode least likely to be
+caught by inspection, and because the corrected finding is the less convenient one.
 
 \section{Discussion}
 \label{sec:discussion}
@@ -769,27 +774,28 @@ national inventory exists. Any such study that reports a demographic correlation
 a within-locality control is at serious risk of reporting the demography of \emph{mappers}
 rather than of the surveilled. We would encourage that control to become routine.
 
-\subsection{Attention and exposure are pointed at different vendors}
+\subsection{Attention and exposure are aimed at different infrastructure}
 
 Flock Safety is the name in municipal council debates, in local journalism, and in the
 activist mapping effort that produced the data underlying this paper. It holds five-sixths
-of mapped installations. Yet its cameras show no measurable racial gradient in commute
-exposure, and per unit deployed they reach less than half as many commuters as a tolling or
-transport-agency camera.
+of mapped installations. Yet per unit deployed its cameras reach fewer than half as many
+commuters as a tolling or transport-agency camera, and the racial gradient in its exposure
+is roughly a third weaker.
 
-We do not read this as exonerating. A camera at the entrance of a residential subdivision
-is doing something qualitatively different from a camera on a toll gantry: it observes a
-small population repeatedly rather than a large population once, and repeated observation
-of a known small set is precisely what makes pattern-of-life inference possible. Commute
-exposure measures breadth, not depth, and Flock's model appears optimised for depth. A
-study designed around repeat observation of the same vehicle would likely reverse the
-ordering reported here, and we would expect it to.
+We do not read this as exonerating, for a reason the measurement itself makes clear. A
+camera at the entrance of a residential subdivision does something qualitatively different
+from a camera on a toll gantry: it observes a small population repeatedly rather than a
+large population once, and repeated observation of a known small set is precisely what
+makes pattern-of-life inference possible. Commute exposure measures breadth, not depth, and
+Flock's model appears optimised for depth. A study designed around repeat observation of
+the same vehicle would likely reverse the ordering reported here, and we would expect it
+to.
 
-What the result does establish is that the public conversation has attached a distributional
-concern to the wrong infrastructure. If the question is which cameras disproportionately
-watch Black commuters on their way to work, the measured answer is highway and tolling
-cameras---installed by transport agencies, largely absent from the municipal debate, and
-sited on corridors laid down decades before \alpr existed.
+What the result does establish is that a distributional concern has been attached
+disproportionately to one vendor. The infrastructure with the steeper measured gradient is
+installed by transport agencies, largely absent from the municipal debate, and sited on
+corridors laid down decades before \alpr existed. Regulation aimed only at the vendor
+currently in the news would leave the larger measured disparity untouched.
 
 \subsection{Where the burden actually concentrates}
 
