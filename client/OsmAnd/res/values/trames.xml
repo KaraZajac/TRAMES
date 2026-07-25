@@ -35,4 +35,9 @@
     <string name="trames_berth_strong">Strong</string>
     <string name="trames_berth_maximum">Maximum — avoid all cameras</string>
 
+
+    <!-- Route exposure readout -->
+    <string name="trames_exposure_none">No licence-plate readers can see this route</string>
+    <string name="trames_exposure_count">%1$d licence-plate reader(s) can see this route</string>
+
 </resources>

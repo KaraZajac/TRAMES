@@ -1,15 +1,24 @@
 package net.osmand.plus.trames;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 
-import androidx.annotation.NonNull;
+import android.graphics.drawable.Drawable;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.content.res.AppCompatResources;
+
+import net.osmand.Location;
 import net.osmand.data.QuadRect;
 import net.osmand.data.RotatedTileBox;
+import net.osmand.plus.OsmandApplication;
+import net.osmand.plus.R;
+import net.osmand.plus.routing.IRouteInformationListener;
+import net.osmand.plus.routing.RoutingHelper;
+import net.osmand.data.ValueHolder;
 import net.osmand.plus.views.OsmandMapTileView;
 import net.osmand.plus.views.layers.base.OsmandMapLayer;
 
@@ -27,30 +36,38 @@ import java.util.List;
  * <p>Placed in net.osmand.plus.trames rather than views.layers so every TRAMES-original
  * class sits in one package, keeping the fork's diff against upstream easy to audit.
  */
-public class TramesCameraLayer extends OsmandMapLayer {
+public class TramesCameraLayer extends OsmandMapLayer implements IRouteInformationListener {
 
 	/** Camera body. Matches the launcher icon's camera dot. */
 	private static final int COLOR_CAMERA = 0xFFD9584B;
 	/** Field-of-view wedge — translucent so overlapping cones stay readable. */
-	private static final int COLOR_CONE = 0x33D9584B;
+	private static final int COLOR_CONE = 0x4DD9584B;
 
 	/**
-	 * Drawn cone length in pixels. Deliberately NOT to scale: a real plate-read range is
-	 * ~25 m, which at city zoom is a couple of pixels and invisible. This is a legibility
-	 * indicator of which way a camera looks, not a survey of its exact coverage.
+	 * Sizes in DP, scaled by display density at draw time.
+	 *
+	 * These were originally raw pixels, which made the markers roughly a seventh of their
+	 * intended size on a 3x-density phone — barely visible next to OsmAnd's own POI pins.
+	 * Anything spatial in a layer has to be multiplied by density.
+	 *
+	 * The cone is deliberately NOT to scale: a real plate-read range is ~25 m, which at
+	 * city zoom is a couple of pixels. It indicates which way a camera looks; it is not a
+	 * survey of its coverage.
 	 */
-	private static final float CONE_PX = 34f;
+	private static final float CONE_DP = 46f;
 	private static final float CONE_SPAN_DEG = 45f;
-	private static final float DOT_RADIUS_PX = 4.5f;
+	private static final float ICON_DP = 26f;
 
 	private final TramesCameraSource source = new TramesCameraSource();
 
-	private Paint dotPaint;
 	private Paint conePaint;
-	private Paint outlinePaint;
+	private Paint bitmapPaint;
+	private Bitmap icon;
 	private final Path conePath = new Path();
 
 	private boolean enabled = true;
+	private OsmandApplication app;
+	private RoutingHelper routingHelper;
 
 	public TramesCameraLayer(@NonNull Context ctx) {
 		super(ctx);
@@ -59,16 +76,26 @@ public class TramesCameraLayer extends OsmandMapLayer {
 	@Override
 	public void initLayer(@NonNull OsmandMapTileView view) {
 		super.initLayer(view);
-		dotPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		dotPaint.setStyle(Paint.Style.FILL);
-		dotPaint.setColor(COLOR_CAMERA);
+		OsmandApplication app = view.getApplication();
+		routingHelper = app.getRoutingHelper();
+		routingHelper.addListener(this);
+		this.app = app;
+		bitmapPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		bitmapPaint.setFilterBitmap(true);
 
-		outlinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		outlinePaint.setStyle(Paint.Style.STROKE);
-		outlinePaint.setStrokeWidth(1.5f);
-		// A white ring keeps the marker legible over both the dark road casing and pale
-		// map background; without it the dots vanish on red-tinted areas.
-		outlinePaint.setColor(Color.WHITE);
+		// Rendered into our OWN bitmap rather than via
+		// RenderingIcons.getBitmapFromVectorDrawable(): that helper returns a shared
+		// static cacheBmp which it eraseColor()s and redraws on every call, so a
+		// reference held across frames silently becomes whatever another layer drew last.
+		float density = getContext().getResources().getDisplayMetrics().density;
+		int px = Math.max(1, (int) (ICON_DP * density));
+		Drawable d = AppCompatResources.getDrawable(getContext(), R.drawable.ic_trames_camera);
+		if (d != null) {
+			icon = Bitmap.createBitmap(px, px, Bitmap.Config.ARGB_8888);
+			Canvas c = new Canvas(icon);
+			d.setBounds(0, 0, px, px);
+			d.draw(c);
+		}
 
 		conePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		conePaint.setStyle(Paint.Style.FILL);
@@ -90,7 +117,7 @@ public class TramesCameraLayer extends OsmandMapLayer {
 
 	@Override
 	public void onDraw(Canvas canvas, RotatedTileBox tileBox, DrawSettings settings) {
-		if (!enabled || dotPaint == null) {
+		if (!enabled || bitmapPaint == null) {
 			return;
 		}
 		int zoom = tileBox.getZoom();
@@ -112,6 +139,8 @@ public class TramesCameraLayer extends OsmandMapLayer {
 			return;
 		}
 
+		float density = tileBox.getDensity();
+		float coneLen = CONE_DP * density;
 		float rotation = tileBox.getRotate();
 		for (TramesCameraSource.Camera cam : cameras) {
 			if (cam.lat < bounds.bottom || cam.lat > bounds.top
@@ -126,29 +155,75 @@ public class TramesCameraLayer extends OsmandMapLayer {
 			for (float bearing : cam.directions) {
 				// Screen bearings must account for map rotation, or the cones point the
 				// wrong way the moment the user rotates the map.
-				float screenBearing = bearing - rotation;
-				drawCone(canvas, x, y, screenBearing);
+				drawCone(canvas, x, y, bearing - rotation, coneLen);
 			}
 
-			canvas.drawCircle(x, y, DOT_RADIUS_PX, dotPaint);
-			canvas.drawCircle(x, y, DOT_RADIUS_PX, outlinePaint);
+			if (icon != null) {
+				canvas.drawBitmap(icon, x - icon.getWidth() / 2f,
+						y - icon.getHeight() / 2f, bitmapPaint);
+			}
 		}
 	}
 
-	private void drawCone(@NonNull Canvas canvas, float x, float y, float bearingDeg) {
+	private void drawCone(@NonNull Canvas canvas, float x, float y, float bearingDeg,
+	                      float length) {
 		conePath.reset();
 		conePath.moveTo(x, y);
-		int steps = 6;
+		int steps = 8;
 		float start = bearingDeg - CONE_SPAN_DEG / 2f;
 		for (int i = 0; i <= steps; i++) {
 			// Compass bearing: 0 = north = up = -Y on screen, increasing clockwise.
 			double rad = Math.toRadians(start + (CONE_SPAN_DEG * i / steps));
-			float px = x + (float) (CONE_PX * Math.sin(rad));
-			float py = y - (float) (CONE_PX * Math.cos(rad));
+			float px = x + (float) (length * Math.sin(rad));
+			float py = y - (float) (length * Math.cos(rad));
 			conePath.lineTo(px, py);
 		}
 		conePath.close();
 		canvas.drawPath(conePath, conePaint);
+	}
+
+	/**
+	 * Report how many cameras can see the freshly-calculated route.
+	 *
+	 * Only counts cameras already loaded for the current view, so a long route reaching
+	 * outside the fetched area is undercounted. Stated as "on this route" rather than
+	 * "avoided" for that reason, and because a true avoided-count needs a second
+	 * unavoided route to compare against — which would double every routing request.
+	 */
+	@Override
+	public void newRouteIsCalculated(boolean newRoute, ValueHolder<Boolean> showToast) {
+		if (!enabled || app == null || routingHelper == null) {
+			return;
+		}
+		List<TramesCameraSource.Camera> cameras = source.getCameras();
+		if (cameras.isEmpty()) {
+			return;
+		}
+		List<Location> route = routingHelper.getRoute().getImmutableAllLocations();
+		if (route.isEmpty()) {
+			return;
+		}
+		TramesRouteExposure.Result r = TramesRouteExposure.count(route, cameras);
+		String msg = r.seenBy == 0
+				? app.getString(R.string.trames_exposure_none)
+				: app.getString(R.string.trames_exposure_count, r.seenBy);
+		app.runInUIThread(() -> app.showToastMessage(msg));
+	}
+
+	@Override
+	public void routeWasCancelled() {
+	}
+
+	@Override
+	public void routeWasFinished() {
+	}
+
+	@Override
+	public void destroyLayer() {
+		if (routingHelper != null) {
+			routingHelper.removeListener(this);
+		}
+		super.destroyLayer();
 	}
 
 	@Override
