@@ -65,6 +65,9 @@ Two consequences worth knowing before changing the config:
 ## Getting started
 
 ```sh
+# 0. third-party OsmAnd assets the client build reads (~70 MB)
+./setup-resources.sh
+
 # 1. camera geometry (Overpass -> cones)
 cd server/alpr && ./fetch-na-cones.sh
 
@@ -74,6 +77,37 @@ cd ../graphhopper && ./rebuild-with-cones.sh
 # 3. build the app
 cd ../../client && ./trames-build.sh
 ```
+
+### About `resources/`
+
+The client build copies map styles, routing profiles, POI types, icons, fonts and
+voice prompts from `../../resources`, a checkout of
+[OsmAnd-resources](https://github.com/osmandapp/OsmAnd-resources). It is **not** tracked
+here: it is 576 MB of third-party assets we neither maintain nor usefully diff, and
+vendoring it would quadruple the size of this repository.
+
+`setup-resources.sh` fetches it instead. The build reads roughly a tenth of that tree, so
+the script uses a blobless partial clone plus a sparse checkout and pulls only the paths
+the Gradle files actually reference — **~70 MB** rather than 576 MB.
+
+```sh
+./setup-resources.sh              # what the app build needs   (~70 MB)
+./setup-resources.sh --with-tests # plus upstream test fixtures
+./setup-resources.sh --full       # the entire upstream repo   (~576 MB)
+./setup-resources.sh --update     # refresh an existing checkout
+```
+
+> **Do not build without it.** Several of the consuming Gradle tasks are `Sync` tasks,
+> which make the destination match the source. With the source missing they do not
+> fail — they empty the destination, and the build then succeeds and produces an app with
+> no rendering styles, no routing profiles and no fonts. `setup-resources.sh` verifies its
+> own output for exactly this reason.
+
+If a build ever fails on a missing asset, the path list in the script came from:
+>
+> ```sh
+> grep -rn '\.\./\.\./resources/' --include='*.gradle' client/
+> ```
 
 The research pipeline is independent of the app:
 
