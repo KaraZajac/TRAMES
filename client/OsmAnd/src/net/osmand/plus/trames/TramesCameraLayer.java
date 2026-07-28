@@ -15,9 +15,14 @@ import net.osmand.Location;
 import net.osmand.core.android.MapRendererView;
 import net.osmand.core.jni.MapMarker;
 import net.osmand.core.jni.MapMarkerBuilder;
+import net.osmand.core.jni.FColorARGB;
 import net.osmand.core.jni.MapMarkersCollection;
 import net.osmand.core.jni.PointI;
-import net.osmand.core.jni.SwigUtilities;
+import net.osmand.core.jni.PolygonBuilder;
+import net.osmand.core.jni.PolygonsCollection;
+import net.osmand.core.jni.QVectorPointI;
+import net.osmand.core.jni.ZoomLevel;
+import net.osmand.data.LatLon;
 import net.osmand.data.QuadRect;
 import net.osmand.data.RotatedTileBox;
 import net.osmand.plus.OsmandApplication;
@@ -53,29 +58,35 @@ public class TramesCameraLayer extends OsmandMapLayer implements IRouteInformati
 	private static final int COLOR_CONE = 0x4DD9584B;
 
 	/**
-	 * Sizes in DP, scaled by display density at draw time.
+	 * Camera field-of-view geometry, anchored to the ground in real-world metres — so a
+	 * cone always covers the same stretch of road and grows/shrinks with zoom, the way
+	 * the DeFlock map draws it.
 	 *
-	 * These were originally raw pixels, which made the markers roughly a seventh of their
-	 * intended size on a 3x-density phone — barely visible next to OsmAnd's own POI pins.
-	 * Anything spatial in a layer has to be multiplied by density.
+	 * <p>The previous build drew a fixed ~46dp screen wedge: identical pixel size at every
+	 * zoom, which meant it implied a different real-world coverage each time you zoomed,
+	 * and read as far too small next to DeFlock's ground-anchored cones.
 	 *
-	 * The cone is deliberately NOT to scale: a real plate-read range is ~25 m, which at
-	 * city zoom is a couple of pixels. It indicates which way a camera looks; it is not a
-	 * survey of its coverage.
+	 * <p>These two numbers are the knobs. {@code CONE_RADIUS_M} is how far down the road a
+	 * reader is shown watching; {@code CONE_SPAN_DEG} is how wide the wedge is. They are a
+	 * display convention, not a survey — OSM gives us only the bearing a camera faces, not
+	 * its lens or range.
 	 */
-	private static final float CONE_DP = 46f;
-	private static final float CONE_SPAN_DEG = 45f;
+	private static final double CONE_RADIUS_M = 90.0;
+	private static final float CONE_SPAN_DEG = 55f;
+
+	/** Camera dot icon size in DP — a screen-space point symbol, unlike the ground cones. */
 	private static final float ICON_DP = 26f;
 
-	/** Surface-icon keys are a limited resource per marker; 4 covers every real unit. */
-	private static final int MAX_CONES = 4;
+	/** Safety cap on sectors per unit; a real multi-head 360° unit has at most ~5. */
+	private static final int MAX_HEADS = 8;
 
 	private final TramesCameraSource source = new TramesCameraSource();
 
 	private Paint conePaint;
 	private Paint bitmapPaint;
 	private Bitmap icon;
-	private Bitmap coneBitmap;
+	/** Filled ground sectors for the GL renderer — geographic, so they scale with zoom. */
+	private PolygonsCollection conesCollection;
 	/** Identity of the marker set currently pushed to the GL renderer, to detect staleness. */
 	private int builtForCameras = -1;
 	private final Path conePath = new Path();
@@ -115,35 +126,6 @@ public class TramesCameraLayer extends OsmandMapLayer implements IRouteInformati
 		conePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		conePaint.setStyle(Paint.Style.FILL);
 		conePaint.setColor(COLOR_CONE);
-
-		coneBitmap = buildConeBitmap((int) (CONE_DP * density * 2));
-	}
-
-	/**
-	 * A wedge pointing north (up), for use as an on-map-surface icon.
-	 *
-	 * The GL renderer rotates this to each camera's bearing and projects it onto the
-	 * ground plane, so it stays glued to the map and lies flat when the view is tilted —
-	 * which a canvas-drawn wedge cannot do.
-	 */
-	@NonNull
-	private Bitmap buildConeBitmap(int size) {
-		Bitmap bmp = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
-		Canvas c = new Canvas(bmp);
-		float cx = size / 2f;
-		float cy = size / 2f;
-		float len = size / 2f;
-		Path p = new Path();
-		p.moveTo(cx, cy);
-		int steps = 10;
-		float start = -CONE_SPAN_DEG / 2f;
-		for (int i = 0; i <= steps; i++) {
-			double rad = Math.toRadians(start + (CONE_SPAN_DEG * i / steps));
-			p.lineTo(cx + (float) (len * Math.sin(rad)), cy - (float) (len * Math.cos(rad)));
-		}
-		p.close();
-		c.drawPath(p, conePaint);
-		return bmp;
 	}
 
 	/**
@@ -162,7 +144,7 @@ public class TramesCameraLayer extends OsmandMapLayer implements IRouteInformati
 			return;
 		}
 		if (!enabled || tileBox.getZoom() < TramesCameraSource.MIN_ZOOM) {
-			clearMapMarkersCollections();
+			clearSymbols();
 			builtForCameras = -1;
 			return;
 		}
@@ -174,7 +156,7 @@ public class TramesCameraLayer extends OsmandMapLayer implements IRouteInformati
 		List<TramesCameraSource.Camera> cameras = source.getCameras();
 		int identity = cameras.hashCode();
 		if (identity != builtForCameras) {
-			clearMapMarkersCollections();
+			clearSymbols();
 			buildMarkers(mapRenderer, cameras);
 			builtForCameras = identity;
 		}
@@ -182,36 +164,80 @@ public class TramesCameraLayer extends OsmandMapLayer implements IRouteInformati
 
 	private void buildMarkers(@NonNull MapRendererView mapRenderer,
 	                          @NonNull List<TramesCameraSource.Camera> cameras) {
-		if (icon == null || coneBitmap == null || cameras.isEmpty()) {
+		if (icon == null || cameras.isEmpty()) {
 			return;
 		}
+		// Two providers: filled ground sectors (geographic, scale with zoom) and the
+		// billboard camera pins on top of them.
+		PolygonsCollection cones = new PolygonsCollection(ZoomLevel.ZoomLevel1, ZoomLevel.ZoomLevel20);
+		FColorARGB fill = NativeUtilities.createFColorARGB(COLOR_CONE);
+		int polygonId = 0;
 		mapMarkersCollection = new MapMarkersCollection();
 		for (TramesCameraSource.Camera cam : cameras) {
-			MapMarkerBuilder b = new MapMarkerBuilder();
-			b.setPosition(new PointI(MapUtils.get31TileNumberX(cam.lon),
-							MapUtils.get31TileNumberY(cam.lat)))
+			new MapMarkerBuilder()
+					.setPosition(point31(cam.lat, cam.lon))
 					.setIsAccuracyCircleSupported(false)
 					.setBaseOrder(getPointsOrder())
 					// Billboard pin: always faces the viewer, so the icon stays legible
-					// however the map is rotated or tilted.
+					// however the map is rotated or tilted, and sits over the cones.
 					.setPinIcon(NativeUtilities.createSkImageFromBitmap(icon))
 					.setPinIconHorisontalAlignment(MapMarker.PinIconHorisontalAlignment.CenterHorizontal)
-					.setPinIconVerticalAlignment(MapMarker.PinIconVerticalAlignment.CenterVertical);
+					.setPinIconVerticalAlignment(MapMarker.PinIconVerticalAlignment.CenterVertical)
+					.buildAndAddToCollection(mapMarkersCollection);
 
-			// One surface cone per head, so multi-head units show every direction they
-			// actually watch rather than just the first.
-			int heads = Math.min(cam.directions.length, MAX_CONES);
+			// One filled sector per head — multi-head units genuinely watch several ways
+			// at once, so drawing only the first would understate their coverage.
+			int heads = Math.min(cam.directions.length, MAX_HEADS);
 			for (int i = 0; i < heads; i++) {
-				b.addOnMapSurfaceIcon(SwigUtilities.getOnSurfaceIconKey(i + 1),
-						NativeUtilities.createSkImageFromBitmap(coneBitmap));
-			}
-			MapMarker marker = b.buildAndAddToCollection(mapMarkersCollection);
-			for (int i = 0; i < heads; i++) {
-				marker.setOnMapSurfaceIconDirection(
-						SwigUtilities.getOnSurfaceIconKey(i + 1), cam.directions[i]);
+				new PolygonBuilder()
+						.setPolygonId(++polygonId)
+						// Higher base order than the pins, so the fill renders beneath them.
+						.setBaseOrder(getPointsOrder() + 1)
+						.setIsHidden(false)
+						.setPoints(sectorPoints31(cam.lat, cam.lon, cam.directions[i]))
+						.setFillColor(fill)
+						.buildAndAddToCollection(cones);
 			}
 		}
 		mapRenderer.addSymbolsProvider(mapMarkersCollection);
+		if (polygonId > 0) {
+			mapRenderer.addSymbolsProvider(cones);
+			conesCollection = cones;
+		}
+	}
+
+	/** Clear both providers this layer pushes to the GL renderer. */
+	private void clearSymbols() {
+		clearMapMarkersCollections();
+		MapRendererView mapRenderer = getMapRenderer();
+		if (mapRenderer != null && conesCollection != null) {
+			mapRenderer.removeSymbolsProvider(conesCollection);
+		}
+		conesCollection = null;
+	}
+
+	@NonNull
+	private static PointI point31(double lat, double lon) {
+		return new PointI(MapUtils.get31TileNumberX(lon), MapUtils.get31TileNumberY(lat));
+	}
+
+	/**
+	 * A filled field-of-view sector — apex at the camera, arc at {@link #CONE_RADIUS_M}
+	 * metres — as 31-tile points. Built in geographic space so the GL renderer scales it
+	 * with zoom and lays it flat on the ground when the view is tilted.
+	 */
+	@NonNull
+	private QVectorPointI sectorPoints31(double lat, double lon, float bearing) {
+		QVectorPointI pts = new QVectorPointI();
+		pts.add(point31(lat, lon));
+		int steps = 14;
+		float start = bearing - CONE_SPAN_DEG / 2f;
+		for (int i = 0; i <= steps; i++) {
+			double b = start + CONE_SPAN_DEG * i / steps;
+			LatLon edge = MapUtils.rhumbDestinationPoint(lat, lon, CONE_RADIUS_M, b);
+			pts.add(point31(edge.getLatitude(), edge.getLongitude()));
+		}
+		return pts;
 	}
 
 	public void setEnabled(boolean enabled) {
@@ -256,44 +282,41 @@ public class TramesCameraLayer extends OsmandMapLayer implements IRouteInformati
 			return;
 		}
 
-		float density = tileBox.getDensity();
-		float coneLen = CONE_DP * density;
-		float rotation = tileBox.getRotate();
 		for (TramesCameraSource.Camera cam : cameras) {
 			if (cam.lat < bounds.bottom || cam.lat > bounds.top
 					|| cam.lon < bounds.left || cam.lon > bounds.right) {
 				continue;
 			}
-			float x = tileBox.getPixXFromLatLon(cam.lat, cam.lon);
-			float y = tileBox.getPixYFromLatLon(cam.lat, cam.lon);
-
-			// One wedge per head. Multi-head units genuinely watch several ways at once,
-			// so drawing only the first would understate their coverage.
+			// Ground sectors, projected from real lat/lon so they scale with zoom and
+			// follow map rotation for free (getPixXFromLatLon already accounts for it).
 			for (float bearing : cam.directions) {
-				// Screen bearings must account for map rotation, or the cones point the
-				// wrong way the moment the user rotates the map.
-				drawCone(canvas, x, y, bearing - rotation, coneLen);
+				drawConeGeo(canvas, tileBox, cam.lat, cam.lon, bearing);
 			}
-
 			if (icon != null) {
+				float x = tileBox.getPixXFromLatLon(cam.lat, cam.lon);
+				float y = tileBox.getPixYFromLatLon(cam.lat, cam.lon);
 				canvas.drawBitmap(icon, x - icon.getWidth() / 2f,
 						y - icon.getHeight() / 2f, bitmapPaint);
 			}
 		}
 	}
 
-	private void drawCone(@NonNull Canvas canvas, float x, float y, float bearingDeg,
-	                      float length) {
+	/**
+	 * Canvas (non-GL) fallback: the same geographic sector as the GL path, projected
+	 * corner by corner. Because every vertex is a real ground point, the wedge scales with
+	 * zoom and follows map rotation with no explicit rotation maths.
+	 */
+	private void drawConeGeo(@NonNull Canvas canvas, @NonNull RotatedTileBox tb,
+	                         double lat, double lon, float bearing) {
 		conePath.reset();
-		conePath.moveTo(x, y);
-		int steps = 8;
-		float start = bearingDeg - CONE_SPAN_DEG / 2f;
+		conePath.moveTo(tb.getPixXFromLatLon(lat, lon), tb.getPixYFromLatLon(lat, lon));
+		int steps = 14;
+		float start = bearing - CONE_SPAN_DEG / 2f;
 		for (int i = 0; i <= steps; i++) {
-			// Compass bearing: 0 = north = up = -Y on screen, increasing clockwise.
-			double rad = Math.toRadians(start + (CONE_SPAN_DEG * i / steps));
-			float px = x + (float) (length * Math.sin(rad));
-			float py = y - (float) (length * Math.cos(rad));
-			conePath.lineTo(px, py);
+			double b = start + CONE_SPAN_DEG * i / steps;
+			LatLon edge = MapUtils.rhumbDestinationPoint(lat, lon, CONE_RADIUS_M, b);
+			conePath.lineTo(tb.getPixXFromLatLon(edge.getLatitude(), edge.getLongitude()),
+					tb.getPixYFromLatLon(edge.getLatitude(), edge.getLongitude()));
 		}
 		conePath.close();
 		canvas.drawPath(conePath, conePaint);
@@ -337,7 +360,7 @@ public class TramesCameraLayer extends OsmandMapLayer implements IRouteInformati
 
 	@Override
 	public void destroyLayer() {
-		clearMapMarkersCollections();
+		clearSymbols();
 		if (routingHelper != null) {
 			routingHelper.removeListener(this);
 		}
