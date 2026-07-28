@@ -286,6 +286,9 @@ public class OsmandApplication extends MultiDexApplication {
 
 		localeHelper.onCreateApplication();
 		appInitializer.onCreateApplication();
+		// TRAMES: ALPR avoidance works out of the box — first launch seeds the online
+		// routing engine and points the car profile at it. No-op on every later start.
+		net.osmand.plus.trames.TramesDefaults.ensureSeeded(this);
 		osmandMap.getMapLayers().createLayers(osmandMap.getMapView());
 		startApplication();
 		System.out.println("Time to start application " + (System.currentTimeMillis() - timeToStart) + " ms. Should be less < 800 ms");
