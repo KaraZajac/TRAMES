@@ -2,12 +2,16 @@ package net.osmand;
 
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,10 +20,8 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 
 import net.osmand.plus.R;
-import net.osmand.plus.Version;
 import net.osmand.plus.base.BaseFullScreenFragment;
 import net.osmand.plus.helpers.AndroidUiHelper;
-import net.osmand.plus.inapp.InAppPurchaseUtils;
 import net.osmand.plus.utils.AndroidUtils;
 import net.osmand.plus.utils.ColorUtilities;
 
@@ -49,7 +51,11 @@ public class SecondSplashScreenFragment extends BaseFullScreenFragment {
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		FragmentActivity activity = requireActivity();
-		nightMode = settings.isSupportSystemTheme() && !settings.isLightSystemTheme();
+		// TRAMES: the launch screen is always dark, to match the themed first splash
+		// (trames_splash_background, #161A20). The TRAMES logo is drawn in light strokes,
+		// so a theme-dependent light background would render it nearly invisible in day
+		// mode — and forcing dark here also keeps the two splash layers visually seamless.
+		nightMode = true;
 
 		RelativeLayout view = new RelativeLayout(activity);
 		view.setId(R.id.bottom_buttons_container);
@@ -64,11 +70,11 @@ public class SecondSplashScreenFragment extends BaseFullScreenFragment {
 
 		ImageView logo = new ImageView(getContext());
 		logo.setId(LOGO_ID);
-		if (Version.isFreeVersion(app)) {
-			logo.setImageDrawable(AppCompatResources.getDrawable(activity, R.drawable.ic_logo_splash_osmand));
-		} else if (Version.isPaidVersion(app) || Version.isDeveloperVersion(app)) {
-			logo.setImageDrawable(AppCompatResources.getDrawable(activity, R.drawable.ic_logo_splash_osmand_plus));
-		}
+		// TRAMES: always our own launch mark, in every build variant. An app named
+		// TRAMES showing OsmAnd's logo at startup would imply an endorsement that does
+		// not exist — and it is the first thing a user sees. This is GPLv3 code, freely
+		// modifiable; OsmAnd's ic_logo_splash_osmand* drawables stay in the tree, unused.
+		logo.setImageDrawable(AppCompatResources.getDrawable(activity, R.drawable.ic_logo_splash_trames));
 		RelativeLayout.LayoutParams logoLayoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
 		if (!AndroidUiHelper.isTablet(activity)) {
 			logoLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
@@ -77,30 +83,19 @@ public class SecondSplashScreenFragment extends BaseFullScreenFragment {
 			logoLayoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
 		}
 
-		ImageView text = new ImageView(activity);
-		text.setId(TEXT_ID);
+		// TRAMES: the wordmark, as text rather than one of OsmAnd's image_text_* brand
+		// bitmaps. Drawn in the app's camera-marker colour, which reads clearly on the
+		// dark splash. The OpenStreetMap credit below is kept unchanged — the map data
+		// is OSM's and crediting it is correct (ODbL).
 		int textColorId = ColorUtilities.getTertiaryTextColorId(nightMode);
-		if (Version.isFreeVersion(app)) {
-			if (InAppPurchaseUtils.isOsmAndProAvailable(app)) {
-				text.setImageDrawable(uiUtilities.getIcon(R.drawable.image_text_osmand_pro, textColorId));
-			} else if (InAppPurchaseUtils.isMapsPlusAvailable(app)) {
-				text.setImageDrawable(uiUtilities.getIcon(R.drawable.image_text_osmand_maps_plus, textColorId));
-			} else if (InAppPurchaseUtils.isLiveUpdatesAvailable(app)) {
-				text.setImageDrawable(uiUtilities.getIcon(R.drawable.image_text_osmand_osmlive, textColorId));
-			} else if (InAppPurchaseUtils.isFullVersionAvailable(app)) {
-				text.setImageDrawable(uiUtilities.getIcon(R.drawable.image_text_osmand_inapp, textColorId));
-			} else {
-				text.setImageDrawable(uiUtilities.getIcon(R.drawable.image_text_osmand, textColorId));
-			}
-		} else if (Version.isPaidVersion(app) || Version.isDeveloperVersion(app)) {
-			if (InAppPurchaseUtils.isOsmAndProAvailable(app)) {
-				text.setImageDrawable(uiUtilities.getIcon(R.drawable.image_text_osmand_plus_pro, textColorId));
-			} else if (InAppPurchaseUtils.isLiveUpdatesAvailable(app)) {
-				text.setImageDrawable(uiUtilities.getIcon(R.drawable.image_text_osmand_plus_osmlive, textColorId));
-			} else {
-				text.setImageDrawable(uiUtilities.getIcon(R.drawable.image_text_osmand_plus, textColorId));
-			}
-		}
+		TextView text = new TextView(activity);
+		text.setId(TEXT_ID);
+		text.setText("TRAMES");
+		text.setTypeface(Typeface.DEFAULT_BOLD);
+		text.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30);
+		text.setLetterSpacing(0.2f);
+		text.setGravity(Gravity.CENTER);
+		text.setTextColor(0xFFD9584B);
 		RelativeLayout.LayoutParams textLayoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
 		textLayoutParams.addRule(RelativeLayout.ABOVE, OSM_TEXT_ID);
 		textLayoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
