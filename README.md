@@ -4,6 +4,8 @@
 
 Navigation that routes around automated licence-plate readers.
 
+**Website · [trames.karazajac.io](https://trames.karazajac.io)** — what it is, how it works, and the APK.
+
 TRAMES answers an ordinary navigation request — an address, a route — with one
 additional constraint: prefer paths that no ALPR camera can actually see. Cameras are
 modelled as **directional wedges**, not circles, because a reader watching northbound
