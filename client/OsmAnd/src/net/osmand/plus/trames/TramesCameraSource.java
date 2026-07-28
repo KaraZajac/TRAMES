@@ -19,6 +19,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -63,6 +64,12 @@ public class TramesCameraSource {
 
 	/** Padding around the visible box so panning slightly doesn't trigger a refetch. */
 	private static final double PAD_DEG = 0.03;
+
+	/** Tile size for whole-route camera fetches — kept under the server's per-query span cap. */
+	private static final double ROUTE_TILE_DEG = 2.0;
+
+	/** Backstop so a pathologically long route can't fan out into dozens of queries. */
+	private static final int ROUTE_MAX_TILES = 16;
 
 	public static class Camera {
 		public final long osmId;
@@ -194,6 +201,47 @@ public class TramesCameraSource {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Fetch every camera within the given bounds, for scoring a whole route rather than
+	 * just the visible map. Synchronous — call it off the UI thread. Independent of the
+	 * view cache, so it never disturbs what the map is currently drawing.
+	 *
+	 * <p>Bounds larger than the server's per-query span cap are split into tiles and the
+	 * results unioned by OSM id. Returns {@code null} only if <em>every</em> tile failed:
+	 * an empty list means the route genuinely passes no mapped cameras, which the caller
+	 * must not confuse with a network failure — the difference is a real "you're clear"
+	 * versus "we could not check".
+	 */
+	@Nullable
+	public List<Camera> fetchForRouteSync(double south, double west, double north, double east) {
+		int rows = Math.max(1, (int) Math.ceil((north - south) / ROUTE_TILE_DEG));
+		int cols = Math.max(1, (int) Math.ceil((east - west) / ROUTE_TILE_DEG));
+		if ((long) rows * cols > ROUTE_MAX_TILES) {
+			// Pathologically long route: one capped query beats firing dozens. The server
+			// truncates, so this can undercount — acceptable at that scale, and still far
+			// better than the old visible-view-only count.
+			return fetch(south, west, north, east);
+		}
+		LinkedHashMap<Long, Camera> merged = new LinkedHashMap<>();
+		boolean anySuccess = false;
+		for (int r = 0; r < rows; r++) {
+			for (int c = 0; c < cols; c++) {
+				double s = south + r * ROUTE_TILE_DEG;
+				double n = Math.min(north, s + ROUTE_TILE_DEG);
+				double w = west + c * ROUTE_TILE_DEG;
+				double e = Math.min(east, w + ROUTE_TILE_DEG);
+				List<Camera> tile = fetch(s, w, n, e);
+				if (tile != null) {
+					anySuccess = true;
+					for (Camera cam : tile) {
+						merged.put(cam.osmId, cam);
+					}
+				}
+			}
+		}
+		return anySuccess ? new ArrayList<>(merged.values()) : null;
 	}
 
 	@NonNull

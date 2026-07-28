@@ -7,6 +7,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
@@ -325,29 +326,61 @@ public class TramesCameraLayer extends OsmandMapLayer implements IRouteInformati
 	/**
 	 * Report how many cameras can see the freshly-calculated route.
 	 *
-	 * Only counts cameras already loaded for the current view, so a long route reaching
-	 * outside the fetched area is undercounted. Stated as "on this route" rather than
-	 * "avoided" for that reason, and because a true avoided-count needs a second
-	 * unavoided route to compare against — which would double every routing request.
+	 * <p>Fetches every camera along the whole route — not just the visible map — so the
+	 * count is complete however the user has the map zoomed or panned. Both the fetch and
+	 * the scoring run off the UI thread. On a <em>total</em> fetch failure it falls back to
+	 * the cameras already loaded for the view, so a network hiccup degrades to a partial
+	 * count rather than a false "you're clear"; if it can't check at all, it stays silent
+	 * rather than claim zero. Stated as "on this route" rather than "avoided" because a
+	 * true avoided-count needs a second unavoided route to compare against.
 	 */
 	@Override
 	public void newRouteIsCalculated(boolean newRoute, ValueHolder<Boolean> showToast) {
 		if (!enabled || app == null || routingHelper == null) {
 			return;
 		}
-		List<TramesCameraSource.Camera> cameras = source.getCameras();
-		if (cameras.isEmpty()) {
-			return;
-		}
 		List<Location> route = routingHelper.getRoute().getImmutableAllLocations();
 		if (route.isEmpty()) {
 			return;
 		}
-		TramesRouteExposure.Result r = TramesRouteExposure.count(route, cameras);
-		String msg = r.seenBy == 0
-				? app.getString(R.string.trames_exposure_none)
-				: app.getString(R.string.trames_exposure_count, r.seenBy);
-		app.runInUIThread(() -> app.showToastMessage(msg));
+		// Whole-route bounding box, padded past the exposure capture radius so a camera
+		// sitting just off the end of the route is still fetched and scored.
+		double south = 90, north = -90, west = 180, east = -180;
+		for (Location loc : route) {
+			south = Math.min(south, loc.getLatitude());
+			north = Math.max(north, loc.getLatitude());
+			west = Math.min(west, loc.getLongitude());
+			east = Math.max(east, loc.getLongitude());
+		}
+		double pad = 0.002;
+		final double s = south - pad, n = north + pad, w = west - pad, e = east + pad;
+
+		new AsyncTask<Void, Void, String>() {
+			@Override
+			protected String doInBackground(Void... voids) {
+				// The whole-route set, so exposure covers cameras off the visible map too.
+				// null means every tile failed — only then fall back to the view cache, so
+				// a network hiccup degrades to the old behaviour, never a false "clear".
+				List<TramesCameraSource.Camera> fetched = source.fetchForRouteSync(s, w, n, e);
+				List<TramesCameraSource.Camera> use = fetched != null ? fetched : source.getCameras();
+				if (use.isEmpty()) {
+					// Empty after a successful fetch = genuinely no cameras (say "clear");
+					// empty after a failure = we truly couldn't check (say nothing).
+					return fetched != null ? app.getString(R.string.trames_exposure_none) : null;
+				}
+				TramesRouteExposure.Result r = TramesRouteExposure.count(route, use);
+				return r.seenBy == 0
+						? app.getString(R.string.trames_exposure_none)
+						: app.getString(R.string.trames_exposure_count, r.seenBy);
+			}
+
+			@Override
+			protected void onPostExecute(String msg) {
+				if (msg != null) {
+					app.showToastMessage(msg);
+				}
+			}
+		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 	}
 
 	@Override
