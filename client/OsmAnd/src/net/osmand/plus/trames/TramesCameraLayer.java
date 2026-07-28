@@ -60,20 +60,17 @@ public class TramesCameraLayer extends OsmandMapLayer implements IRouteInformati
 
 	/**
 	 * Camera field-of-view geometry, anchored to the ground in real-world metres — so a
-	 * cone always covers the same stretch of road and grows/shrinks with zoom, the way
-	 * the DeFlock map draws it.
+	 * cone always covers the same stretch of road and grows/shrinks with zoom.
 	 *
 	 * <p>The previous build drew a fixed ~46dp screen wedge: identical pixel size at every
-	 * zoom, which meant it implied a different real-world coverage each time you zoomed,
-	 * and read as far too small next to DeFlock's ground-anchored cones.
-	 *
-	 * <p>These two numbers are the knobs. {@code CONE_RADIUS_M} is how far down the road a
-	 * reader is shown watching; {@code CONE_SPAN_DEG} is how wide the wedge is. They are a
-	 * display convention, not a survey — OSM gives us only the bearing a camera faces, not
-	 * its lens or range.
+	 * zoom, which implied a different real-world coverage each time you zoomed. This is
+	 * now a true ground sector — and it is drawn at exactly the geometry the router avoids
+	 * and the exposure count uses, from the single source of truth in {@link TramesGeometry}
+	 * (60 m / 45°, mirroring the server's build_cones.py). So the wedge on the map is the
+	 * wedge the route was planned around; it is not an independent display knob.
 	 */
-	private static final double CONE_RADIUS_M = 90.0;
-	private static final float CONE_SPAN_DEG = 55f;
+	private static final double CONE_RADIUS_M = TramesGeometry.CONE_RADIUS_M;
+	private static final float CONE_SPAN_DEG = (float) TramesGeometry.CONE_SPAN_DEG;
 
 	/** Camera dot icon size in DP — a screen-space point symbol, unlike the ground cones. */
 	private static final float ICON_DP = 26f;

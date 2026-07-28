@@ -22,14 +22,15 @@ import java.util.List;
 public class TramesRouteExposure {
 
 	/**
-	 * Capture radius in metres. Real fixed-unit plate-read range is ~23 m; 40 m is
-	 * deliberately generous so a route threading just past a camera still counts as seen
-	 * rather than flattering the result.
+	 * Capture radius and half-angle come from {@link TramesGeometry} — the same 60 m / 45°
+	 * wedge the router avoids and the map draws, so "seen" here means exactly what "avoided"
+	 * meant on the server. This scorer is a per-point approximation of the server's
+	 * line-intersects-cone test in {@code score_route.py}: identical geometry, cheaper maths.
 	 */
-	private static final double CAPTURE_M = 40.0;
+	private static final double CAPTURE_M = TramesGeometry.CONE_RADIUS_M;
 
-	/** Half-angle of the capture wedge. 45 deg total is what OSM contributors record. */
-	private static final double HALF_SPAN_DEG = 22.5;
+	/** Half the capture wedge; the full 45° is what OSM contributors record. */
+	private static final double HALF_SPAN_DEG = TramesGeometry.CONE_HALF_SPAN_DEG;
 
 	/** Cameras with no direction tag are treated as watching everything. */
 	private static final boolean OMNI_IF_UNKNOWN = true;
@@ -61,8 +62,8 @@ public class TramesRouteExposure {
 
 	private static boolean sees(@NonNull TramesCameraSource.Camera cam,
 	                            @NonNull List<Location> route) {
-		// Cheap latitude gate before the per-point maths: at any latitude 40 m is well
-		// under 0.001 deg, so anything outside that band cannot possibly qualify.
+		// Cheap latitude gate before the per-point maths: 0.001 deg is ~111 m, safely
+		// beyond the 60 m capture radius, so anything outside that band cannot qualify.
 		double latPad = 0.001;
 		for (Location loc : route) {
 			if (Math.abs(loc.getLatitude() - cam.lat) > latPad) {
