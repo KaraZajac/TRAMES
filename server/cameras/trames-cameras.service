@@ -1,0 +1,43 @@
+# TRAMES camera layer service — /opt/trames/cameras on astrophage.
+# Install:  cp trames-cameras.service /etc/systemd/system/ && systemctl daemon-reload
+#           systemctl enable --now trames-cameras
+# Refresh:  scp a new cameras.json into place, then systemctl reload trames-cameras
+[Unit]
+Description=TRAMES camera positions (Overpass-compatible bbox service for the map layer)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=trames
+Group=trames
+WorkingDirectory=/opt/trames/cameras
+ExecStart=/usr/bin/python3 /opt/trames/cameras/serve_cameras.py --port 8991 --data /opt/trames/cameras/cameras.json
+# SIGHUP re-reads cameras.json in place — no restart, no dropped requests.
+ExecReload=/bin/kill -HUP $MAINPID
+
+Restart=always
+RestartSec=5
+
+# Blast-radius cap, same philosophy as trames-routing but scaled to a service
+# that holds 14 MB of JSON instead of an 18 GB graph. Measured RSS 122 MB;
+# the ceiling is generous headroom, not an expectation. This box runs
+# GraphHopper at 18 of 22 GB — a leak here must die young rather than
+# pressure the router.
+CPUQuota=100%
+MemoryHigh=384M
+MemoryMax=512M
+
+# Bound to 127.0.0.1 — no auth or rate limiting of its own. Caddy fronts it,
+# same posture as the routing endpoint.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+# Read-only service: no ReadWritePaths at all.
+
+[Install]
+WantedBy=multi-user.target

@@ -6,6 +6,7 @@ navigation can avoid the cameras that can actually see you.
 
 ```
 alpr/         OSM/Overpass -> directional camera cones -> GeoJSON
+cameras/      Overpass-compatible bbox service feeding the app's camera map layer
 graphhopper/  config, import and serve scripts
 ```
 

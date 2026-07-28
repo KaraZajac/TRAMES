@@ -23,13 +23,17 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Fetches ALPR (licence-plate reader) camera positions from OpenStreetMap via Overpass,
- * for display on the map.
+ * Fetches ALPR (licence-plate reader) camera positions for display on the map.
  *
- * <p>Deliberately independent of the routing backend. The router already has every camera
- * baked into its graph and never needs to send them to the client; this is purely so the
- * user can see what is being avoided. Keeping it separate means the map layer still works
- * against a self-hosted or offline router that exposes no camera endpoint.
+ * <p>Primary source is the TRAMES server's own camera endpoint, which serves the exact
+ * snapshot the routing graph's cones were built from — so the map shows the cameras the
+ * router is actually avoiding, not a fresher OSM state the graph has never seen. It
+ * speaks Overpass's protocol, so the public Overpass instances remain as fallbacks and
+ * the fetch path below cannot tell them apart. That fallback is what keeps the layer
+ * alive for a self-hoster running a router with no camera endpoint — and it is not
+ * hypothetical the other way round either: on 2026-07-28 both public instances answered
+ * 504 to this exact query for a full day, which on the old Overpass-only path meant a
+ * silent, clean-looking map over surveilled streets.
  *
  * <p>Tag handling follows what OSM actually contains rather than what the wiki recommends
  * — see TramesCameraSource#parseDirections. Measured over 3,899 cameras in one metro:
@@ -40,6 +44,7 @@ public class TramesCameraSource {
 	private static final Log LOG = PlatformUtil.getLog(TramesCameraSource.class);
 
 	private static final String[] ENDPOINTS = {
+			"https://routing.blackflagintel.com/cameras",
 			"https://overpass-api.de/api/interpreter",
 			"https://overpass.kumi.systems/api/interpreter"
 	};
