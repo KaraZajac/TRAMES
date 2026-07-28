@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-label="TRAMES">
+  <!-- ALPR camera glyph, ported from the app's map marker (ic_trames_camera).
+       Flamingo disc, white pole-mounted licence-plate reader silhouette. -->
+  <defs>
+    <linearGradient id="disc" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e58a8a"/>
+      <stop offset="1" stop-color="#dd7878"/>
+    </linearGradient>
+  </defs>
+  <circle cx="12" cy="12" r="11" fill="url(#disc)"/>
+  <circle cx="12" cy="12" r="11" fill="none" stroke="#ffffff" stroke-width="1.2" stroke-opacity="0.9"/>
+  <!-- solar panel -->
+  <path fill="#ffffff" d="M5.6,5.2 H15.2 V6.5 H5.6 Z"/>
+  <!-- mast -->
+  <path fill="#ffffff" d="M9.8,6.5 H11.0 V18.6 H9.8 Z"/>
+  <!-- camera housing -->
+  <path fill="#ffffff" d="M11.0,8.6 H17.6 A1.1,1.1 0 0 1 18.7,9.7 V12.6 A1.1,1.1 0 0 1 17.6,13.7 H11.0 Z"/>
+  <!-- lens -->
+  <circle cx="16.6" cy="11.15" r="1.5" fill="#dd7878"/>
+</svg>

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRAMES — navigation that routes around licence-plate readers</title>
+<meta name="description" content="A native Android app that routes you around automated licence-plate readers. ALPR cameras are modelled as directional wedges — not circles — so you only detour around roads a camera can actually see. On by default, zero setup. Built on OsmAnd + GraphHopper.">
+<meta property="og:title" content="TRAMES — route around licence-plate readers">
+<meta property="og:description" content="Android navigation that avoids the fields of view of 120,838 mapped ALPR cameras. Directional cones, not circles. On by default. 84.6% of commutes route to zero exposure for a median 1.5 min.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://trames.karazajac.io/">
+<meta property="og:image" content="https://trames.karazajac.io/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://trames.karazajac.io/og.png">
+<meta name="theme-color" content="#eff1f5">
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css?v=1">
+</head>
+<body>
+
+<div class="bg-mesh" aria-hidden="true">
+  <div class="mesh-blob mesh-blob-1"></div>
+  <div class="mesh-blob mesh-blob-2"></div>
+  <div class="mesh-blob mesh-blob-3"></div>
+</div>
+
+<nav class="nav">
+  <div class="container nav-inner">
+    <a class="nav-brand" href="#">
+      <img class="nav-logo" src="logo.svg" width="30" height="30" alt="" aria-hidden="true">
+      TRAMES
+    </a>
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#berth">Strength</a>
+      <a href="#study">The study</a>
+      <a href="#screens">Screens</a>
+      <a href="#download">Download</a>
+      <a class="nav-github" href="https://github.com/KaraZajac/TRAMES" aria-label="GitHub">
+        <svg height="18" viewBox="0 0 16 16" width="18" fill="currentColor" aria-hidden="true">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- ──────────────── HERO ──────────────── -->
+<header class="hero">
+  <div class="container hero-inner">
+    <div class="hero-eyebrow">
+      <span class="dot dot-pulse"></span>
+      v1.1.0 · Android · on by default
+    </div>
+    <h1 class="hero-title">
+      <span class="display-wordmark">TRAMES</span>
+    </h1>
+    <p class="hero-tag">
+      <strong>Navigation that routes around automated licence-plate readers.</strong>
+      An ordinary route request — an address, a destination — with one extra
+      constraint: prefer roads that no ALPR camera can actually see.
+      <span class="hero-tag-pop">Cameras are directional wedges, not circles. You detour only where one is really looking.</span>
+    </p>
+
+    <div class="phone-hero">
+      <img class="phone" src="img/trames-route.png" width="640" height="1495"
+        alt="TRAMES navigating from Idylwood to Fairlington: a blue route curves away from a dense cluster of red camera markers, and a toast reads &quot;1 licence-plate reader(s) can see this route.&quot;" loading="eager">
+    </div>
+
+    <div class="stats-row" id="stats-row">
+      <div class="stat-chip"><span class="num" data-target="5">0</span><span>avoidance levels</span></div>
+      <div class="stat-chip stat-warm"><span class="num">120,838</span><span>cameras mapped</span></div>
+      <div class="stat-chip stat-vfy"><span class="num">84.6%</span><span>route to zero</span></div>
+      <div class="stat-chip"><span class="num">v1.1.0</span><span>latest APK</span></div>
+    </div>
+
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://github.com/KaraZajac/TRAMES/releases/latest">
+        ↓ Download APK
+      </a>
+      <a class="btn" href="#how">How it works</a>
+      <a class="btn btn-ghost" href="https://github.com/KaraZajac/TRAMES">
+        <svg height="16" viewBox="0 0 16 16" width="16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+        Source on GitHub
+      </a>
+    </div>
+
+    <p class="hero-warn"><em>Trames</em> (Latin): byways, side roads. · Debug-signed APK — sideload; no Play Store. <a href="https://github.com/KaraZajac/TRAMES">Read the README.</a></p>
+  </div>
+</header>
+
+<!-- ──────────────── TRUST STRIP ──────────────── -->
+<section class="trust-strip">
+  <div class="container">
+    <div class="trust-row">
+      <span class="trust-label">Built on</span>
+      <ul class="trust-items">
+        <li>OsmAnd (GPLv3)</li>
+        <li>GraphHopper 11</li>
+        <li>OpenStreetMap · Overpass</li>
+        <li>DeFlock ALPR map</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────── SIBLING FAMILY ──────────────── -->
+<section class="section section-callout reveal">
+  <div class="container">
+    <div class="callout">
+      <div class="callout-mark">🗺</div>
+      <div>
+        <h3>The one that <em>acts</em> — sibling to <a href="https://overwatch.netslum.io">OVERWATCH</a> &amp; <a href="https://vigil.netslum.io">VIGIL</a></h3>
+        <p>
+          <strong>OVERWATCH</strong> shows you the surveillance watching a place
+          right now. <strong>VIGIL</strong> shows you what has been following
+          <em>you</em> over time. <strong>TRAMES</strong> is the one that does
+          something about it — it takes the same map of cameras and drives you
+          around them.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────── HOW IT WORKS ──────────────── -->
+<section id="how" class="section section-feature reveal">
+  <div class="container">
+    <div class="section-head">
+      <span class="section-tag">how it works</span>
+      <h2>A camera watches one way. So we model it that way.</h2>
+      <p class="lead">
+        A reader pointed at northbound traffic says nothing about the southbound
+        carriageway. Treat it as a circle and the router detours around roads
+        nobody is being read on. TRAMES models every camera as a <strong>cone
+        pointing where it actually looks</strong>, and asks for the fastest path
+        that crosses none of them.
+      </p>
+    </div>
+
+    <div class="feature-split">
+      <div class="phone-frame">
+        <img class="phone" src="img/trames-cameras.png" width="640" height="1495"
+          alt="TRAMES map over Reston, Virginia: red ALPR camera markers, each drawn with a translucent wedge showing the direction it watches, some clustered into groups." loading="lazy">
+      </div>
+      <div class="explain-annotations">
+        <div class="annotation">
+          <span class="anno-num">1</span>
+          <div>
+            <strong>Directional cones, not dots</strong>
+            <p>Each camera becomes a wedge aimed the way it faces. A route that
+            passes a reader on the far carriageway isn't penalised — it was never
+            seen.</p>
+          </div>
+        </div>
+        <div class="annotation">
+          <span class="anno-num">2</span>
+          <div>
+            <strong>Baked into the graph</strong>
+            <p>120,838 camera cones are compiled into GraphHopper's spatial index
+            at import as one area, <code>alpr</code>. A request just references it
+            — <code>{"if": "in_alpr", "multiply_by": 0.05}</code> — no geometry
+            attached, so the payload stays tiny.</p>
+          </div>
+        </div>
+        <div class="annotation">
+          <span class="anno-num">3</span>
+          <div>
+            <strong>Strength is a live knob</strong>
+            <p>Because the penalty rides on each request, avoidance strength stays
+            a per-route slider instead of being frozen into the graph. No forked
+            routing engine required.</p>
+          </div>
+        </div>
+        <div class="annotation">
+          <span class="anno-num">4</span>
+          <div>
+            <strong>See what you're avoiding</strong>
+            <p>The map draws the same cameras the router steers around — from the
+            server's own snapshot, so the picture matches the route. Overpass is a
+            fallback, not the only source.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────── OUT OF THE BOX ──────────────── -->
+<section class="section section-bento reveal">
+  <div class="container">
+    <div class="section-head">
+      <span class="section-tag">new in v1.1.0</span>
+      <h2>Install, type a destination, it already avoids.</h2>
+      <p class="lead">Avoidance is the whole point of the app, so it is no longer
+      opt-in homework. A fresh install sets itself up on first launch — no engine
+      to create, no URL to paste, no setting to find.</p>
+    </div>
+
+    <div class="bento">
+      <article class="bento-card bento-lg bento-vfy">
+        <div class="bento-icon">✅</div>
+        <h3>On by default</h3>
+        <p>
+          First launch points the driving profile at the public routing engine at
+          <strong>Strong</strong> avoidance. Open the app, enter where you're
+          going, and the route already bends around camera fields of view. The
+          only thing you touch is the destination.
+        </p>
+      </article>
+      <article class="bento-card">
+        <div class="bento-icon">🎚</div>
+        <h3>Your call, and it sticks</h3>
+        <p>Turn avoidance down, off, or up — the app seeds itself exactly once, so
+        your choice is never overwritten on the next launch.</p>
+      </article>
+      <article class="bento-card">
+        <div class="bento-icon">🧩</div>
+        <h3>Installs alongside OsmAnd</h3>
+        <p>Package <code>org.soulstone.trames</code> — a distinct app, not a
+        replacement. Keep your OsmAnd exactly as it is.</p>
+      </article>
+      <article class="bento-card">
+        <div class="bento-icon">🛰</div>
+        <h3>Self-host friendly</h3>
+        <p>Point the engine at your own GraphHopper if you'd rather. Upgraders who
+        configured one by hand keep it, custom strength and all.</p>
+      </article>
+      <article class="bento-card bento-lg">
+        <div class="bento-icon">🧭</div>
+        <h3>A real navigator underneath</h3>
+        <p>
+          TRAMES is a fork of <strong>OsmAnd</strong>, so turn-by-turn voice
+          guidance, offline maps, lane hints and the rest are all there — the
+          avoidance is one honest constraint layered onto a mature navigation app,
+          not a demo.
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────── BERTH STRENGTH ──────────────── -->
+<section id="berth" class="section reveal">
+  <div class="container">
+    <div class="section-head">
+      <span class="section-tag">avoidance strength</span>
+      <h2>Five levels, from fastest to leave-no-plate-unturned.</h2>
+      <p class="lead">The levels aren't evenly spaced, and that's deliberate:
+      measured on the continental graph, everything from off down to about a third
+      leaves most routes unchanged — a penalty can't outweigh a highway. So the
+      useful range is packed where it actually bites, and the effective strength
+      shifts with how dense the cameras are around you.</p>
+    </div>
+
+    <div class="tiers">
+      <div class="tier tier-off">
+        <div class="tier-name">OFF</div>
+        <p>Fastest route. No avoidance — TRAMES navigates like any other app.</p>
+      </div>
+      <div class="tier tier-light">
+        <div class="tier-name">LIGHT</div>
+        <p>Avoid readers only where the detour is nearly free.</p>
+      </div>
+      <div class="tier tier-mod">
+        <div class="tier-name">MODERATE</div>
+        <p>A balanced trade — dodge most cameras for a modest cost.</p>
+      </div>
+      <div class="tier tier-strong is-default">
+        <div class="tier-name">STRONG<span class="tier-badge">default</span></div>
+        <p>Avoid readers wherever a reasonable alternative exists. Where TRAMES ships.</p>
+      </div>
+      <div class="tier tier-max">
+        <div class="tier-name">MAXIMUM</div>
+        <p>Avoid every camera it can find a way around, whatever the extra time.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────── THE STUDY ──────────────── -->
+<section id="study" class="section section-feature reveal">
+  <div class="container">
+    <div class="section-head">
+      <span class="section-tag">the measurement study</span>
+      <h2>Does avoidance actually cost anything? We measured it.</h2>
+      <p class="lead">
+        We routed <strong>17,580 real home–work commutes</strong> — drawn from
+        Census LEHD LODES in proportion to how many workers actually make each
+        trip, across 15 states — twice each: once normally, once avoiding the
+        fields of view of <strong>120,838 mapped ALPR installations</strong>.
+      </p>
+    </div>
+
+    <div class="readout">
+      <div class="cell"><span class="big">17,580</span><span class="lbl">commutes routed, twice each</span></div>
+      <div class="cell warm"><span class="big">74.8%</span><span class="lbl">pass at least one reader</span></div>
+      <div class="cell good"><span class="big">84.6%</span><span class="lbl">can route to zero exposure</span></div>
+      <div class="cell"><span class="big">+1.5<span style="font-size:.6em"> min</span></span><span class="lbl">median cost to do it (5.96%)</span></div>
+    </div>
+
+    <div class="callout" style="margin-top:2.6rem">
+      <div class="callout-mark">📈</div>
+      <div>
+        <h3>Avoidance is cheapest where cameras are densest</h3>
+        <p>
+          A metropolitan grid always offers a parallel street a block over; a
+          rural route often has one road and no alternative. So the burden of
+          refusal falls hardest on the drivers with the <em>fewest</em> cameras to
+          refuse. The full method, limitations, and the equity findings are in the
+          paper.
+          <a href="https://github.com/KaraZajac/TRAMES/blob/main/research/paper/trames.pdf" style="display:inline-block;margin-top:.7rem">Read the paper (PDF) →</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────── SCREENSHOTS ──────────────── -->
+<section id="screens" class="section reveal">
+  <div class="container">
+    <div class="section-head">
+      <span class="section-tag">screenshots</span>
+      <h2>The route, the cameras, the drive.</h2>
+      <p class="lead">Real routes over real ALPR data — the avoided cluster, the
+      directional markers, and turn-by-turn guidance that already went the quiet
+      way.</p>
+    </div>
+
+    <div class="shots">
+      <figure class="shot">
+        <img class="phone" src="img/trames-route.png" width="640" height="1495"
+          alt="A planned route from Idylwood to Fairlington curving away from a dense red cluster of camera markers, with a readout of 9.26 mi, 18 min, and a toast: 1 licence-plate reader can see this route." loading="lazy">
+        <figcaption><strong>Routed around the cluster</strong>The blue line bends away from a wall of readers on the right — and the app tells you exactly how many can still see the route.</figcaption>
+      </figure>
+      <figure class="shot">
+        <img class="phone" src="img/trames-cameras.png" width="640" height="1495"
+          alt="Map of Reston, Virginia with red ALPR camera markers, each drawn with a translucent wedge indicating the direction it faces." loading="lazy">
+        <figcaption><strong>Directional camera layer</strong>Every reader drawn as a wedge pointing where it looks — the same cones the router avoids, so the map matches the route.</figcaption>
+      </figure>
+      <figure class="shot">
+        <img class="phone" src="img/trames-nav.png" width="640" height="1495"
+          alt="Turn-by-turn navigation following King Street, with ALPR camera markers visible along the route." loading="lazy">
+        <figcaption><strong>Turn-by-turn, the quiet way</strong>Full OsmAnd navigation — voice, lanes, offline maps — on a route that already chose to avoid what it could.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────── HONEST PRIVACY ──────────────── -->
+<section class="section section-bento reveal">
+  <div class="container">
+    <div class="section-head">
+      <span class="section-tag">the honest part</span>
+      <h2>Routing needs a server. Here's exactly what it sees.</h2>
+      <p class="lead">Unlike its fully-offline siblings, a router has to know where
+      you're starting and where you're going — that's what routing <em>is</em>. So
+      rather than pretend otherwise, here's the whole posture.</p>
+    </div>
+
+    <div class="bento">
+      <article class="bento-card bento-lg">
+        <div class="bento-icon">📍</div>
+        <h3>What the endpoint receives</h3>
+        <p>
+          To compute a route, the app sends your start and destination
+          coordinates to the routing server. That's the price of online routing —
+          and the reason the <strong>self-host option exists</strong>: point
+          TRAMES at your own GraphHopper and no third party sees anything.
+        </p>
+      </article>
+      <article class="bento-card bento-vfy">
+        <div class="bento-icon">🎫</div>
+        <h3>No account, no token</h3>
+        <p>The public endpoint is open — no sign-up, no API key, nothing tying a
+        request to you. A key baked into a public APK was never real security, so
+        there isn't one.</p>
+      </article>
+      <article class="bento-card">
+        <div class="bento-icon">🗒</div>
+        <h3>Cameras, not tracking</h3>
+        <p>The map layer pulls cameras for the area you're viewing from the
+        server's own snapshot — the same data the routing graph is built from. No
+        profile, no history.</p>
+      </article>
+      <article class="bento-card">
+        <div class="bento-icon">🧾</div>
+        <h3>Open source, open data</h3>
+        <p>The client, the server, and the study are all public. Camera data is
+        © OpenStreetMap contributors under ODbL, largely mapped by the
+        <a href="https://deflock.me">DeFlock</a> community.</p>
+      </article>
+      <article class="bento-card bento-cam">
+        <div class="bento-icon">🔑</div>
+        <h3>Read this before you trust the build</h3>
+        <p>The APK is signed with the <strong>public Android debug key</strong>.
+        Anyone can build one that looks identical, so the signature proves nothing
+        about who built it. Verify the SHA-256 on the release, or build from
+        source.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────── DOWNLOAD ──────────────── -->
+<section id="download" class="section section-timeline reveal">
+  <div class="container">
+    <div class="section-head">
+      <span class="section-tag">get it</span>
+      <h2>Sideload in three steps.</h2>
+    </div>
+
+    <div class="feature-split">
+      <div class="phone-frame">
+        <img class="phone" src="img/trames-nav.png" width="640" height="1495"
+          alt="TRAMES turn-by-turn navigation following King Street with camera markers along the road." loading="lazy">
+      </div>
+      <div class="timeline dl-steps">
+        <div class="tl-col tl-shipped">
+          <div class="tl-tag">1 · download</div>
+          <ul>
+            <li>Grab the latest debug-signed APK from
+              <a href="https://github.com/KaraZajac/TRAMES/releases/latest">Releases</a>
+              (currently <strong>v1.1.0</strong>, arm64-v8a, Android 7.0+).</li>
+          </ul>
+        </div>
+        <div class="tl-col tl-active">
+          <div class="tl-tag">2 · install</div>
+          <ul>
+            <li>Sideload it — allow "install unknown apps" for your browser or files app, then open the APK. It installs alongside OsmAnd.</li>
+          </ul>
+        </div>
+        <div class="tl-col tl-next">
+          <div class="tl-tag">3 · just drive</div>
+          <ul>
+            <li>Grant location, type a destination — avoidance is already on. Tune the strength in the driving profile if you like.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <p class="tl-foot">
+      Build from source, read the paper, or file issues:
+      <a href="https://github.com/KaraZajac/TRAMES">github.com/KaraZajac/TRAMES</a>
+      ·
+      <a href="https://github.com/KaraZajac/TRAMES/blob/main/research/paper/trames.pdf">the paper</a>
+    </p>
+  </div>
+</section>
+
+<!-- ──────────────── FOOTER ──────────────── -->
+<footer class="footer">
+  <div class="container footer-inner">
+    <div class="footer-col">
+      <div class="footer-brand">
+        <img class="nav-logo" src="logo.svg" width="26" height="26" alt="" aria-hidden="true">
+        TRAMES
+      </div>
+      <p class="footer-tag">
+        Navigation that routes around licence-plate readers. Directional cones,
+        not circles. On by default. A sibling to OVERWATCH and VIGIL.
+      </p>
+    </div>
+    <div class="footer-col">
+      <h4>Project</h4>
+      <ul>
+        <li><a href="https://github.com/KaraZajac/TRAMES">Source</a></li>
+        <li><a href="https://github.com/KaraZajac/TRAMES/releases">Releases</a></li>
+        <li><a href="https://github.com/KaraZajac/TRAMES/blob/main/research/paper/trames.pdf">The paper</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Built on</h4>
+      <ul>
+        <li><a href="https://osmand.net">OsmAnd</a></li>
+        <li><a href="https://www.graphhopper.com">GraphHopper</a></li>
+        <li><a href="https://deflock.me">DeFlock ALPR map</a></li>
+        <li><a href="https://www.openstreetmap.org">OpenStreetMap</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Siblings</h4>
+      <ul>
+        <li><a href="https://overwatch.netslum.io">OVERWATCH</a></li>
+        <li><a href="https://vigil.netslum.io">VIGIL</a></li>
+        <li><a href="https://karazajac.io">karazajac.io</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="container footer-bottom">
+    <p>
+      TRAMES avoids the fields of view of mapped licence-plate readers; it does
+      not disable, obscure, or interfere with any camera. Know your local traffic
+      laws — it is a navigator, and you are driving.
+    </p>
+    <p class="footer-meta">
+      v1.1.0 · <a href="https://github.com/KaraZajac/TRAMES">github.com/KaraZajac/TRAMES</a>
+      · camera data © OpenStreetMap contributors (ODbL)
+    </p>
+  </div>
+</footer>
+
+<script src="app.js" defer></script>
+
+</body>
+</html>
