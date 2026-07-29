@@ -99,7 +99,7 @@ def build_state(slug, mc, cones, work, out, roads_only):
     sh(f'python3 "{HERE}/tag_ways.py" --cones "{cones}" --in "{pbf}" --out "{tagged}"')
     print(f"[{slug}] building obf ...")
     cmd = "generate-roads" if roads_only else "generate-obf"
-    env = dict(os.environ, JAVA_OPTS="-Xms1G -Xmx8G")
+    env = dict(os.environ, JAVA_OPTS=os.environ.get("TRAMES_JAVA_OPTS", "-Xms1G -Xmx8G"))
     build_start = time.time()
     sh(f'bash "{mc}/utilities.sh" {cmd} "{tagged}"', cwd=work, env=env)
     # the obf MapCreator just wrote (named after the input, casing varies) — pick by mtime
