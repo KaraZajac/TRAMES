@@ -108,10 +108,14 @@ avoided offline route on a spike map (`tag_ways.py` → OsmAndMapCreator with th
 `rendering_types` lines → OsmAnd offline router reroutes around `alpr=yes`). What remains is
 **scale and delivery**, not feasibility:
 
-- **Phase 3** — run it on a real metro extract: `build_cones.py` for `alpr.geojson`,
-  `tag_ways.py` over the Geofabrik `.osm.pbf`, then OsmAndMapCreator with a
-  `rendering_types.xml` carrying the two lines (packaged as a proper override, not the
-  hacked jar the spike used). Validate the `.obf` against known camera positions.
+- [x] **Phase 3 — done + validated on real Delaware.** `cones_from_cameras.py` built 505
+  cone parts from 529 real cameras (local `cameras.json`, no Overpass); `tag_ways.py`
+  tagged 1,183 of 138,180 roads in 15.6 s; OsmAndMapCreator built the `.obf` with the two
+  `rendering_types` lines and the `alpr` tag is confirmed in its routing section. Routing
+  proof: **7 of 12 routes across camera-dense Wilmington rerouted** on the tagged map vs
+  the untagged control, detours up to **+758 m** — realistic, cheap avoidance, exactly the
+  online behaviour. (Spike used a jar patched with the two lines; the US batch should carry
+  them as a proper `rendering_types.xml` override.)
 - **Phase 4** — client: a "TRAMES (offline)" driving profile (OsmAnd engine + the
   `car_alpr` berth params), auto-fallback when the server is unreachable, exposure count
   against on-device camera data.
