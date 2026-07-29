@@ -116,6 +116,15 @@ avoided offline route on a spike map (`tag_ways.py` → OsmAndMapCreator with th
   the untagged control, detours up to **+758 m** — realistic, cheap avoidance, exactly the
   online behaviour. (Spike used a jar patched with the two lines; the US batch should carry
   them as a proper `rendering_types.xml` override.)
+- **Phase 3b — US batch (`build_maps.py`), tooling done + validated.** Builds the US cone
+  set once (114,172 parts, 34 s), patches the MapCreator's `rendering_types.xml` with the
+  two lines idempotently, then per state downloads the Geofabrik extract, tags roads, and
+  builds the `.obf` (resumable; skips states already built). Proven on 3 real states — DC
+  63 s, Rhode Island 158 s, Delaware 99 s, road-only. **Running all 51 is a heavy job**
+  (~10–15 GB of extracts, 51 builds; big states dwarf these tiny ones, and full map+POI
+  builds are much slower than road-only). Output belongs on astrophage, where it will be
+  hosted for download — so the full run should execute there, resource-capped so it can't
+  disturb the production GraphHopper / sites.
 - **Phase 4** — client: a "TRAMES (offline)" driving profile (OsmAnd engine + the
   `car_alpr` berth params), auto-fallback when the server is unreachable, exposure count
   against on-device camera data.
