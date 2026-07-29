@@ -62,10 +62,13 @@ offline route that avoids cameras, no server
 - [x] **0 · Feasibility.** Proven: routing.xml applies a soft, tunable penalty to a custom
       way tag via a parameter group. Berth maps 1:1 to the online multipliers. (This doc +
       `car_alpr.routing.xml.md`.)
-- [ ] **1 · Cone→way tagging** (`tag_ways.py`). Given `alpr.geojson` + a region extract,
-      find every way that intersects a cone and write `alpr=yes` onto it; emit a tagged
-      `.osm.pbf`. Pure geometry (shapely + osmium/pyosmium). Testable with no device.
-      **Toolchain:** `osmium`/`pyosmium` (not yet installed).
+- [x] **1 · Cone→way tagging** (`tag_ways.py`) — **done + validated end-to-end.** Reads
+      `alpr.geojson` + an OSM extract, tags every road way whose geometry intersects a cone
+      with `alpr=yes` (two-pass pyosmium; shapely STRtree for the intersect), emits a tagged
+      extract. On the two-road spike map it tagged only the watched road, and feeding its
+      output through the Phase-2 build gave the avoided route (1904.8 m) while the untagged
+      control stayed on the short road (1112.1 m) — Phases 1+2 proven together. Needs
+      `pyosmium` + `shapely` (now installed).
 - [x] **2 · Tag preservation — PROVEN.** The make-or-break unknown is closed by a
       spike: registering `alpr` as a `<routing_type>` (plus a `<type>`) in
       `rendering_types.xml` puts it into the `.obf` routing section, and the offline
@@ -100,8 +103,17 @@ offline route that avoids cameras, no server
 
 ## Status
 
-Phases 0 and **2 proven** (routing DSL + tag preservation, both demonstrated end-to-end on
-a spike map). The make-or-break risk is gone. Next is **Phase 1** (`tag_ways.py`, the
-cone→way tagger — device-independent, needs `pyosmium`), then **Phase 3** (run
-OsmAndMapCreator on a real metro extract with the two `rendering_types` lines) and the
-client/distribution phases.
+Phases **0, 1, and 2 done** — the offline pipeline is proven from cone geometry to an
+avoided offline route on a spike map (`tag_ways.py` → OsmAndMapCreator with the two
+`rendering_types` lines → OsmAnd offline router reroutes around `alpr=yes`). What remains is
+**scale and delivery**, not feasibility:
+
+- **Phase 3** — run it on a real metro extract: `build_cones.py` for `alpr.geojson`,
+  `tag_ways.py` over the Geofabrik `.osm.pbf`, then OsmAndMapCreator with a
+  `rendering_types.xml` carrying the two lines (packaged as a proper override, not the
+  hacked jar the spike used). Validate the `.obf` against known camera positions.
+- **Phase 4** — client: a "TRAMES (offline)" driving profile (OsmAnd engine + the
+  `car_alpr` berth params), auto-fallback when the server is unreachable, exposure count
+  against on-device camera data.
+- **Phase 5** — distribution: host the ALPR-tagged `.obf` on astrophage, in-app
+  download/import, a freshness stamp.
