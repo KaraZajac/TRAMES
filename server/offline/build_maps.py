@@ -90,27 +90,39 @@ def build_state(slug, mc, cones, work, out, roads_only):
         print(f"[{slug}] output exists, skip")
         return "skip"
     t0 = time.time()
-    pbf = os.path.join(work, f"{slug}.osm.pbf")
-    if not os.path.exists(pbf):
-        print(f"[{slug}] downloading extract ...")
-        urllib.request.urlretrieve(GEOFABRIK.format(slug=slug), pbf)
     tagged = os.path.join(work, f"{slug}-alpr.osm.pbf")
-    print(f"[{slug}] tagging ...")
-    sh(f'python3 "{HERE}/tag_ways.py" --cones "{cones}" --in "{pbf}" --out "{tagged}"')
-    print(f"[{slug}] building obf ...")
-    cmd = "generate-roads" if roads_only else "generate-obf"
-    env = dict(os.environ, JAVA_OPTS=os.environ.get("TRAMES_JAVA_OPTS", "-Xms1G -Xmx8G"))
-    build_start = time.time()
-    sh(f'bash "{mc}/utilities.sh" {cmd} "{tagged}"', cwd=work, env=env)
-    # the obf MapCreator just wrote (named after the input, casing varies) — pick by mtime
-    produced = [f for f in glob.glob(os.path.join(work, "*.obf"))
-                if os.path.getmtime(f) >= build_start - 1]
-    if not produced:
-        sys.exit(f"[{slug}] no obf produced")
-    os.replace(max(produced, key=os.path.getmtime), obf_out)
-    os.remove(tagged)
-    print(f"[{slug}] done in {time.time()-t0:.0f}s -> {obf_out}")
-    return "built"
+    try:
+        pbf = os.path.join(work, f"{slug}.osm.pbf")
+        if not os.path.exists(pbf):
+            print(f"[{slug}] downloading extract ...")
+            urllib.request.urlretrieve(GEOFABRIK.format(slug=slug), pbf)
+        print(f"[{slug}] tagging ...")
+        sh(f'python3 "{HERE}/tag_ways.py" --cones "{cones}" --in "{pbf}" --out "{tagged}"')
+        print(f"[{slug}] building obf ...")
+        cmd = "generate-roads" if roads_only else "generate-obf"
+        env = dict(os.environ, JAVA_OPTS=os.environ.get("TRAMES_JAVA_OPTS", "-Xms1G -Xmx8G"))
+        build_start = time.time()
+        sh(f'bash "{mc}/utilities.sh" {cmd} "{tagged}"', cwd=work, env=env)
+        # the obf MapCreator just wrote (named after the input, casing varies) — pick by mtime
+        produced = [f for f in glob.glob(os.path.join(work, "*.obf"))
+                    if os.path.getmtime(f) >= build_start - 1]
+        if not produced:
+            raise RuntimeError("no obf produced")
+        os.replace(max(produced, key=os.path.getmtime), obf_out)
+        print(f"[{slug}] done in {time.time()-t0:.0f}s -> {obf_out}")
+        return "built"
+    except Exception as e:
+        # One state failing (usually a giant state OOM) must not abort the whole run —
+        # log it and move on; a later high-heap pass picks it up (output still missing).
+        print(f"[{slug}] FAILED after {time.time()-t0:.0f}s: {e}")
+        return "failed"
+    finally:
+        for f in (tagged,) + tuple(glob.glob(os.path.join(work, f"{slug}*.obf"))):
+            if os.path.exists(f):
+                try:
+                    os.remove(f)
+                except OSError:
+                    pass
 
 
 def main():
@@ -132,10 +144,11 @@ def main():
 
     states = US_STATES if args.states == "all" else args.states.split(",")
     print(f"building {len(states)} regions -> {args.out}\n")
-    tally = {"built": 0, "skip": 0}
+    tally = {"built": 0, "skip": 0, "failed": 0}
     for slug in states:
         tally[build_state(slug, args.mapcreator, cones, args.work, args.out, args.roads_only)] += 1
-    print(f"\ndone: {tally['built']} built, {tally['skip']} skipped, in {args.out}")
+    print(f"\ndone: {tally['built']} built, {tally['skip']} skipped, "
+          f"{tally['failed']} failed, in {args.out}")
 
 
 if __name__ == "__main__":
