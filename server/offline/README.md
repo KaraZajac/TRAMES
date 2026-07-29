@@ -66,9 +66,13 @@ offline route that avoids cameras, no server
       find every way that intersects a cone and write `alpr=yes` onto it; emit a tagged
       `.osm.pbf`. Pure geometry (shapely + osmium/pyosmium). Testable with no device.
       **Toolchain:** `osmium`/`pyosmium` (not yet installed).
-- [ ] **2 · Tag preservation.** Register `alpr` in the OsmAnd map-build tag config
-      (`rendering_types.xml`, routing category) so the `.obf` build keeps it — the main
-      technical unknown. Finalise `car_alpr` in routing.xml.
+- [x] **2 · Tag preservation — PROVEN.** The make-or-break unknown is closed by a
+      spike: registering `alpr` as a `<routing_type>` (plus a `<type>`) in
+      `rendering_types.xml` puts it into the `.obf` routing section, and the offline
+      router then avoids `alpr=yes` ways — a two-road test map rerouted 1112 m → 1905 m
+      once the penalty applied, and stayed on the short road without it. Exact recipe and
+      proof table in `rendering_types.delta.md`. It's config-only; no OsmAnd-tools code
+      change needed.
 - [ ] **3 · `.obf` build.** Run OsmAndMapCreator on the tagged extract with the
       ALPR-aware config. **Toolchain:** OsmAndMapCreator — *not present*, needs setup
       (Java 21 is available). Start with one metro (e.g. the DC/Delaware area the paper
@@ -83,10 +87,9 @@ offline route that avoids cameras, no server
 
 ## Open questions / risks
 
-- **Tag preservation (Phase 2)** is the make-or-break unknown: OsmAnd's `.obf` build only
-  keeps way tags registered in its routing/rendering config. If `alpr` can be registered
-  cleanly, the rest is engineering; if not, Path A needs a rethink. Prove this early, on a
-  tiny extract, before investing in the full pipeline.
+- ~~**Tag preservation (Phase 2)** is the make-or-break unknown.~~ **Resolved** — two
+  `rendering_types.xml` declarations (`<type>` + `<routing_type>`) register `alpr` cleanly
+  and the offline router avoids it. See `rendering_types.delta.md`. The rest is engineering.
 - **Map size + staleness.** OsmAnd regional maps are large; ALPR-tagged variants double the
   download story (users fetch our maps instead of standard ones), and they age as DeFlock
   adds cameras. A per-region rebuild cadence is needed.
@@ -97,6 +100,8 @@ offline route that avoids cameras, no server
 
 ## Status
 
-Phase 0 done (this commit). Next tractable, device-independent step is **Phase 1**
-(`tag_ways.py`) — it produces a tagged extract we can inspect and validate against
-`alpr.geojson` without any map toolchain, and it's the input everything downstream needs.
+Phases 0 and **2 proven** (routing DSL + tag preservation, both demonstrated end-to-end on
+a spike map). The make-or-break risk is gone. Next is **Phase 1** (`tag_ways.py`, the
+cone→way tagger — device-independent, needs `pyosmium`), then **Phase 3** (run
+OsmAndMapCreator on a real metro extract with the two `rendering_types` lines) and the
+client/distribution phases.
