@@ -779,6 +779,10 @@ public class RouteOptionsBottomSheet extends MenuBottomSheetDialogFragment imple
 				RouteSimulationItem.KEY),
 
 		BICYCLE(MuteSoundRoutingParameter.KEY,
+				// TRAMES: camera avoidance, same control as CAR — a camera is a camera
+				// whether you drive, ride or walk past it.
+				TRAMES_ALPR_AVOIDANCE,
+				DividerItem.KEY,
 				DRIVING_STYLE,
 				GeneralRouter.USE_HEIGHT_OBSTACLES,
 				DividerItem.KEY,
@@ -793,6 +797,10 @@ public class RouteOptionsBottomSheet extends MenuBottomSheetDialogFragment imple
 				RouteSimulationItem.KEY),
 
 		PEDESTRIAN(MuteSoundRoutingParameter.KEY,
+				// TRAMES: camera avoidance, same control as CAR — a camera is a camera
+				// whether you drive, ride or walk past it.
+				TRAMES_ALPR_AVOIDANCE,
+				DividerItem.KEY,
 				GeneralRouter.USE_HEIGHT_OBSTACLES,
 				DividerItem.KEY,
 				AvoidRoadsRoutingParameter.KEY,
