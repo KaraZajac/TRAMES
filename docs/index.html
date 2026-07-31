@@ -4,16 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TRAMES — navigation that routes around licence-plate readers</title>
-<meta name="description" content="A native Android app that routes you around automated licence-plate readers. ALPR cameras are modelled as directional wedges — not circles — so you only detour around roads a camera can actually see. On by default, zero setup. Built on OsmAnd + GraphHopper.">
+<meta name="description" content="A native Android app that routes you around automated licence-plate readers — offline, on your phone. ALPR cameras are modelled as directional wedges, not circles, so you only detour around roads a camera can actually see. Offline maps for all 50 states + DC. On by default. Built on OsmAnd + GraphHopper.">
 <meta property="og:title" content="TRAMES — route around licence-plate readers">
-<meta property="og:description" content="Android navigation that avoids the fields of view of 120,838 mapped ALPR cameras. Directional cones, not circles. On by default. 84.6% of commutes route to zero exposure for a median 1.5 min.">
+<meta property="og:description" content="Android navigation that avoids the fields of view of 120,838 mapped ALPR cameras — computed offline, so nothing about where you are leaves the device. Directional cones, not circles. Driving, cycling and walking. Offline maps for all 50 states + DC.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://trames.karazajac.io/">
-<meta property="og:image" content="https://trames.karazajac.io/og.png?v=114">
+<meta property="og:image" content="https://trames.karazajac.io/og.png?v=123">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://trames.karazajac.io/og.png?v=114">
+<meta name="twitter:image" content="https://trames.karazajac.io/og.png?v=123">
 <meta name="theme-color" content="#eff1f5">
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 
@@ -57,16 +57,17 @@
   <div class="container hero-inner">
     <div class="hero-eyebrow">
       <span class="dot dot-pulse"></span>
-      v1.1.4 · Android · on by default
+      v1.2.3 · Android · offline by default
     </div>
     <h1 class="hero-title">
       <span class="display-wordmark">TRAMES</span>
     </h1>
     <p class="hero-tag">
-      <strong>Navigation that routes around automated licence-plate readers.</strong>
+      <strong>Navigation that routes around automated licence-plate readers —
+      entirely on your phone.</strong>
       An ordinary route request — an address, a destination — with one extra
       constraint: prefer roads that no ALPR camera can actually see.
-      <span class="hero-tag-pop">Cameras are directional wedges, not circles. You detour only where one is really looking.</span>
+      <span class="hero-tag-pop">Routing runs offline by default, so where you are and where you're going never leave the device.</span>
     </p>
 
     <div class="phone-hero">
@@ -77,8 +78,8 @@
     <div class="stats-row" id="stats-row">
       <div class="stat-chip"><span class="num" data-target="5">0</span><span>avoidance levels</span></div>
       <div class="stat-chip stat-warm"><span class="num">120,838</span><span>cameras mapped</span></div>
-      <div class="stat-chip stat-vfy"><span class="num">84.6%</span><span>route to zero</span></div>
-      <div class="stat-chip"><span class="num">v1.1.4</span><span>latest APK</span></div>
+      <div class="stat-chip stat-vfy"><span class="num" data-target="51">0</span><span>states, offline</span></div>
+      <div class="stat-chip"><span class="num">v1.2.3</span><span>latest APK</span></div>
     </div>
 
     <div class="cta-row">
@@ -207,12 +208,13 @@
     <div class="bento">
       <article class="bento-card bento-lg bento-vfy">
         <div class="bento-icon">✅</div>
-        <h3>On by default</h3>
+        <h3>On by default, offline by default</h3>
         <p>
-          First launch points the driving profile at the public routing engine at
-          <strong>Strong</strong> avoidance. Open the app, enter where you're
-          going, and the route already bends around camera fields of view. The
-          only thing you touch is the destination.
+          First launch sets the driving profile to the <strong>offline</strong>
+          engine at <strong>Strong</strong> avoidance. Download your state, enter
+          where you're going, and the route already bends around camera fields of
+          view — computed on the phone, with nothing sent anywhere. The only thing
+          you touch is the destination.
         </p>
       </article>
       <article class="bento-card">
@@ -220,6 +222,13 @@
         <h3>Your call, and it sticks</h3>
         <p>Turn avoidance down, off, or up — the app seeds itself exactly once, so
         your choice is never overwritten on the next launch.</p>
+      </article>
+      <article class="bento-card">
+        <div class="bento-icon">🚲</div>
+        <h3>Driving, cycling, walking</h3>
+        <p>A camera is a camera whether you drive, ride or walk past it. All three
+        profiles get the same five levels, and a level means the same thing in
+        each.</p>
       </article>
       <article class="bento-card">
         <div class="bento-icon">🧩</div>
@@ -359,36 +368,38 @@
   <div class="container">
     <div class="section-head">
       <span class="section-tag">the honest part</span>
-      <h2>Routing needs a server. Here's exactly what it sees.</h2>
-      <p class="lead">Unlike its fully-offline siblings, a router has to know where
-      you're starting and where you're going — that's what routing <em>is</em>. So
-      rather than pretend otherwise, here's the whole posture.</p>
+      <h2>Routing happens on your phone. Nothing about you leaves it.</h2>
+      <p class="lead">Earlier versions routed through a server, which meant handing
+      over every start and destination — the exact movement record this app exists
+      to avoid. As of v1.2.0 that's inverted: the private path is the default and
+      the network is opt-in. Here's the whole posture.</p>
     </div>
 
     <div class="bento">
-      <article class="bento-card bento-lg">
-        <div class="bento-icon">📍</div>
-        <h3>What the endpoint receives</h3>
+      <article class="bento-card bento-lg bento-vfy">
+        <div class="bento-icon">📴</div>
+        <h3>The default sends nothing</h3>
         <p>
-          To compute a route, the app sends your start and destination
-          coordinates to the routing server. That's the price of online routing —
-          and the reason the <strong>self-host option exists</strong>: point
-          TRAMES at your own GraphHopper and no third party sees anything.
+          Routes are computed on the device against maps you've downloaded, so
+          your start, destination and timing never travel. Airplane mode changes
+          nothing — avoidance keeps working. Avoiding cameras while streaming your
+          itinerary to a host isn't privacy, so we stopped doing it.
         </p>
       </article>
       <article class="bento-card bento-vfy">
-        <div class="bento-icon">🎫</div>
-        <h3>No account, no token</h3>
-        <p>The public endpoint is open — no sign-up, no API key, nothing tying a
-        request to you. A key baked into a public APK was never real security, so
-        there isn't one.</p>
+        <div class="bento-icon">🛑</div>
+        <h3>The map doesn't phone home either</h3>
+        <p>Camera positions come from a 1.1 MB pack on the device. A camera query
+        would carry a box around your current view — your location — so those
+        requests are <strong>denied by default</strong> and only permitted if you
+        deliberately switch a profile to online routing.</p>
       </article>
       <article class="bento-card">
-        <div class="bento-icon">🗒</div>
-        <h3>Cameras, not tracking</h3>
-        <p>The map layer pulls cameras for the area you're viewing from the
-        server's own snapshot — the same data the routing graph is built from. No
-        profile, no history.</p>
+        <div class="bento-icon">🌐</div>
+        <h3>Online is still there, opt-in</h3>
+        <p>Prefer fresher camera data, or need an area you have no map for? Pick
+        the online engine in navigation settings and it works as before — open,
+        no account, no API key. Or point it at your own GraphHopper.</p>
       </article>
       <article class="bento-card">
         <div class="bento-icon">🧾</div>
@@ -414,7 +425,7 @@
   <div class="container">
     <div class="section-head">
       <span class="section-tag">get it</span>
-      <h2>Sideload in three steps.</h2>
+      <h2>Sideload in four steps.</h2>
     </div>
 
     <div class="feature-split">
@@ -428,7 +439,7 @@
           <ul>
             <li>Grab the latest debug-signed APK from
               <a href="https://github.com/KaraZajac/TRAMES/releases/latest">Releases</a>
-              (currently <strong>v1.1.4</strong>, arm64-v8a, Android 7.0+).</li>
+              (currently <strong>v1.2.3</strong>, arm64-v8a, Android 7.0+).</li>
           </ul>
         </div>
         <div class="tl-col tl-active">
@@ -437,12 +448,18 @@
             <li>Sideload it — allow "install unknown apps" for your browser or files app, then open the APK. It installs alongside OsmAnd.</li>
           </ul>
         </div>
-        <div class="tl-col tl-next">
-          <div class="tl-tag">3 · just drive</div>
-          <ul>
-            <li>Grant location, type a destination — avoidance is already on. Tune the strength in the driving profile if you like.</li>
-          </ul>
-        </div>
+          <div class="tl-col tl-next">
+            <div class="tl-tag">3 · get your maps</div>
+            <ul>
+              <li>Open <strong>TRAMES offline maps</strong> in the drawer and download your state — the camera data (1.1 MB) comes with it. Routing is offline by default, so this step is what makes it work.</li>
+            </ul>
+          </div>
+          <div class="tl-col tl-next">
+            <div class="tl-tag">4 · just drive</div>
+            <ul>
+              <li>Grant location, type a destination — avoidance is already on. Tune the strength in the driving, cycling or walking profile if you like.</li>
+            </ul>
+          </div>
       </div>
     </div>
 
@@ -501,7 +518,7 @@
       laws — it is a navigator, and you are driving.
     </p>
     <p class="footer-meta">
-      v1.1.4 · <a href="https://github.com/KaraZajac/TRAMES">github.com/KaraZajac/TRAMES</a>
+      v1.2.3 · <a href="https://github.com/KaraZajac/TRAMES">github.com/KaraZajac/TRAMES</a>
       · camera data © OpenStreetMap contributors (ODbL)
     </p>
   </div>
