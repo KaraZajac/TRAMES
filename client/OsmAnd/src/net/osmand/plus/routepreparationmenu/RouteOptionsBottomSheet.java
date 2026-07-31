@@ -93,6 +93,13 @@ public class RouteOptionsBottomSheet extends MenuBottomSheetDialogFragment imple
 	private static final Log LOG = PlatformUtil.getLog(RouteOptionsBottomSheet.class);
 	public static final String DIALOG_MODE_KEY = "DIALOG_MODE_KEY";
 
+	/**
+	 * TRAMES: the routing.xml parameter group holding the camera-avoidance levels. Must
+	 * match the `group` attribute trames-patch-resources.sh writes — OsmAnd keys groups by
+	 * that name, and the row's label comes from routing_attr_alpr_avoidance_name.
+	 */
+	private static final String TRAMES_ALPR_AVOIDANCE = "alpr_avoidance";
+
 	private RoutingHelper routingHelper;
 	private RoutingOptionsHelper routingOptionsHelper;
 	private ApplicationMode applicationMode;
@@ -750,6 +757,12 @@ public class RouteOptionsBottomSheet extends MenuBottomSheetDialogFragment imple
 	public enum AppModeOptions {
 
 		CAR(MuteSoundRoutingParameter.KEY,
+				DividerItem.KEY,
+				// TRAMES: camera-avoidance level, first because it is the app's reason to
+				// exist. The id is the routing.xml parameter group (see
+				// trames-patch-resources.sh); OsmAnd renders same-group booleans as one row
+				// showing the current level, tapping through to a picker.
+				TRAMES_ALPR_AVOIDANCE,
 				DividerItem.KEY,
 				AvoidRoadsRoutingParameter.KEY,
 				ShowAlongTheRouteItem.KEY,

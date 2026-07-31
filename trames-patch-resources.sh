@@ -34,36 +34,65 @@ import sys, xml.dom.minidom
 path, check_only = sys.argv[1], sys.argv[2] == "1"
 src = open(path, encoding="utf-8").read()
 
-# Declare the toggle next to OsmAnd's own avoid_* switches. default="true" makes camera
-# avoidance on out of the box — opt-out, not opt-in. The id must start with "avoid_" so
-# RouteParametersFragment files it into the existing "Avoid..." group with no UI code.
+# Five mutually exclusive levels rather than one on/off switch. A shared `group` is what
+# makes them exclusive: OsmAnd collects same-group boolean parameters into a
+# LocalRoutingParameterGroup and renders it as one row showing the current level, tapping
+# through to a picker — the same treatment the built-in "Driving style" group gets. That
+# is entirely OsmAnd's own machinery; the fork adds no UI code for it.
+#
+# The multipliers mirror TramesEngine.BERTH_MULTIPLIERS exactly, so a given level means
+# the same thing online and offline. They are NOT evenly spaced: measured on the
+# continental graph, everything from 1.0 down to ~0.3 leaves most routes unchanged, so
+# the useful range is 0.3..0.01 and the levels are distributed across that instead of
+# across 0..1, where most of the control would do nothing.
+#
+# alpr_strong is default="true": camera avoidance is on out of the box at the same
+# strength the online engine defaults to. Opt-out, not opt-in.
 PARAM_ANCHOR = ('\t\t<parameter id="avoid_toll" name="Avoid toll roads" '
                 'description="Avoid toll roads" type="boolean"/>')
-PARAM_NEW = ('\t\t<!-- TRAMES: avoid ALPR (licence-plate reader) cameras, on by default. -->\n'
-             '\t\t<parameter id="avoid_alpr" name="Avoid ALPR cameras" '
-             'description="Avoid roads watched by licence-plate readers" '
-             'type="boolean" default="true"/>')
+PARAM_NEW = (
+    '\t\t<!-- TRAMES: ALPR (licence-plate reader) avoidance level. -->\n'
+    '\t\t<parameter group="alpr_avoidance" id="alpr_off" name="Off" '
+    'description="Do not avoid licence-plate readers" type="boolean"/>\n'
+    '\t\t<parameter group="alpr_avoidance" id="alpr_light" name="Light" '
+    'description="Avoid readers only where the detour is nearly free" type="boolean"/>\n'
+    '\t\t<parameter group="alpr_avoidance" id="alpr_moderate" name="Moderate" '
+    'description="A balanced trade between detour and exposure" type="boolean"/>\n'
+    '\t\t<parameter group="alpr_avoidance" id="alpr_strong" name="Strong" '
+    'description="Avoid readers wherever a reasonable alternative exists" '
+    'type="boolean" default="true"/>\n'
+    '\t\t<parameter group="alpr_avoidance" id="alpr_max" name="Maximum" '
+    'description="Avoid every reader it can find a way around" type="boolean"/>')
 
-# The penalty itself, inside <way attribute="priority">. Anchored on the toll *priority*
-# rule specifically — there is a second <if param="avoid_toll"> further down under
-# <point attribute="obstacle"> for physical toll booths, which must NOT be touched.
+# The penalties themselves, inside <way attribute="priority">. Anchored on the toll
+# *priority* rule specifically — there is a second <if param="avoid_toll"> further down
+# under <point attribute="obstacle"> for physical toll booths, which must NOT be touched.
 RULE_ANCHOR = ('\t\t\t<if param="avoid_toll">\n'
                '\t\t\t\t<select value="0.1" t="toll" v="yes"/>\n'
                '\t\t\t</if>')
 RULE_NEW = ('\t\t\t<!-- TRAMES: "alpr=yes" is stamped onto camera-watched ways by\n'
             '\t\t\t     server/offline/tag_ways.py and preserved in the .obf routing section.\n'
-            '\t\t\t     0.05 mirrors TramesEngine.BERTH_MULTIPLIERS\' STRONG default, so an\n'
-            '\t\t\t     offline route dodges the same cameras as an online one. A priority\n'
-            '\t\t\t     multiplier discourages a road; it never blocks it. -->\n'
-            '\t\t\t<if param="avoid_alpr">\n'
+            '\t\t\t     A priority multiplier discourages a road; it never blocks it, so a\n'
+            '\t\t\t     watched road stays usable when it is the only way through.\n'
+            '\t\t\t     alpr_off deliberately has no rule: priority stays 1. -->\n'
+            '\t\t\t<if param="alpr_light">\n'
+            '\t\t\t\t<select value="0.3" t="alpr" v="yes"/>\n'
+            '\t\t\t</if>\n'
+            '\t\t\t<if param="alpr_moderate">\n'
+            '\t\t\t\t<select value="0.1" t="alpr" v="yes"/>\n'
+            '\t\t\t</if>\n'
+            '\t\t\t<if param="alpr_strong">\n'
             '\t\t\t\t<select value="0.05" t="alpr" v="yes"/>\n'
+            '\t\t\t</if>\n'
+            '\t\t\t<if param="alpr_max">\n'
+            '\t\t\t\t<select value="0.01" t="alpr" v="yes"/>\n'
             '\t\t\t</if>')
 
-if "avoid_alpr" in src:
-    print("  ok      routing.xml already carries the ALPR rule")
+if "alpr_avoidance" in src:
+    print("  ok      routing.xml already carries the ALPR avoidance levels")
     sys.exit(0)
 if check_only:
-    print("  MISSING routing.xml has no ALPR rule — run without --check to apply")
+    print("  MISSING routing.xml has no ALPR levels — run without --check to apply")
     sys.exit(1)
 
 for name, anchor in (("parameter", PARAM_ANCHOR), ("priority rule", RULE_ANCHOR)):
@@ -83,5 +112,5 @@ try:
 except Exception as e:
     print(f"  FAILED  patched routing.xml is not well-formed: {e}", file=sys.stderr)
     sys.exit(1)
-print("  ok      routing.xml patched with the ALPR avoidance rule (avoid_alpr, 0.05)")
+print("  ok      routing.xml patched: alpr_avoidance levels (off/light/moderate/strong/max, default strong)")
 PY

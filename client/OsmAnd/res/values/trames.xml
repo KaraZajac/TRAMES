@@ -41,14 +41,28 @@
     <string name="trames_exposure_count">%1$d licence-plate reader(s) can see this route</string>
 
     <!--
-      Offline avoidance toggle. These two names are not free-form: OsmAnd looks up a
-      routing parameter's label as routing_attr_<id>_name / _description (see
-      AndroidUtils.getRoutingStringPropertyName), so they must match the `avoid_alpr`
-      parameter that trames-patch-resources.sh adds to routing.xml. Defined here rather
+      Offline avoidance levels. These names are not free-form: OsmAnd looks up a routing
+      parameter's label as routing_attr_<id>_name / _description (see
+      AndroidUtils.getRoutingStringPropertyName), and a group's label as
+      routing_attr_<group>_name — so they must match the `alpr_avoidance` group and its
+      five ids that trames-patch-resources.sh adds to routing.xml. Defined here rather
       than in OsmAnd's strings.xml because that file is CC-BY-NC-ND — see the header.
+
+      The level names deliberately mirror the online berth labels above: the same word
+      means the same multiplier whichever engine is routing.
     -->
-    <string name="routing_attr_avoid_alpr_name">Avoid ALPR cameras</string>
-    <string name="routing_attr_avoid_alpr_description">Avoids roads watched by licence-plate readers</string>
+    <string name="routing_attr_alpr_avoidance_name">Camera avoidance</string>
+    <string name="routing_attr_alpr_avoidance_description">How hard to avoid roads watched by licence-plate readers</string>
+    <string name="routing_attr_alpr_off_name">Off — fastest route</string>
+    <string name="routing_attr_alpr_off_description">Do not avoid licence-plate readers</string>
+    <string name="routing_attr_alpr_light_name">Light</string>
+    <string name="routing_attr_alpr_light_description">Avoid readers only where the detour is nearly free</string>
+    <string name="routing_attr_alpr_moderate_name">Moderate</string>
+    <string name="routing_attr_alpr_moderate_description">A balanced trade between detour and exposure</string>
+    <string name="routing_attr_alpr_strong_name">Strong</string>
+    <string name="routing_attr_alpr_strong_description">Avoid readers wherever a reasonable alternative exists</string>
+    <string name="routing_attr_alpr_max_name">Maximum</string>
+    <string name="routing_attr_alpr_max_description">Avoid every reader it can find a way around</string>
 
     <!-- ── offline map catalogue (TramesMapsDialog) ─────────────────────────── -->
     <string name="trames_maps_title">TRAMES offline maps</string>
