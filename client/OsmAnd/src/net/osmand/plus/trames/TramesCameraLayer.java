@@ -29,7 +29,9 @@ import net.osmand.data.RotatedTileBox;
 import net.osmand.plus.OsmandApplication;
 import net.osmand.plus.R;
 import net.osmand.plus.routing.IRouteInformationListener;
+import net.osmand.plus.routing.RouteService;
 import net.osmand.plus.routing.RoutingHelper;
+import net.osmand.plus.settings.backend.ApplicationMode;
 import net.osmand.data.ValueHolder;
 import net.osmand.plus.utils.NativeUtilities;
 import net.osmand.plus.views.OsmandMapTileView;
@@ -107,6 +109,16 @@ public class TramesCameraLayer extends OsmandMapLayer implements IRouteInformati
 		// Lets the layer keep drawing with no network — see TramesCameraStore. Without it
 		// airplane mode renders a blank map over surveilled streets, which reads as safety.
 		source.setStore(new TramesCameraStore(app));
+		// Camera queries carry a bounding box around the current view — the user's location.
+		// They are only permitted once the user has chosen an online routing engine, i.e.
+		// has already accepted sending destinations to a server. Under the default offline
+		// setup nothing about where the user is ever leaves the device: the map draws from
+		// the downloaded pack instead. Evaluated per call so switching a profile back to
+		// offline stops the queries immediately, without needing a restart.
+		source.setNetworkPolicy(() -> {
+			ApplicationMode mode = routingHelper != null ? routingHelper.getAppMode() : null;
+			return mode != null && mode.getRouteService() == RouteService.ONLINE;
+		});
 		bitmapPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		bitmapPaint.setFilterBitmap(true);
 

@@ -72,6 +72,9 @@
     <string name="trames_maps_installed">installed</string>
     <string name="trames_maps_download_prompt">Download the %1$s map (%2$s)? It replaces the standard map for that area and lets offline routing avoid cameras there.</string>
     <string name="trames_maps_redownload_prompt">%1$s is already installed. Download it again (%2$s) to pick up newly added cameras?</string>
+    <string name="trames_maps_camera_pack">Camera positions — 1.1 MB (needed to show cameras offline)</string>
+    <string name="trames_maps_camera_pack_downloading">Downloading camera positions…</string>
+    <string name="trames_maps_camera_pack_ready">Camera positions ready — the map can now show cameras offline</string>
     <string name="trames_maps_downloading">Downloading %1$s…</string>
     <string name="trames_maps_ready">%1$s is ready — offline routing now avoids cameras there</string>
     <string name="trames_maps_failed">Download failed: %1$s</string>

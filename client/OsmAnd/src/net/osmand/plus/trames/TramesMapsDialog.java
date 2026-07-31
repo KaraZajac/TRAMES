@@ -76,19 +76,59 @@ public class TramesMapsDialog {
 	private static void showList(@NonNull Activity activity,
 	                             @NonNull TramesMapDownloader downloader,
 	                             @NonNull List<TramesMapDownloader.TramesMap> maps) {
-		CharSequence[] labels = new CharSequence[maps.size()];
+		OsmandApplication app = (OsmandApplication) activity.getApplication();
+		TramesCameraStore store = new TramesCameraStore(app);
+
+		// The camera pack leads the list. Without it the map draws no cameras at all under
+		// the default offline setup — the layer is forbidden from asking the network,
+		// because a camera query carries the user's location (TramesCameraSource's network
+		// policy). It normally arrives with a map, but it is offered on its own so someone
+		// who has not downloaded a state yet is not stuck looking at an empty map and
+		// reading that as "no cameras here".
+		String installed = "  ·  " + activity.getString(R.string.trames_maps_installed);
+		CharSequence[] labels = new CharSequence[maps.size() + 1];
+		labels[0] = activity.getString(R.string.trames_maps_camera_pack)
+				+ (store.isPresent() ? installed : "");
 		for (int i = 0; i < maps.size(); i++) {
 			TramesMapDownloader.TramesMap m = maps.get(i);
 			// "California — 2.0 GB" / "· installed" so the state of each row is obvious
 			// without a custom adapter.
-			labels[i] = prettyName(m.name) + " — " + humanSize(m.size)
-					+ (downloader.isInstalled(m) ? "  ·  " + activity.getString(R.string.trames_maps_installed) : "");
+			labels[i + 1] = prettyName(m.name) + " — " + humanSize(m.size)
+					+ (downloader.isInstalled(m) ? installed : "");
 		}
 		new AlertDialog.Builder(activity)
 				.setTitle(R.string.trames_maps_title)
-				.setItems(labels, (dialog, which) -> confirm(activity, downloader, maps.get(which)))
+				.setItems(labels, (dialog, which) -> {
+					if (which == 0) {
+						downloadCameraPack(activity, store);
+					} else {
+						confirm(activity, downloader, maps.get(which - 1));
+					}
+				})
 				.setNegativeButton(R.string.shared_string_close, null)
 				.show();
+	}
+
+	/** Fetch the camera pack on its own. A static file: no location is sent. */
+	private static void downloadCameraPack(@NonNull Activity activity,
+	                                       @NonNull TramesCameraStore store) {
+		AlertDialog dialog = new AlertDialog.Builder(activity)
+				.setView(messageView(activity,
+						activity.getString(R.string.trames_maps_camera_pack_downloading)))
+				.setCancelable(false)
+				.show();
+		new Thread(() -> {
+			String error = store.download(null);
+			post(() -> {
+				dismiss(dialog);
+				if (activity.isFinishing()) {
+					return;
+				}
+				toast(activity, error == null
+						? activity.getString(R.string.trames_maps_camera_pack_ready)
+						: activity.getString(R.string.trames_maps_failed, error));
+			});
+		}, "trames-camera-pack").start();
 	}
 
 	private static void confirm(@NonNull Activity activity,

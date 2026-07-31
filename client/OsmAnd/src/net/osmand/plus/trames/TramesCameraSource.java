@@ -109,6 +109,34 @@ public class TramesCameraSource {
 		this.store = store;
 	}
 
+	/** Decides whether this source may talk to the network at all. */
+	public interface NetworkPolicy {
+		boolean allowed();
+	}
+
+	/**
+	 * Default DENY, and deliberately so.
+	 *
+	 * <p>A camera query is a bounding box around what the user is looking at — which is to
+	 * say, where they are. Sending that to our server (or worse, to a public Overpass
+	 * instance) is exactly the kind of movement record this app exists to prevent, and on
+	 * a fresh install it happened before the user had opted into anything at all.
+	 *
+	 * <p>So the source cannot reach the network unless something explicitly permits it,
+	 * and the failure mode of a mis-wired policy is a map with no cameras rather than a
+	 * silent location leak. See {@link #fetch} for the single choke point this gates.
+	 */
+	private volatile NetworkPolicy networkPolicy = () -> false;
+
+	public void setNetworkPolicy(@NonNull NetworkPolicy policy) {
+		this.networkPolicy = policy;
+	}
+
+	private boolean networkAllowed() {
+		NetworkPolicy p = networkPolicy;
+		return p != null && p.allowed();
+	}
+
 	/**
 	 * True when nothing can currently supply cameras — no network answer and no pack on
 	 * disk. Distinct from "fetched successfully and there are none here": the UI must be
@@ -131,6 +159,13 @@ public class TramesCameraSource {
 	 */
 	public void ensureLoaded(@NonNull QuadRect visibleBox, int zoom, @Nullable Runnable onLoaded) {
 		if (zoom < MIN_ZOOM || fetching.get()) {
+			return;
+		}
+		// Nothing can answer: no permission to ask, and no pack to read. Return before
+		// spawning a task rather than after — on a fresh install with offline routing this
+		// is the common path, and it must cost nothing and send nothing.
+		TramesCameraStore local = store;
+		if (!networkAllowed() && (local == null || !local.isPresent())) {
 			return;
 		}
 		// Back off for a minute after a failure. Overpass is a free community service and
@@ -186,6 +221,13 @@ public class TramesCameraSource {
 
 	@Nullable
 	private List<Camera> fetch(double south, double west, double north, double east) {
+		// The single choke point for every camera request, gated here rather than at the
+		// call sites so a new caller cannot accidentally reintroduce the leak. The bounding
+		// box below IS the user's location; it does not leave the device unless the policy
+		// says so.
+		if (!networkAllowed()) {
+			return null;
+		}
 		String query = "[out:json][timeout:" + QUERY_TIMEOUT_S + "];"
 				+ "(node[\"man_made\"=\"surveillance\"][\"surveillance:type\"=\"ALPR\"]"
 				+ "(" + south + "," + west + "," + north + "," + east + "););out body;";
