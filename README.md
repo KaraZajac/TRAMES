@@ -5,6 +5,7 @@
 Navigation that routes around automated licence-plate readers.
 
 **Website · [trames.karazajac.io](https://trames.karazajac.io)** — what it is, how it works, and the APK.
+**Download · [latest release](https://github.com/KaraZajac/TRAMES/releases/latest)** — debug-signed APK, arm64-v8a, Android 7.0+. Sideload; there is no Play Store build.
 
 TRAMES answers an ordinary navigation request — an address, a route — with one
 additional constraint: prefer paths that no ALPR camera can actually see. Cameras are
@@ -12,14 +13,20 @@ modelled as **directional wedges**, not circles, because a reader watching north
 traffic says nothing about the southbound carriageway, and treating it as a circle makes
 the router detour around roads nobody is being read on.
 
+Since v1.2.0 it does this **offline by default**. Routes are computed on the device
+against ALPR-tagged maps, so a start, a destination and a departure time never leave the
+phone. Online routing still exists and still avoids cameras, but it is opt-in: sending a
+server your itinerary in order to dodge cameras trades one movement record for another.
+
 ---
 
 ## What is here
 
 | Path | What it is |
 |---|---|
-| `client/` | Android app — a fork of [OsmAnd](https://github.com/osmandapp/OsmAnd) (GPLv3) with an ALPR-avoiding online routing engine, a camera map layer, and a berth selector |
-| `server/` | Routing backend — stock GraphHopper 11 plus a preprocessor that turns OSM ALPR data into camera-cone geometry |
+| `client/` | Android app — a fork of [OsmAnd](https://github.com/osmandapp/OsmAnd) (GPLv3): offline ALPR avoidance for car/bike/foot, an ALPR-avoiding online engine, a camera map layer, and an in-app map downloader |
+| `server/alpr`, `server/graphhopper` | Online routing backend — stock GraphHopper 11 plus a preprocessor that turns OSM ALPR data into camera-cone geometry |
+| `server/offline/` | The offline pipeline — tags camera-watched ways, builds `.obf` maps that carry the tag, and packs camera positions for the map layer |
 | `research/` | The measurement study: pipeline, results, and the paper |
 
 ## The finding
@@ -42,7 +49,41 @@ ALPR installations**.
 Paper: [`research/paper/trames.pdf`](research/paper/trames.pdf) — build with
 `tectonic -X compile research/paper/trames.tex`.
 
-## How it works
+## How it works — offline
+
+The offline path has to solve a different problem from the online one: OsmAnd's router
+reads only what is inside the `.obf` map, so the cameras have to be *in the map*.
+
+1. **Tag the roads.** `server/offline/tag_ways.py` intersects the same 60 m / 45° cones
+   against an OSM extract and writes `alpr=yes` onto every way a camera watches.
+2. **Keep the tag through the build.** A `.obf` drops unknown tags unless they are
+   declared, so `rendering_types.xml` gains a `<routing_type tag="alpr">` — the one
+   genuinely uncertain step, proven on a spike before the continent was built.
+3. **Penalise it while routing.** `routing.xml` gets five mutually exclusive levels
+   (`alpr_off` … `alpr_max`) in the `car`, `bicycle` and `pedestrian` profiles, sharing
+   an `alpr_avoidance` group so OsmAnd renders them as one picker with no UI code.
+
+The multipliers are the same numbers the online engine uses — `0.3 / 0.1 / 0.05 / 0.01`,
+default *Strong* — so a level means the same thing whichever engine routes, by
+construction rather than by coincidence.
+
+Two things worth knowing:
+
+- **Rule order is load-bearing.** `GeneralRouter` returns the *first* matching priority
+  rule and stops; priorities do not accumulate. The ALPR rules are therefore first in
+  each block. Anywhere later, a watched road that also carried `smoothness=bad` or
+  `access=destination` would match that instead and silently escape avoidance.
+- **`routing.xml` is not ours and is overwritten on every build** — it is synced from
+  upstream OsmAnd-resources and gitignored at both ends. `trames-patch-resources.sh`
+  keeps the delta in a tracked, idempotent script that the build applies and that fails
+  loudly if upstream moves. Without it the app builds clean and quietly avoids nothing,
+  which is the worst failure this project has: routing still works, it just stops doing
+  the one thing the app is for.
+
+Prebuilt maps for all 50 states + DC are hosted at
+**[maps.blackflagintel.com](https://maps.blackflagintel.com)** and download in-app.
+
+## How it works — online
 
 GraphHopper resolves `custom_areas.directory` into a spatial index **at graph import
 time**. Register 114,172 camera cones as one merged area named `alpr`, and a per-request
@@ -66,19 +107,39 @@ Two consequences worth knowing before changing the config:
 
 ## Getting started
 
+Building the app needs only steps 0 and 1 — the graph is for running your own online
+endpoint, which the app no longer requires.
+
 ```sh
 # 0. third-party OsmAnd assets the client build reads (~70 MB)
 ./setup-resources.sh
 
-# 1. camera geometry (Overpass -> cones)
+# 1. build the app  (applies trames-patch-resources.sh first — see below)
+cd client && ./trames-build.sh
+```
+
+Optional, to host the online endpoint yourself:
+
+```sh
+# camera geometry (Overpass -> cones)
 cd server/alpr && ./fetch-na-cones.sh
 
-# 2. import the graph, then serve  (~82 min for North America)
+# import the graph, then serve  (~82 min for North America)
 cd ../graphhopper && ./rebuild-with-cones.sh
-
-# 3. build the app
-cd ../../client && ./trames-build.sh
 ```
+
+Optional, to build your own ALPR-tagged offline maps instead of using the hosted ones:
+
+```sh
+cd server/offline
+python3 cones_from_cameras.py --cameras ../cameras/cameras.json -o .work/us-alpr.geojson
+python3 build_maps.py --mapcreator /path/to/OsmAndMapCreator --states delaware
+python3 build_camera_pack.py -o cameras-us.json.gz     # positions for the map layer
+```
+
+> A full-map state build is memory-hungry: California and Texas each need roughly a 48 GB
+> JVM heap and a couple of hours. `--roads-only` is far cheaper if you only need routing
+> and not map display. `build_maps.py` is resumable and skips states already built.
 
 ### About `resources/`
 
@@ -121,11 +182,33 @@ cd research
 ../server/.venv/bin/python scripts/analyze.py --results out/results.csv
 ```
 
+## What leaves the device
+
+Under the default configuration, nothing about where you are. Routes are computed
+on-device and the map draws cameras from a downloaded pack.
+
+A camera query carries a bounding box around the current view — which is to say, the
+user's location — so those requests **default to denied** and are permitted only while
+the active profile uses an online routing engine. The gate lives inside the single
+function that builds the request rather than at its call sites, so a later change cannot
+reintroduce the leak by forgetting a check. Until v1.2.3 this was wrong: a fresh install
+queried cameras before the user had opted into anything.
+
+The remaining network calls carry no location and are all user-initiated: a static map
+manifest, a map file by name, and the camera pack. Choosing online routing sends start
+and destination coordinates to whichever endpoint is configured — that is what routing
+is — which is why self-hosting is supported.
+
 ## Security note
 
 **The routing server has no authentication and no rate limiting.** It binds to localhost
 and must not be exposed directly to the internet. Any public deployment needs a reverse
 proxy supplying both.
+
+**Released APKs are signed with the public Android debug key.** Anyone can build an APK
+signed with the identical key and Android will accept it as an update, so the signature
+proves nothing about who built it. Verify the SHA-256 published on the release, or build
+from source.
 
 ## Licensing and provenance
 
