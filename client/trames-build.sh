@@ -46,6 +46,15 @@ echo "JDK:     $("$JAVA_HOME/bin/java" -version 2>&1 | head -1)"
 echo "SDK:     $ANDROID_HOME"
 echo "variant: $VARIANT"
 echo "task:    $TASK"
+
+# Re-apply the TRAMES deltas to the upstream resources checkout before Gradle syncs it in.
+# Not optional and not a no-op: routing.xml is gitignored at both ends and is overwritten
+# by the Sync task on every build, so without this the app builds clean and silently stops
+# avoiding cameras. Idempotent — a no-op once applied.
+if [ -x ../trames-patch-resources.sh ]; then
+  echo "patches:"
+  ../trames-patch-resources.sh || { echo "resource patching failed — refusing to build an app that would not avoid cameras" >&2; exit 1; }
+fi
 echo
 
 mkdir -p ../build-logs

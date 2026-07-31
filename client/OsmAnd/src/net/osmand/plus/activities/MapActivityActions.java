@@ -25,6 +25,7 @@ import net.osmand.data.PointDescription;
 import net.osmand.plus.OsmAndLocationProvider;
 import net.osmand.plus.OsmandApplication;
 import net.osmand.plus.R;
+import net.osmand.plus.trames.TramesMapsDialog;
 import net.osmand.plus.Version;
 import net.osmand.plus.backup.ui.BackupAuthorizationFragment;
 import net.osmand.plus.backup.ui.BackupCloudFragment;
@@ -528,6 +529,17 @@ public class MapActivityActions extends MapActions {
 					Intent newIntent = new Intent(activity, app.getAppCustomization().getDownloadActivity());
 					newIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 					activity.startActivity(newIntent);
+					return true;
+				}));
+
+		// TRAMES: the ALPR-tagged map catalogue. Sits next to "Maps & resources" rather than
+		// inside it because those maps come from our own host and manifest, not from the
+		// download.osmand.net index that screen is built around (see TramesMapsDialog).
+		adapter.addItem(new ContextMenuItem(DRAWER_ITEM_ID_SCHEME + "trames_maps")
+				.setTitleId(R.string.trames_maps_title, activity)
+				.setIcon(R.drawable.ic_type_archive)
+				.setListener((uiAdapter, view, item, isChecked) -> {
+					TramesMapsDialog.show(activity);
 					return true;
 				}));
 

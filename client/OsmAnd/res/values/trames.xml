@@ -40,4 +40,26 @@
     <string name="trames_exposure_none">No licence-plate readers can see this route</string>
     <string name="trames_exposure_count">%1$d licence-plate reader(s) can see this route</string>
 
+    <!--
+      Offline avoidance toggle. These two names are not free-form: OsmAnd looks up a
+      routing parameter's label as routing_attr_<id>_name / _description (see
+      AndroidUtils.getRoutingStringPropertyName), so they must match the `avoid_alpr`
+      parameter that trames-patch-resources.sh adds to routing.xml. Defined here rather
+      than in OsmAnd's strings.xml because that file is CC-BY-NC-ND — see the header.
+    -->
+    <string name="routing_attr_avoid_alpr_name">Avoid ALPR cameras</string>
+    <string name="routing_attr_avoid_alpr_description">Avoids roads watched by licence-plate readers</string>
+
+    <!-- ── offline map catalogue (TramesMapsDialog) ─────────────────────────── -->
+    <string name="trames_maps_title">TRAMES offline maps</string>
+    <string name="trames_maps_descr">Maps with licence-plate readers built in, so offline routing avoids them</string>
+    <string name="trames_maps_loading">Loading available maps…</string>
+    <string name="trames_maps_unavailable">Could not reach the TRAMES map server. Check your connection and try again.</string>
+    <string name="trames_maps_installed">installed</string>
+    <string name="trames_maps_download_prompt">Download the %1$s map (%2$s)? It replaces the standard map for that area and lets offline routing avoid cameras there.</string>
+    <string name="trames_maps_redownload_prompt">%1$s is already installed. Download it again (%2$s) to pick up newly added cameras?</string>
+    <string name="trames_maps_downloading">Downloading %1$s…</string>
+    <string name="trames_maps_ready">%1$s is ready — offline routing now avoids cameras there</string>
+    <string name="trames_maps_failed">Download failed: %1$s</string>
+
 </resources>
