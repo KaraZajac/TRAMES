@@ -104,6 +104,9 @@ public class TramesCameraLayer extends OsmandMapLayer implements IRouteInformati
 		routingHelper = app.getRoutingHelper();
 		routingHelper.addListener(this);
 		this.app = app;
+		// Lets the layer keep drawing with no network — see TramesCameraStore. Without it
+		// airplane mode renders a blank map over surveilled streets, which reads as safety.
+		source.setStore(new TramesCameraStore(app));
 		bitmapPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		bitmapPaint.setFilterBitmap(true);
 

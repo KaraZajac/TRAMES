@@ -109,6 +109,25 @@ public class TramesMapDownloader {
 		}
 	}
 
+	/**
+	 * Fetch the offline camera pack if it isn't already here.
+	 *
+	 * <p>Rides along with a map download rather than being its own errand: about 1.1 MB
+	 * against a map measured in gigabytes, and a user who has downloaded a map for offline
+	 * use has already said what they want. Without it the map draws no cameras once the
+	 * network drops, while the router carries on avoiding them — the map and the route
+	 * would disagree exactly when the user can least check.
+	 *
+	 * <p>Best-effort: a failure here leaves the map perfectly usable, so it is logged by
+	 * the downloader and never surfaced as a map-download failure.
+	 */
+	private void ensureCameraPack() {
+		TramesCameraStore store = new TramesCameraStore(app);
+		if (!store.isPresent()) {
+			store.download(null);
+		}
+	}
+
 	/** The on-device path a map installs to (whether or not it exists yet). */
 	@NonNull
 	public File localFile(@NonNull TramesMap map) {
@@ -144,6 +163,7 @@ public class TramesMapDownloader {
 			// download screen's installed-state cache is refreshed.
 			app.getResourceManager().reloadIndexes(IProgress.EMPTY_PROGRESS, new ArrayList<>());
 			app.getDownloadThread().updateLoadedFiles();
+			ensureCameraPack();
 		}
 		return error;
 	}

@@ -98,6 +98,28 @@ public class TramesCameraSource {
 	private volatile LatLon lastCentre;
 	private volatile long lastFetchFailedAt;
 
+	/**
+	 * On-device fallback. Set by the app so the layer keeps working with no network; when
+	 * null the source is network-only (its behaviour before the offline pack existed).
+	 */
+	@Nullable
+	private volatile TramesCameraStore store;
+
+	public void setStore(@Nullable TramesCameraStore store) {
+		this.store = store;
+	}
+
+	/**
+	 * True when nothing can currently supply cameras — no network answer and no pack on
+	 * disk. Distinct from "fetched successfully and there are none here": the UI must be
+	 * able to tell an empty area from an unanswerable question, because a blank map over
+	 * surveilled streets reads as safety.
+	 */
+	public boolean isUnknown() {
+		TramesCameraStore s = store;
+		return cameras.isEmpty() && (s == null || !s.isPresent());
+	}
+
 	@NonNull
 	public List<Camera> getCameras() {
 		return cameras;
@@ -135,7 +157,15 @@ public class TramesCameraSource {
 		new AsyncTask<Void, Void, List<Camera>>() {
 			@Override
 			protected List<Camera> doInBackground(Void... voids) {
-				return fetch(south, west, north, east);
+				List<Camera> net = fetch(south, west, north, east);
+				if (net != null) {
+					return net;
+				}
+				// No network answer: fall back to the on-device pack rather than leaving
+				// the map blank. Same snapshot the offline router avoids, so offline the
+				// map and the route agree exactly.
+				TramesCameraStore s = store;
+				return s != null ? s.forBox(south, west, north, east) : null;
 			}
 
 			@Override
@@ -216,13 +246,22 @@ public class TramesCameraSource {
 	 */
 	@Nullable
 	public List<Camera> fetchForRouteSync(double south, double west, double north, double east) {
+		// Offline the whole route is answerable from the pack in one pass — no tiling, no
+		// per-query span cap, and no undercount on a long route. Preferred whenever the
+		// pack is present and the network is not answering.
+		TramesCameraStore pack = store;
+
 		int rows = Math.max(1, (int) Math.ceil((north - south) / ROUTE_TILE_DEG));
 		int cols = Math.max(1, (int) Math.ceil((east - west) / ROUTE_TILE_DEG));
 		if ((long) rows * cols > ROUTE_MAX_TILES) {
 			// Pathologically long route: one capped query beats firing dozens. The server
 			// truncates, so this can undercount — acceptable at that scale, and still far
 			// better than the old visible-view-only count.
-			return fetch(south, west, north, east);
+			List<Camera> one = fetch(south, west, north, east);
+			if (one != null) {
+				return one;
+			}
+			return pack != null && pack.isPresent() ? pack.forBox(south, west, north, east) : null;
 		}
 		LinkedHashMap<Long, Camera> merged = new LinkedHashMap<>();
 		boolean anySuccess = false;
@@ -241,7 +280,12 @@ public class TramesCameraSource {
 				}
 			}
 		}
-		return anySuccess ? new ArrayList<>(merged.values()) : null;
+		if (anySuccess) {
+			return new ArrayList<>(merged.values());
+		}
+		// Every tile failed. The pack answers the whole box at once, so an offline
+		// exposure count is complete rather than partial.
+		return pack != null && pack.isPresent() ? pack.forBox(south, west, north, east) : null;
 	}
 
 	@NonNull
