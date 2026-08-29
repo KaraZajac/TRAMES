@@ -1,5 +1,13 @@
 # `car_alpr` — offline ALPR-avoidance routing profile
 
+> **Implemented — this is the design record, not the source of truth.** The shipped
+> delta lives in [`trames-patch-resources.sh`](../../trames-patch-resources.sh), which
+> patches these rules into `routing.xml`'s **car, bicycle and pedestrian** profiles at
+> build time (same ids, same multipliers, plus the rule-order guarantee it documents);
+> the user-visible labels moved to `client/OsmAnd/res/values/trames.xml` as
+> `routing_attr_*` strings. The "Phase 2" unknown below is closed —
+> `rendering_types.delta.md`. To change the rules, edit the script, not this file.
+
 The additions that turn OsmAnd's offline car routing into camera-avoiding routing.
 These are a **delta against OsmAnd's `routing.xml`** (one big shared file), not a
 standalone profile, so they're documented here and merged in at Phase 2.

@@ -13,7 +13,8 @@ any cone — the offline analogue of "this road segment is observed".
 Two passes over the extract: the first builds way geometries (needs node locations) and
 records which way ids a cone touches; the second copies the whole file through, adding
 `alpr=yes` to those ways. Downstream, rendering_types.delta.md registers the tag so it
-survives the .obf build, and car_alpr.routing.xml.md penalises it by berth.
+survives the .obf build, and the alpr_avoidance levels in routing.xml (applied by
+trames-patch-resources.sh; designed in car_alpr.routing.xml.md) penalise it by berth.
 """
 
 import argparse

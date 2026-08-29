@@ -4,10 +4,16 @@ Routing backend for [TRAMES](https://github.com/KaraZajac/TRAMES) — GraphHoppe
 automated licence-plate reader (ALPR) camera cones baked into the routing graph, so
 navigation can avoid the cameras that can actually see you.
 
+Since v1.2.0 the app routes **offline by default** on ALPR-tagged maps and needs no
+server at all — `offline/` is the pipeline that builds those maps. The GraphHopper
+backend here is the **opt-in online path**, for fresher camera data than a downloaded
+map or for areas with no map installed.
+
 ```
 alpr/         OSM/Overpass -> directional camera cones -> GeoJSON
 cameras/      Overpass-compatible bbox service feeding the app's camera map layer
 graphhopper/  config, import and serve scripts
+offline/      ALPR-tagged .obf map pipeline (offline routing — see offline/README.md)
 ```
 
 ## Quick start

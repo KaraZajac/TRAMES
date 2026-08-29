@@ -47,7 +47,8 @@ The only change between rows 1 and 2 is the `<routing_type>` line. That is Phase
 
 ## Consequence for the pipeline
 
-Phase 2 is no longer a risk. The real build just needs OsmAndMapCreator run with a
-`rendering_types.xml` carrying these two lines, over an extract that `tag_ways.py`
-(Phase 1) has stamped with `alpr=yes`. Everything downstream (the `car_alpr` berth
-profile) is already drafted and shown here to work.
+Phase 2 is no longer a risk, and the recipe is automated: `build_maps.py`'s
+`patch_mapcreator()` adds these two lines to the MapCreator jars idempotently before
+every batch run, over extracts that `tag_ways.py` has stamped with `alpr=yes`.
+Downstream, the berth rules ship in `routing.xml` via `trames-patch-resources.sh` —
+this is the pipeline behind the hosted maps at maps.blackflagintel.com.

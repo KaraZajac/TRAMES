@@ -26,7 +26,7 @@ import static net.osmand.util.Algorithms.isEmpty;
  * {@code DownloadActivityType} and gated by a free-download counter. Our maps aren't
  * there and never will be — they carry an extra {@code alpr=yes} routing tag (written by
  * {@code server/offline/tag_ways.py}, preserved in the {@code .obf} routing section) that
- * the {@code car_alpr} profile penalises. Stock OsmAnd maps lack that tag, so avoidance
+ * the {@code alpr_avoidance} routing rules penalise. Stock OsmAnd maps lack that tag, so avoidance
  * offline <em>requires</em> ours. Rather than graft a second index source onto OsmAnd's
  * catalogue plumbing, this reads a tiny JSON manifest from our host and fetches each
  * {@code .obf} straight into the maps directory — the same install path

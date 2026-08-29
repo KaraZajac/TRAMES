@@ -7,9 +7,9 @@
 
 For each region it downloads the Geofabrik extract, stamps `alpr=yes` onto every road a
 camera cone watches (tag_ways.py), and builds a `.obf` whose routing section carries the
-tag — so OsmAnd's offline router avoids cameras with the car_alpr berth profile. The cone
-set is built once from the local camera snapshot (cones_from_cameras.py) and shared across
-every state.
+tag — so OsmAnd's offline router avoids cameras via the alpr_avoidance levels that
+trames-patch-resources.sh puts in routing.xml. The cone set is built once from the local
+camera snapshot (cones_from_cameras.py) and shared across every state.
 
 Resumable: a region whose output `.obf` already exists is skipped. Idempotent MapCreator
 patch: the two rendering_types lines (see rendering_types.delta.md) are added to the

@@ -1,15 +1,15 @@
-# TRAMES offline routing — ALPR-baked maps (Path A)
+# TRAMES offline routing — ALPR-baked maps
 
-Offline navigation that still avoids licence-plate readers, with no server in the
-loop. The online engine bakes camera cones into a GraphHopper graph; this does the
-same thing for OsmAnd's **offline** router by baking an `alpr=yes` tag onto the road
-ways a camera watches, inside custom `.obf` map files, and penalising that tag in a
-routing profile.
+Offline navigation that still avoids licence-plate readers, with no server in the loop.
+**Shipped in v1.2.0 and the app's default since**: the online engine bakes camera cones
+into a GraphHopper graph; this pipeline bakes the same knowledge into OsmAnd's offline
+router by stamping `alpr=yes` onto the road ways a camera watches, building `.obf` maps
+that carry the tag, and penalising it in `routing.xml`.
 
-This is the "correct" offline design (from the offline-routing discussion): it keeps
-the **soft, continuous berth** — OFF / LIGHT / MODERATE / STRONG / MAXIMUM — rather than
-the hard road-blocking of OsmAnd's impassable-roads feature, and it reuses the exact
-same geometry and multipliers as the online engine.
+The design keeps the soft, continuous berth — OFF / LIGHT / MODERATE / STRONG / MAXIMUM —
+rather than the hard road-blocking of OsmAnd's impassable-roads feature, and it reuses
+the exact same geometry and multipliers as the online engine, so a level means the same
+thing whichever engine routes.
 
 ## Why this works — the one thing that had to be true
 
@@ -34,99 +34,103 @@ wall. That is precisely the offline twin of the server's per-request
 | STRONG | 0.05 | 0.05 |
 | MAXIMUM | 0.01 | 0.01 |
 
-Same numbers as `TramesEngine.BERTH_MULTIPLIERS`, and — since v1.1.4 — the same 60 m / 45°
-cone geometry (`TramesGeometry` / `build_cones.py`). Online and offline would agree by
-construction. The profile is drafted in `car_alpr.routing.xml.md`.
+Same numbers as `TramesEngine.BERTH_MULTIPLIERS`, same 60 m / 45° cone geometry
+(`TramesGeometry` / `build_cones.py`). Online and offline agree by construction rather
+than by coincidence.
 
 ## The pipeline
 
 ```
-alpr.geojson (cones, from ../alpr/build_cones.py)
+cameras.json (the served snapshot, ../cameras/)
+        │
+        ▼  cones_from_cameras.py  ── same parse/geometry as the online build_cones.py
+us-alpr.geojson (114,172 cone parts, ~34 s)
         +
 region .osm.pbf (Geofabrik)
         │
         ▼  tag_ways.py   ── snap cones to ways, write alpr=yes onto watched ways
 region-alpr.osm.pbf
         │
-        ▼  OsmAndMapCreator (+ ALPR-aware rendering_types so the tag survives)
+        ▼  OsmAndMapCreator (jars patched with the two rendering_types lines)
 region-alpr.obf            ── ships to the phone
         +
-car_alpr routing profile   ── penalises alpr=yes by berth
+alpr_avoidance levels in routing.xml (trames-patch-resources.sh)
         │
         ▼
 offline route that avoids cameras, no server
 ```
 
-## Phases
+`build_maps.py` drives all of it per state: download the Geofabrik extract, tag, build.
+It patches the MapCreator jars idempotently (`patch_mapcreator()`), skips states whose
+`.obf` already exists (resumable), and one state failing does not abort the run — a later
+higher-heap pass picks up the stragglers.
 
-- [x] **0 · Feasibility.** Proven: routing.xml applies a soft, tunable penalty to a custom
-      way tag via a parameter group. Berth maps 1:1 to the online multipliers. (This doc +
-      `car_alpr.routing.xml.md`.)
-- [x] **1 · Cone→way tagging** (`tag_ways.py`) — **done + validated end-to-end.** Reads
-      `alpr.geojson` + an OSM extract, tags every road way whose geometry intersects a cone
-      with `alpr=yes` (two-pass pyosmium; shapely STRtree for the intersect), emits a tagged
-      extract. On the two-road spike map it tagged only the watched road, and feeding its
-      output through the Phase-2 build gave the avoided route (1904.8 m) while the untagged
-      control stayed on the short road (1112.1 m) — Phases 1+2 proven together. Needs
-      `pyosmium` + `shapely` (now installed).
-- [x] **2 · Tag preservation — PROVEN.** The make-or-break unknown is closed by a
-      spike: registering `alpr` as a `<routing_type>` (plus a `<type>`) in
-      `rendering_types.xml` puts it into the `.obf` routing section, and the offline
-      router then avoids `alpr=yes` ways — a two-road test map rerouted 1112 m → 1905 m
-      once the penalty applied, and stayed on the short road without it. Exact recipe and
-      proof table in `rendering_types.delta.md`. It's config-only; no OsmAnd-tools code
-      change needed.
-- [ ] **3 · `.obf` build.** Run OsmAndMapCreator on the tagged extract with the
-      ALPR-aware config. **Toolchain:** OsmAndMapCreator — *not present*, needs setup
-      (Java 21 is available). Start with one metro (e.g. the DC/Delaware area the paper
-      used), not the continent.
-- [ ] **4 · Client.** A "TRAMES (offline)" driving profile: OsmAnd offline engine +
-      `car_alpr` routing + the berth exposed as the same selector. Auto-fall back to it
-      when the server is unreachable; keep the exposure count working against on-device
-      camera data.
-- [ ] **5 · Distribution.** Host ALPR-tagged `.obf` on astrophage; in-app download/import;
-      a freshness/version stamp (maps go stale as cameras are added — same problem the
-      graph re-import has, at bigger file sizes).
+```sh
+# one-time: https://download.osmand.net/latest-night-build/OsmAndMapCreator-main.zip
+python3 build_maps.py --mapcreator /path/to/OsmAndMapCreator --states all
+python3 build_camera_pack.py -o cameras-us.json.gz     # positions for the map layer
+```
 
-## Open questions / risks
+Needs `pyosmium` and `shapely` importable by plain `python3` (they are invoked outside
+the server venv, which carries only `shapely`).
 
-- ~~**Tag preservation (Phase 2)** is the make-or-break unknown.~~ **Resolved** — two
-  `rendering_types.xml` declarations (`<type>` + `<routing_type>`) register `alpr` cleanly
-  and the offline router avoids it. See `rendering_types.delta.md`. The rest is engineering.
-- **Map size + staleness.** OsmAnd regional maps are large; ALPR-tagged variants double the
-  download story (users fetch our maps instead of standard ones), and they age as DeFlock
-  adds cameras. A per-region rebuild cadence is needed.
-- **Shipping the routing profile.** Whether `car_alpr` can be bundled in the app or must be
-  a user-imported routing file — affects Phase 4 UX.
-- **Build cost.** A continental `.obf` build is heavy; the paper's metro extracts are the
-  right size to prototype and validate against known camera positions.
+## The client half (all shipped)
 
-## Status
+- **The routing rules.** Five mutually exclusive levels (`alpr_off` … `alpr_max`) in the
+  `car`, `bicycle` and `pedestrian` profiles, sharing an `alpr_avoidance` group so OsmAnd
+  renders them as one picker with no fork UI code. Default **Strong** (0.05). Applied to
+  `routing.xml` at build time by `trames-patch-resources.sh` — that file is upstream's
+  and overwritten on every build; the script is the tracked home of the delta and fails
+  loudly if upstream moves. Rule *placement* is load-bearing (first in each priority
+  block); the script documents why.
+- **The maps.** An in-app catalogue (`TramesMapsDialog` / `TramesMapDownloader`) reads
+  `manifest.json` from the map host and installs a `.obf` straight into the maps
+  directory with an immediate re-index — no restart, no file picker.
+- **The camera pack.** `build_camera_pack.py` slims the served snapshot to position +
+  direction (~1.1 MB gzipped for all 120k US cameras); it rides along with a map download
+  so the offline map draws exactly the cameras the offline router is avoiding.
+- **The default.** `TramesDefaults` points the car profile at OsmAnd's offline engine;
+  the online TRAMES engine is seeded but not selected. Offline is the default because
+  sending a server your itinerary to dodge cameras trades one movement record for another.
 
-Phases **0, 1, and 2 done** — the offline pipeline is proven from cone geometry to an
-avoided offline route on a spike map (`tag_ways.py` → OsmAndMapCreator with the two
-`rendering_types` lines → OsmAnd offline router reroutes around `alpr=yes`). What remains is
-**scale and delivery**, not feasibility:
+## Hosted maps
 
-- [x] **Phase 3 — done + validated on real Delaware.** `cones_from_cameras.py` built 505
-  cone parts from 529 real cameras (local `cameras.json`, no Overpass); `tag_ways.py`
-  tagged 1,183 of 138,180 roads in 15.6 s; OsmAndMapCreator built the `.obf` with the two
-  `rendering_types` lines and the `alpr` tag is confirmed in its routing section. Routing
-  proof: **7 of 12 routes across camera-dense Wilmington rerouted** on the tagged map vs
-  the untagged control, detours up to **+758 m** — realistic, cheap avoidance, exactly the
-  online behaviour. (Spike used a jar patched with the two lines; the US batch should carry
-  them as a proper `rendering_types.xml` override.)
-- **Phase 3b — US batch (`build_maps.py`), tooling done + validated.** Builds the US cone
-  set once (114,172 parts, 34 s), patches the MapCreator's `rendering_types.xml` with the
-  two lines idempotently, then per state downloads the Geofabrik extract, tags roads, and
-  builds the `.obf` (resumable; skips states already built). Proven on 3 real states — DC
-  63 s, Rhode Island 158 s, Delaware 99 s, road-only. **Running all 51 is a heavy job**
-  (~10–15 GB of extracts, 51 builds; big states dwarf these tiny ones, and full map+POI
-  builds are much slower than road-only). Output belongs on astrophage, where it will be
-  hosted for download — so the full run should execute there, resource-capped so it can't
-  disturb the production GraphHopper / sites.
-- **Phase 4** — client: a "TRAMES (offline)" driving profile (OsmAnd engine + the
-  `car_alpr` berth params), auto-fallback when the server is unreachable, exposure count
-  against on-device camera data.
-- **Phase 5** — distribution: host the ALPR-tagged `.obf` on astrophage, in-app
-  download/import, a freshness stamp.
+All 50 states + DC are published at **https://maps.blackflagintel.com** — 51 full maps
+(rendering + POI + routing), ~23 GB, built 2026-07-29 → 31 from the 120,838-camera
+snapshot. `manifest.json` is `{version, maps: [{name, file, size, date}, …]}`; the `date`
+is the freshness stamp the in-app catalogue shows, and re-downloading a map is how a user
+picks up newly mapped cameras.
+
+## Things that will bite you
+
+- **Full-map state builds are memory-hungry.** California and Texas each need roughly a
+  48 GB JVM heap (`TRAMES_JAVA_OPTS="-Xms1G -Xmx48G"`; the default is 8 GB) and a couple
+  of hours. `--roads-only` is far cheaper if you only need routing and not map display.
+- **Refreshing means rebuilding.** `build_maps.py` skips any state whose output `.obf`
+  exists, so a camera-data refresh needs the old outputs moved aside first, then the new
+  set uploaded and `manifest.json` regenerated. There is no automated cadence yet; maps
+  age as DeFlock contributors add cameras.
+- **Avoidance only works on these maps.** Stock OsmAnd maps have no `alpr` tag, so on
+  them the levels select fine and change nothing. The app steers users to this catalogue,
+  but a region covered only by a stock map silently gets no offline avoidance there.
+- **The two `rendering_types.xml` lines are non-negotiable.** Without the
+  `<routing_type>` declaration the tag survives into the map section but not the routing
+  section, and the router ignores it — see `rendering_types.delta.md` for the proof.
+
+## How it was proven
+
+The plan ran as phases (this file used to be the phase tracker; "Path A" in old commit
+messages is this design). What each spike established, kept for the record:
+
+- **Tag preservation was the make-or-break unknown, closed by a two-road spike**: with
+  the `<type>` line alone the router ignored `alpr=yes` (took the short 1,112 m road);
+  adding the `<routing_type>` line rerouted it onto the 1,905 m detour, matching a
+  `toll=yes` control. Config-only — no OsmAnd-tools code change. Recipe and proof table:
+  `rendering_types.delta.md`.
+- **End-to-end on real Delaware**: 529 cameras → 505 cone parts; `tag_ways.py` tagged
+  1,183 of 138,180 road ways in 15.6 s; on the built `.obf`, **7 of 12 routes across
+  camera-dense Wilmington rerouted** versus the untagged control, detours up to +758 m —
+  realistic, cheap avoidance, matching the online engine's behaviour.
+- **Batch tooling validated small, then run in full**: DC 63 s, Rhode Island 158 s,
+  Delaware 99 s (road-only) proved `build_maps.py`; the full 51-region full-map run
+  produced the hosted set above.
