@@ -33,18 +33,25 @@ server your itinerary in order to dodge cameras trades one movement record for a
 
 We routed **17,580 real home–work commutes** — drawn from Census LEHD LODES with
 probability proportional to the number of workers actually making each trip, across 15
-states — twice each: once normally, once avoiding the fields of view of **120,838 mapped
-ALPR installations**.
+states — twice each: once normally, once avoiding the fields of view of **142,991 mapped
+ALPR installations** (snapshot of 2026-09-22; the same commutes were first routed against
+a July snapshot of 120,838, and the paper compares the two).
 
-- **74.8%** of American commutes pass at least one licence-plate reader.
-- **84.6%** can be routed to *zero* exposure, for a median of **1.50 minutes** — an
-  overhead of 5.96%.
+- **78.7%** of American commutes pass at least one licence-plate reader.
+- **82.1%** can be routed to *zero* exposure, for a median of **1.98 minutes** — an
+  overhead of 7.90%.
 - Avoidance is **cheapest where cameras are densest**. Metropolitan grids offer a parallel
   street a block over; rural routes often have one road. The burden of refusal falls
   hardest on drivers with the fewest cameras to refuse.
 - Demographic gradients that look robust nationally **do not survive ranking tracts within
-  their own county**. Mapped camera density varies 3.9× per capita across the states
-  studied, and we cannot separate "more cameras" from "more mappers".
+  their own county**. Mapped camera density varies 3.4× per capita across the states
+  studied, and we cannot separate "more cameras" from "more mappers". The one contrast
+  that survives the control is a small (1.20×) gradient in transport-agency and tolling
+  cameras.
+- **Two months of mapping changed the map, not the road network's answer.** 18% more
+  cameras raised measured exposure by exactly 18%, the price of evading one camera stayed
+  at 0.78 minutes, and the states that grew most were the ones that had looked least
+  surveilled — Pennsylvania's exposure rose 88%.
 
 Paper: [`research/paper/trames.pdf`](research/paper/trames.pdf) — build with
 `tectonic -X compile research/paper/trames.tex`.
@@ -86,7 +93,7 @@ Prebuilt maps for all 50 states + DC are hosted at
 ## How it works — online
 
 GraphHopper resolves `custom_areas.directory` into a spatial index **at graph import
-time**. Register 114,172 camera cones as one merged area named `alpr`, and a per-request
+time**. Register 135,210 camera cones as one merged area named `alpr`, and a per-request
 custom model can then reference it with no geometry in the request at all:
 
 ```json
@@ -178,8 +185,10 @@ The research pipeline is independent of the app:
 cd research
 ./data/fetch.sh ga tx ca fl il ny pa oh nc az wa co tn mo va
 ../server/.venv/bin/python scripts/build_sample.py --states ga tx ... -o out/commutes.csv
-./scripts/run-full.sh          # ~7 h, detached, resumable
-../server/.venv/bin/python scripts/analyze.py --results out/results.csv
+./scripts/run-full.sh          # 5–11 h, detached, resumable
+./scripts/run-analyses.sh      # analysis, vendor and cone-radius re-scoring, figures
+../server/.venv/bin/python scripts/compare_snapshots.py \
+    --a out/2026-07/results.csv --b out/results.csv     # paired: what a refresh changed
 ```
 
 ## What leaves the device

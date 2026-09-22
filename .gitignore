@@ -83,6 +83,6 @@ __pycache__/
 server/cameras/cameras*.json
 
 # offline build workspace + downloaded MapCreator/extracts
-server/offline/.work/
+server/offline/.work*/
 server/offline/.mc_patch/
 server/offline/maps/

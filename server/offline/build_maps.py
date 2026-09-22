@@ -127,10 +127,12 @@ def build_state(slug, mc, cones, work, out, roads_only):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--mapcreator", required=True, help="unzipped OsmAndMapCreator dir")
+    ap.add_argument("--mapcreator", required=True, type=os.path.abspath,
+                    help="unzipped OsmAndMapCreator dir (made absolute: patch_mapcreator() "
+                         "cds into a scratch dir before opening the jars)")
     ap.add_argument("--cameras", default=os.path.join(HERE, "..", "cameras", "cameras.json"))
-    ap.add_argument("--out", default=os.path.join(HERE, "maps"))
-    ap.add_argument("--work", default=os.path.join(HERE, ".work"))
+    ap.add_argument("--out", default=os.path.join(HERE, "maps"), type=os.path.abspath)
+    ap.add_argument("--work", default=os.path.join(HERE, ".work"), type=os.path.abspath)
     ap.add_argument("--states", default="all", help="'all' or comma-separated slugs")
     ap.add_argument("--roads-only", action="store_true", help="road-only obf (faster, no map/POI)")
     args = ap.parse_args()

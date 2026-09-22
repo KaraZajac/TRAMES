@@ -1,0 +1,34 @@
+==============================================================================
+CONE RADIUS SENSITIVITY  (paper section 7.3)
+==============================================================================
+
+17580 routes re-scored at radii [30, 45, 60, 90] m.
+Routes were PLANNED against 60 m cones; only exposure is recomputed.
+
+--- 1. EXPOSURE on the unavoided route ---
+   radius     mean  median   >=1 cam   >=5 cam   vs 60 m
+     30 m     4.21     2.0     74.6%     31.8%     0.75x
+     45 m     5.09     3.0     77.4%     37.1%     0.90x
+     60 m     5.62     3.0     78.7%     39.7% --
+     90 m     6.29     4.0     80.3%     42.6%     1.12x
+
+--- 2. AVOIDANCE ROBUSTNESS ---
+  Share of the SAME routes (planned at 60 m) that still cross no cone
+  when scored at each radius:
+   radius     clean  mean exp   residual vs baseline
+     30 m     85.5%      0.23                   5.6%
+     45 m     83.6%      0.28                   5.4%
+     60 m     81.6%      0.31                   5.6%
+     90 m     52.4%      1.32                  21.0%
+
+--- 3. DOES THE HEADLINE SURVIVE? ---
+  at the assumed 60 m:      81.6% of commutes reach zero exposure
+  at 90 m (50% wider):    52.4%
+  absolute change:          -29.2 points
+  95% CI on the change:     [-29.9, -28.6] points
+  at 30 m (half):        85.5%
+
+  Interpretation: routes planned against 60 m cones are re-scored here without
+  re-planning. A router given wider cones would find different clean routes, so
+  the figures above are a LOWER bound on what avoidance could achieve at those
+  radii, not an estimate of it.

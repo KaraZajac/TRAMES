@@ -1,0 +1,49 @@
+==============================================================================
+SNAPSHOT COMPARISON: 2026-07-24 -> 2026-09-22, paired on commute
+==============================================================================
+rows: 2026-07-24 17580, 2026-09-22 17580, matched 17580 (only in 2026-07-24: 0, only in 2026-09-22: 0)
+
+--- 1. BASELINE INTEGRITY (unavoided route: same extract, cameras invisible) ---
+  identical baseline distance AND time: 17580/17580 (100.00%)
+
+--- 2. EXPOSURE ON THE UNAVOIDED COMMUTE ---
+  [2026-07-24]
+  cameras passed (baseline)          n= 17580  median     3.00 [95% CI 2.00–3.00]  IQR 0.00–6.00  mean     4.75
+    >=1 camera  74.8%   >=5  34.6%   >=10  14.6%   p90 12   p99 31   rate 0.0890 cameras/km
+  [2026-09-22]
+  cameras passed (baseline)          n= 17580  median     3.00 [95% CI 3.00–3.00]  IQR 1.00–7.00  mean     5.63
+    >=1 camera  78.7%   >=5  39.7%   >=10  18.3%   p90 14   p99 35   rate 0.1054 cameras/km
+  paired change in cameras passed: mean +0.872 [95% CI +0.837..+0.906]  median +0
+    commutes with MORE exposure  35.5%   same  59.7%   fewer   4.8%
+    newly exposed (0 -> >=1): 830 (4.7% of commutes)   newly clean (>=1 -> 0): 133
+    total camera encounters: 83565 -> 98898 (+18.3%)
+
+--- 3. COST OF AVOIDANCE ---
+  [2026-07-24]  reduced to ZERO cameras:  84.6%   residual exposure 5.5% of baseline
+  extra time                         n= 17580  median     1.50 min [95% CI 1.44–1.57]  IQR 0.00–5.39  mean     5.01
+  avoidance overhead                 n= 17580  median     5.96 % [95% CI 5.67–6.25]  IQR 0.00–17.40  mean    12.14
+  minutes per camera evaded          n= 12921  median     0.78 min [95% CI 0.76–0.80]  IQR 0.36–1.62  mean     1.30
+  [2026-09-22]  reduced to ZERO cameras:  82.1%   residual exposure 5.4% of baseline
+  extra time                         n= 17580  median     1.98 min [95% CI 1.90–2.06]  IQR 0.00–6.44  mean     5.97
+  avoidance overhead                 n= 17580  median     7.90 % [95% CI 7.60–8.14]  IQR 0.00–20.55  mean    14.22
+  minutes per camera evaded          n= 13624  median     0.78 min [95% CI 0.77–0.80]  IQR 0.37–1.62  mean     1.31
+  paired change in extra time: mean +0.951 min [95% CI +0.883..+1.016]  median +0.00
+    zero-exposure set: kept 14251, lost 630, gained 179   (net -451 commutes)
+
+--- 4. BY STATE ---
+  state      n  mean cams -> mean cams     chg     >=1 ->   >=1    zero ->  zero   med +min -> med +min
+  GA      1182      10.36 ->     11.80  +13.9%    90.9 ->  92.0    61.6 ->  54.1       6.79 ->     7.82
+  IL      1188       8.01 ->      9.20  +14.9%    88.4 ->  90.7    92.3 ->  90.4       2.81 ->     3.40
+  NY      1194       6.80 ->      7.43   +9.3%    78.3 ->  80.7    63.7 ->  62.8       1.96 ->     2.43
+  CA      1171       6.63 ->      7.35  +10.9%    83.8 ->  86.7    82.9 ->  80.8       1.91 ->     2.40
+  TX      1176       5.56 ->      6.89  +23.8%    81.8 ->  84.9    84.9 ->  81.2       1.84 ->     2.26
+  FL      1170       5.29 ->      6.26  +18.2%    84.0 ->  86.5    75.5 ->  71.2       2.07 ->     2.63
+  OH      1195       4.80 ->      5.26   +9.6%    82.4 ->  84.8    83.7 ->  81.9       2.26 ->     2.81
+  MO      1182       4.68 ->      5.10   +8.9%    80.3 ->  82.9    85.4 ->  81.2       2.40 ->     2.75
+  VA      1171       2.98 ->      4.65  +56.1%    70.3 ->  73.5    88.3 ->  86.1       0.66 ->     1.18
+  CO      1117       3.25 ->      3.88  +19.4%    78.5 ->  79.8    90.5 ->  89.1       1.25 ->     1.78
+  PA      1178       1.86 ->      3.50  +88.5%    40.6 ->  60.2    98.3 ->  94.8       0.00 ->     0.38
+  AZ      1150       3.13 ->      3.48  +11.3%    67.7 ->  72.8    93.3 ->  93.2       0.73 ->     1.11
+  NC      1179       2.69 ->      3.47  +28.8%    63.0 ->  66.6    89.4 ->  88.1       0.57 ->     0.95
+  TN      1182       2.85 ->      3.34  +16.8%    69.5 ->  74.2    87.5 ->  85.2       1.28 ->     1.71
+  WA      1145       2.15 ->      2.51  +16.4%    61.4 ->  63.9    93.4 ->  92.1       0.41 ->     0.50

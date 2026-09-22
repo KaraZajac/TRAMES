@@ -6,7 +6,7 @@
 <title>TRAMES — navigation that routes around licence-plate readers</title>
 <meta name="description" content="A native Android app that routes you around automated licence-plate readers — offline, on your phone. ALPR cameras are modelled as directional wedges, not circles, so you only detour around roads a camera can actually see. Offline maps for all 50 states + DC. On by default. Built on OsmAnd + GraphHopper.">
 <meta property="og:title" content="TRAMES — route around licence-plate readers">
-<meta property="og:description" content="Android navigation that avoids the fields of view of 120,838 mapped ALPR cameras — computed offline, so nothing about where you are leaves the device. Directional cones, not circles. Driving, cycling and walking. Offline maps for all 50 states + DC.">
+<meta property="og:description" content="Android navigation that avoids the fields of view of 142,991 mapped ALPR cameras — computed offline, so nothing about where you are leaves the device. Directional cones, not circles. Driving, cycling and walking. Offline maps for all 50 states + DC.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://trames.karazajac.io/">
 <meta property="og:image" content="https://trames.karazajac.io/og.png?v=123">
@@ -74,7 +74,7 @@
 
     <div class="stats-row" id="stats-row">
       <div class="stat-chip"><span class="num" data-target="5">0</span><span>avoidance levels</span></div>
-      <div class="stat-chip stat-warm"><span class="num">120,838</span><span>cameras mapped</span></div>
+      <div class="stat-chip stat-warm"><span class="num">142,991</span><span>cameras mapped</span></div>
       <div class="stat-chip stat-vfy"><span class="num" data-target="51">0</span><span>states, offline</span></div>
       <div class="stat-chip"><span class="num">v1.2.3</span><span>latest APK</span></div>
     </div>
@@ -162,7 +162,7 @@
           <span class="anno-num">2</span>
           <div>
             <strong>Baked into the graph</strong>
-            <p>120,838 camera cones are compiled into GraphHopper's spatial index
+            <p>135,210 camera cones are compiled into GraphHopper's spatial index
             at import as one area, <code>alpr</code>. A request just references it
             — <code>{"if": "in_alpr", "multiply_by": 0.05}</code> — no geometry
             attached, so the payload stays tiny.</p>
@@ -301,15 +301,15 @@
         We routed <strong>17,580 real home–work commutes</strong> — drawn from
         Census LEHD LODES in proportion to how many workers actually make each
         trip, across 15 states — twice each: once normally, once avoiding the
-        fields of view of <strong>120,838 mapped ALPR installations</strong>.
+        fields of view of <strong>142,991 mapped ALPR installations</strong>.
       </p>
     </div>
 
     <div class="readout">
       <div class="cell"><span class="big">17,580</span><span class="lbl">commutes routed, twice each</span></div>
-      <div class="cell warm"><span class="big">74.8%</span><span class="lbl">pass at least one reader</span></div>
-      <div class="cell good"><span class="big">84.6%</span><span class="lbl">can route to zero exposure</span></div>
-      <div class="cell"><span class="big">+1.5<span style="font-size:.6em"> min</span></span><span class="lbl">median cost to do it (5.96%)</span></div>
+      <div class="cell warm"><span class="big">78.7%</span><span class="lbl">pass at least one reader</span></div>
+      <div class="cell good"><span class="big">82.1%</span><span class="lbl">can route to zero exposure</span></div>
+      <div class="cell"><span class="big">+2.0<span style="font-size:.6em"> min</span></span><span class="lbl">median cost to do it (7.90%)</span></div>
     </div>
 
     <div class="callout" style="margin-top:2.6rem">

@@ -68,16 +68,21 @@ higher-heap pass picks up the stragglers.
 ```sh
 # one-time: https://download.osmand.net/latest-night-build/OsmAndMapCreator-main.zip,
 # unzipped into .work/OsmAndMapCreator (gitignored with the rest of the workspace)
-python3 build_maps.py --mapcreator .work/OsmAndMapCreator --states all
+./build-all-detached.sh                                   # all 51 states, detached, resumable
 python3 build_camera_pack.py -o maps/cameras-us.json.gz   # positions for the map layer
-rsync -avt maps/ astrophage:/srv/maps/                   # the catalogue rebuilds itself
+./deploy.sh                                               # rsync to the host; catalogue rebuilds itself
 ```
+
+`build-all-detached.sh` wraps `build_maps.py` with a 48 GB heap and JDK 21, and refuses
+to start while the GraphHopper server or the commute experiment is up — the two do not
+fit in a 62 GB box together, and a JVM that collides with them swaps rather than fails.
 
 There is no manifest step: on the host, `trames-manifest.timer` runs
 `/srv/maps/gen-manifest.sh` every five minutes and rewrites `manifest.json` from the
 `*-alpr.obf` files present, taking each map's `date` from its mtime. So maps rsynced in
-overnight appear in the app's catalogue by themselves — and `-t` matters, because a
-copy that resets mtimes would stamp every map with the upload day.
+overnight appear in the app's catalogue by themselves. `deploy.sh` uses rsync for that
+reason and two more: `-t` keeps the mtimes a plain copy would reset to the upload day,
+and rsync's rename-on-complete means a half-uploaded map is never listed for download.
 
 Needs `pyosmium` and `shapely` importable by plain `python3` (they are invoked outside
 the server venv, which carries only `shapely`).
@@ -116,7 +121,7 @@ picks up newly mapped cameras.
   of hours. `--roads-only` is far cheaper if you only need routing and not map display.
 - **Refreshing means rebuilding.** `build_maps.py` skips any state whose output `.obf`
   exists, so a camera-data refresh needs the old outputs moved aside first, then the new
-  set rsynced to `astrophage:/srv/maps` (the manifest timer does the rest). There is no
+  set published with `deploy.sh` (the host's manifest timer does the rest). There is no
   automated build cadence yet; maps age as DeFlock contributors add cameras.
 - **Avoidance only works on these maps.** Stock OsmAnd maps have no `alpr` tag, so on
   them the levels select fine and change nothing. The app steers users to this catalogue,
