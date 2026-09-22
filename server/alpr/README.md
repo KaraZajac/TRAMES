@@ -57,6 +57,41 @@ exactly the ones covering **both** carriageways, so dropping them sends you past
 cameras that are hardest to evade. In Delaware they are 25 of 529 nodes — parsing them
 raises 502 cones to 580.
 
+## Continental build (2026-09-22) — the refresh
+
+Same five regional queries, ~5 minutes. Against the July snapshot the paper was written
+on, two months of DeFlock mapping added a fifth again:
+
+| | 2026-07-24 | **2026-09-22** | change |
+|---|---|---|---|
+| ALPR nodes | 120,838 | **142,991** | +18.3% |
+| Cameras with a usable bearing → cones | 119,132 → 131,781 | 140,043 → **157,084** | +19.2% cones |
+| Multi-head units | 7,010 | 9,146 | |
+| Directional coverage | 98.7% | 98.0% | |
+| Flock Safety share (substring, any vendor key) | 82.5% | 80.0% | Axis tripled: 1,052 → 3,327 |
+| Union | 114,172 parts | **135,210 parts** | |
+
+Rebuild the study's cone-set variants (vendor split, radius sweep) from the same cached
+tiles with `./build-variants.sh` — they go to `variants/`, never into `custom_areas/`,
+because GraphHopper would bake every geojson it finds there into the graph.
+
+### What the refresh taught — three changes to `build_cones.py`
+
+- **The match is case-insensitive now** (`["surveillance:type"~"^alpr$",i]`): 19 readers
+  were tagged `alpr`, and an exact match on `ALPR` silently dropped every one of them.
+- **A stale mirror is a failed answer.** `overpass-api.de` timed out on the Mexico box;
+  the fallback `overpass.kumi.systems` answered promptly from a database dated
+  **2026-05-06**. That box overlaps the whole southern US below 33°N, and regions were
+  merged last-wins, so ~13,600 cameras across Texas, Arizona and Florida reverted to
+  four-month-old tags and ~400 nodes deleted since May came back as ghosts. Nothing
+  failed; the only symptom was the oldest-tile timestamp that `build_cameras_json.py`
+  prints. `MAX_AGE_HOURS` (48 h) now rejects such an answer and moves on, overlapping
+  regions merge **newest-database-wins**, and a >24 h spread between cached tiles is
+  flagged. Check the tile stamps after every fetch anyway.
+- **Endpoint order is `overpass-api.de`, then DeFlock's own mirror, then kumi.**
+  `overpass.deflock.org` measured seconds behind live and fast; kumi was the stale one
+  and later stopped answering at all.
+
 ## Continental build (2026-07-24)
 
 Five regional queries — continental US, Alaska, Hawaii, Canada, Mexico — in ~10 minutes:
@@ -153,12 +188,12 @@ before it outweighs a highway. A UI slider should map its travel onto **0.3 → 
 (probably logarithmically), not linearly onto 0 → 1, or most of the control will do
 nothing.
 
-## Not yet validated
+## Since validated, and still open
 
-- **Only tested on Delaware**, which is sparse (6 cameras on a 106 km route). Atlanta
-  metro alone has 3,899 cameras — dense-metro behaviour is unverified and is where
-  over-detouring would show up first.
-- `--radius` (default 60 m) is not empirically tuned. It must be long enough to reach
-  across the carriageway from a set-back pole, short enough not to catch parallel side
-  streets. Worth sweeping against the camera-count metric.
-- No dedup against DeFlock's own feed; this reads OSM via Overpass only.
+- Dense-metro behaviour: validated on the continental graph above and across 17,580
+  commutes in the study (`research/`) — metros are the cheap case.
+- `--radius`: swept over 30/45/60/90 m in the paper (section 7.3, `build-variants.sh`
+  produces the sets). Exposure is mildly sensitive; the avoidance headline degrades
+  above 60 m.
+- Still open: no dedup against DeFlock's own feed. This reads OSM via Overpass only —
+  now with DeFlock's Overpass mirror as a fallback endpoint, which is the same upstream.

@@ -6,8 +6,8 @@ navigation can avoid the cameras that can actually see you.
 
 Since v1.2.0 the app routes **offline by default** on ALPR-tagged maps and needs no
 server at all — `offline/` is the pipeline that builds those maps. The GraphHopper
-backend here is the **opt-in online path**, for fresher camera data than a downloaded
-map or for areas with no map installed.
+backend here is the **opt-in online path** for self-hosters (the public instance was
+retired on 2026-08-29 — see below) and the engine the research study routes against.
 
 ```
 alpr/         OSM/Overpass -> directional camera cones -> GeoJSON
@@ -74,14 +74,20 @@ alternatives, highway corridors don't. The expensive regime is rural/intercity.
 
 Hybrid-mode latency: 20–46 ms up to 1,085 km, 161 ms coast-to-coast.
 
-## Public endpoint
+## Public endpoint — retired
 
-`https://routing.blackflagintel.com/route` — **open, no API key**, path-restricted to
-`/route`, `/info`, `/health`.
+`https://routing.blackflagintel.com/route` served this graph, open and key-free, from
+2026-07-25 until **2026-08-29**. It was retired because the app has routed offline by
+default since v1.2.0: the continental graph was the whole memory footprint of that box
+— 18.8 GiB of 22.9 GiB, on a host that also serves thirteen websites — to keep an
+opt-in path warm. Caddy now answers `/route`, `/info` and `/health` with a 503 whose
+body says to route offline and where the ALPR-tagged maps are, so a client still
+pointed at the online engine gets a sentence a person can act on rather than a 502.
+`/cameras` (the camera map-layer service, `cameras/`) is unaffected and stays up.
 
-It is deliberately not token-gated. A token embedded in a public APK is extractable in
-seconds, so it was never real security — it only added a setup step. The actual
-protection is a systemd blast-radius cap on the routing service:
+The client keeps the online engine for self-hosters: point it at your own instance.
+Everything below still applies to running one. What the public instance ran under, for
+whoever hosts the next:
 
 ```ini
 CPUQuota=600%     # 6 of 12 cores; Caddy and the other sites always have half the box
@@ -89,18 +95,13 @@ MemoryHigh=19G    # soft: kernel reclaims and throttles here
 MemoryMax=20G     # hard: only if reclaim fails
 ```
 
-That matters because this host also serves 13 websites. Without a ceiling, a routing
-traffic spike doesn't cost money — it takes those sites down, and the first symptom is a
-website failing rather than the router getting busy.
+A systemd blast-radius cap, not a token: a token embedded in a public APK is
+extractable in seconds and only added a setup step. Verified under a 60-request
+concurrent load — 60/60 succeeded, `memory.events` recorded 12,116 `high` reclaim
+events and zero `oom_kill`, and every co-hosted site stayed identical to baseline.
 
-Verified under a 60-request concurrent load: 60/60 succeeded, `memory.events` recorded
-**12,116 `high` reclaim events and zero `oom_kill`**, and all 13 sites stayed identical
-to baseline. The soft limit absorbed the pressure; the hard ceiling never fired.
-
-Worth adding if it ever gets popular: a Cloudflare rate-limit rule. Caddy has no
-rate-limit module built in, and adding one means an `xcaddy` rebuild plus swapping the
-binary on a box serving 13 production sites — not worth the risk when the cgroup cap
-already contains the damage.
+The study in `research/` routes against a **local** instance of this graph; that is
+what the import scripts here are for now.
 
 ## Things that will bite you
 

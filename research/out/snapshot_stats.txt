@@ -1,0 +1,28 @@
+snapshot: 142991 unique camera nodes, OSM base 2026-09-22T01:19:20Z .. 2026-09-22T01:32:47Z
+
+-- direction / tagging (paper tab:tags) --
+  any direction tag             140112   98.0%
+    via direction               138216   96.7%
+    via camera:direction          2311    1.6%   (both keys: 415)
+  multi-head (>1 parsed head)     9146    6.4%   (raw ';' values: 9150)
+  arc-range tokens                4632  tokens (3806 span exactly 45 deg = 82.2%)
+  unparseable direction value       69
+  operator tagged                23872   16.7%
+  cameras with >=1 cone         140043  -> 157084 cones before union
+  surveillance:type spellings  {'ALPR': 142972, 'alpr': 19}
+
+-- vendors (substring across manufacturer/brand keys) --
+  Flock Safety              114360   80.0%   (exact manufacturer='Flock Safety': 109892)
+  Motorola Solutions          7411    5.2%   (exact manufacturer='Motorola Solutions': 7097)
+  Genetec                     3721    2.6%   (exact manufacturer='Genetec': 3571)
+  Leonardo                    1215    0.8%   (exact manufacturer='Leonardo': 1206)
+  Axis Communications         3327    2.3%   (exact manufacturer='Axis Communications': 2231)
+  No vendor tag               6850    4.8%
+  exact manufacturer="Flock Safety" 109892 vs substring 114360 (diff 4468; nodes with flock under brand: 4711)
+
+-- vendor-split sets: cameras with cones / cones / direction coverage --
+  flock     nodes  114360  cameras  113611  cones  120366  cones/camera 1.06  direction  99.4%
+  other     nodes   21781  cameras   20435  cones   30128  cones/camera 1.47  direction  93.8%
+  untagged  nodes    6850  cameras    5997  cones    6590  cones/camera 1.10  direction  88.0%
+
+-- unioned alpr.geojson: 135210 parts --

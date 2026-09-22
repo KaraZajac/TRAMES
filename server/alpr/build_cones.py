@@ -61,10 +61,37 @@ CARDINALS = {
 
 OVERPASS_ENDPOINTS = (
     "https://overpass-api.de/api/interpreter",
+    # DeFlock's own mirror, the instance their app queries — measured seconds behind
+    # live and fast. Second rather than first out of courtesy: the public instance
+    # answered the whole continent in ~10 min in July and again in September.
+    "https://overpass.deflock.org/api/interpreter",
+    # Last: on 2026-09-21 this mirror answered a regional query from a database dated
+    # 2026-05-06 and later stopped answering at all. The staleness guard below now
+    # rejects such an answer, but there is no reason to ask it before the others.
     "https://overpass.kumi.systems/api/interpreter",
 )
 
 ARC_RE = re.compile(r"^\s*(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)\s*$")
+
+# Refuse a response whose database is older than this. Failover is only safe if the
+# fallback mirror is current: on 2026-09-21 overpass-api.de timed out on one regional box,
+# the next endpoint answered promptly from a database dated 2026-05-06, and because that
+# box overlaps the southern US and regions merged last-wins, ~13,600 cameras across Texas,
+# Arizona and Florida silently reverted to four-month-old tags. Nothing failed; the only
+# symptom was a timestamp in the merged output. A stale answer is now treated as a failed
+# answer and the next endpoint (or the next retry round) is tried instead.
+MAX_AGE_HOURS = 48.0
+
+
+def _age_hours(stamp):
+    """Hours between an Overpass osm3s.timestamp_osm_base and now (None if unparseable)."""
+    import calendar
+    try:
+        t = time.strptime(stamp, "%Y-%m-%dT%H:%M:%SZ")
+    except (TypeError, ValueError):
+        return None
+    return (time.time() - calendar.timegm(t)) / 3600.0
+
 
 # Vendor lives under any of four keys and is spelled inconsistently. Measured over
 # 120,838 North American nodes: exact `manufacturer == "Flock Safety"` matches 95,069,
@@ -169,7 +196,10 @@ def fetch_overpass(bbox, timeout_s=180):
     south, west, north, east = bbox
     query = (
         f"[out:json][timeout:{timeout_s}];"
-        f'(node["man_made"="surveillance"]["surveillance:type"="ALPR"]'
+        # Case-insensitive on purpose: the convention is `ALPR`, but a reader tagged
+        # `alpr` or `Alpr` is still a reader, and an exact match silently drops it.
+        # OVERWATCH classifies the same way (equals("ALPR", ignoreCase = true)).
+        f'(node["man_made"="surveillance"]["surveillance:type"~"^alpr$",i]'
         f"({south},{west},{north},{east}););out body;"
     )
     payload = urllib.parse.urlencode({"data": query}).encode()
@@ -197,7 +227,14 @@ def fetch_overpass(bbox, timeout_s=180):
                 ):
                     last_err = f"{endpoint}: overpass runtime/timeout remark"
                     continue
-                return json.loads(body)
+                data = json.loads(body)
+                stamp = (data.get("osm3s") or {}).get("timestamp_osm_base")
+                age = _age_hours(stamp)
+                if age is not None and age > MAX_AGE_HOURS:
+                    last_err = f"{endpoint}: database is stale (base {stamp}, {age:.0f} h old)"
+                    print(f"  rejected {last_err}", flush=True)
+                    continue
+                return data
             except Exception as e:                       # noqa: BLE001
                 last_err = f"{endpoint}: {e}"
         time.sleep(min(60, 5 * (2 ** attempt)))          # 5s, 10s, 20s, 40s
@@ -331,7 +368,10 @@ def main():
     # (e.g. the US/Canada line) so nothing falls through a seam, which means duplicates
     # are expected and must be collapsed rather than double-counted.
     merged = {}
+    stamps = {}           # node id -> base timestamp of the response it came from
+    region_stamps = []
     for bbox in bboxes:
+        stamp = ""
         if args.tile_deg:
             print(f"tiled fetch over {bbox} at {args.tile_deg} deg ...")
             got = fetch_tiled(bbox, args.tile_deg, args.tile_cache)
@@ -357,12 +397,25 @@ def main():
                 if cache_path:
                     json.dump(data, open(cache_path, "w"))
             got = {e["id"]: e for e in data.get("elements", []) if e.get("type") == "node"}
+            stamp = (data.get("osm3s") or {}).get("timestamp_osm_base") or ""
+            region_stamps.append(stamp)
         new = len(set(got) - set(merged))
-        print(f"  {bbox} -> {len(got)} nodes ({new} new; total {len(merged)+new})")
-        merged.update(got)
+        print(f"  {bbox} -> {len(got)} nodes ({new} new; total {len(merged)+new})"
+              + (f"  base {stamp}" if not args.tile_deg else ""))
+        # Boxes overlap on purpose, so a node can arrive from two responses. Keep the
+        # version from the NEWER database rather than whichever box came last: the
+        # region order is geographic, not a statement about freshness.
+        for nid, e in got.items():
+            if nid not in merged or stamp >= stamps.get(nid, ""):
+                merged[nid] = e
+                stamps[nid] = stamp
 
     nodes = list(merged.values())
     print(f"  {len(nodes)} ALPR nodes total across {len(bboxes)} region(s)")
+    rs = sorted(x for x in region_stamps if x)
+    if rs and (_age_hours(rs[0]) or 0) - (_age_hours(rs[-1]) or 0) > 24:
+        print(f"  WARNING: region snapshots span {rs[0]} .. {rs[-1]} — a cached tile is much "
+              f"older than the rest; delete it from --cache and refetch for a coherent snapshot")
 
     stats = {"kept": 0, "cones": 0, "multihead": 0, "no_direction": 0, "unparsed": 0,
              "filtered_manufacturer": 0, "filtered_zone": 0, "omni": 0,
