@@ -34,6 +34,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--sweep", required=True)
     ap.add_argument("--results", help="results.csv, for extra-time context")
+    ap.add_argument("--frame", help="sampling_frame.json: commuter-weighted figures (51-state sample)")
+    ap.add_argument("--draws", help="sample_draws.csv, with --frame")
     ap.add_argument("-o", "--out")
     args = ap.parse_args()
 
@@ -44,12 +46,31 @@ def main():
             if k.startswith(("base_r", "avoid_r")):
                 r[k] = int(r[k])
 
+    # Commuter weights when the design files are given (see wstats.py); otherwise every
+    # route counts once, which reproduces the original 15-state report.
+    if args.frame:
+        import os, sys
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from wstats import Design, ci
+        D = Design(rows, args.frame, args.draws)
+        mean = lambda c: D.mean(np.asarray(c, float))
+        median = lambda c: D.quantile(np.asarray(c, float), 0.5)
+        share = lambda c: D.share(np.asarray(c, float))
+        def change_ci(d):
+            lo, hi = ci(D.boot_ratio(d, np.ones(len(d)))[:, 0])
+            return float(D.mean(d)), float(lo), float(hi)
+    else:
+        mean, median = st.mean, st.median
+        share = lambda c: sum(c) / len(c)
+        change_ci = boot_mean_ci
+
     L = []
     P = L.append
     P("=" * 78)
     P("CONE RADIUS SENSITIVITY  (paper section 7.3)")
     P("=" * 78)
-    P(f"\n{len(rows)} routes re-scored at radii {radii} m.")
+    P(f"\n{len(rows)} routes re-scored at radii {radii} m"
+      + (" (commuter-weighted)." if args.frame else "."))
     P("Routes were PLANNED against 60 m cones; only exposure is recomputed.")
 
     P("\n--- 1. EXPOSURE on the unavoided route ---")
@@ -57,13 +78,13 @@ def main():
       f"{'>=5 cam':>9s} {'vs 60 m':>9s}")
     # Computed up front: the 30 and 45 m rows are printed before the loop would
     # otherwise reach 60, and referencing it there gave a None.
-    base60 = st.mean([x["base_r60"] for x in rows])
+    base60 = mean([x["base_r60"] for x in rows])
     for r in radii:
         c = [x[f"base_r{r}"] for x in rows]
-        m = st.mean(c)
-        P(f"  {r:5d} m {m:8.2f} {st.median(c):7.1f} "
-          f"{100*sum(1 for v in c if v)/len(c):8.1f}% "
-          f"{100*sum(1 for v in c if v>=5)/len(c):8.1f}% "
+        m = mean(c)
+        P(f"  {r:5d} m {m:8.2f} {median(c):7.1f} "
+          f"{100*share([1 if v else 0 for v in c]):8.1f}% "
+          f"{100*share([1 if v >= 5 else 0 for v in c]):8.1f}% "
           f"{'--' if r==60 else f'{m/base60:8.2f}x'}")
 
     P("\n--- 2. AVOIDANCE ROBUSTNESS ---")
@@ -73,29 +94,29 @@ def main():
     for r in radii:
         a = [x[f"avoid_r{r}"] for x in rows]
         b = [x[f"base_r{r}"] for x in rows]
-        clean = 100 * sum(1 for v in a if v == 0) / len(a)
-        P(f"  {r:5d} m {clean:8.1f}% {st.mean(a):9.2f} "
-          f"{100*st.mean(a)/max(st.mean(b),1e-9):21.1f}%")
+        clean = 100 * share([1 if v == 0 else 0 for v in a])
+        P(f"  {r:5d} m {clean:8.1f}% {mean(a):9.2f} "
+          f"{100*mean(a)/max(mean(b),1e-9):21.1f}%")
 
     P("\n--- 3. DOES THE HEADLINE SURVIVE? ---")
     a60 = [x["avoid_r60"] for x in rows]
-    c60 = 100 * sum(1 for v in a60 if v == 0) / len(a60)
+    c60 = 100 * share([1 if v == 0 else 0 for v in a60])
     worst = max(radii)
     aw = [x[f"avoid_r{worst}"] for x in rows]
-    cw = 100 * sum(1 for v in aw if v == 0) / len(aw)
+    cw = 100 * share([1 if v == 0 else 0 for v in aw])
     P(f"  at the assumed 60 m:      {c60:.1f}% of commutes reach zero exposure")
     P(f"  at {worst} m (50% wider):    {cw:.1f}%")
     P(f"  absolute change:          {cw-c60:+.1f} points")
     # Bootstrap the difference so the change is not read off two point estimates.
     d = np.array([(1 if x[f"avoid_r{worst}"] == 0 else 0) - (1 if x["avoid_r60"] == 0 else 0)
                   for x in rows], dtype=float)
-    m, lo, hi = boot_mean_ci(d)
+    m, lo, hi = change_ci(d)
     P(f"  95% CI on the change:     [{100*lo:+.1f}, {100*hi:+.1f}] points")
 
     smallest = min(radii)
     asm = [x[f"avoid_r{smallest}"] for x in rows]
     P(f"  at {smallest} m (half):        "
-      f"{100*sum(1 for v in asm if v==0)/len(asm):.1f}%")
+      f"{100*share([1 if v == 0 else 0 for v in asm]):.1f}%")
 
     P("\n  Interpretation: routes planned against 60 m cones are re-scored here without")
     P("  re-planning. A router given wider cones would find different clean routes, so")

@@ -192,10 +192,16 @@ def cone_polygon(lat, lon, bearing, span, radius_m, segments=8):
     return Polygon(coords)
 
 
-def fetch_overpass(bbox, timeout_s=180):
+def fetch_overpass(bbox, timeout_s=180, date=None):
     south, west, north, east = bbox
+    # `date` asks Overpass for the map as it stood at that instant (its "attic" data):
+    # nodes deleted since are back, nodes added since are absent, and every tag has its
+    # value from that day. Validated exactly — the Georgia box at the July snapshot's
+    # timestamp returned the snapshot's 9,742 nodes to the node. Only overpass-api.de
+    # keeps attic data; the other endpoints answer with a runtime error and are skipped.
+    when = f'[date:"{date}"]' if date else ""
     query = (
-        f"[out:json][timeout:{timeout_s}];"
+        f"[out:json][timeout:{timeout_s}]{when};"
         # Case-insensitive on purpose: the convention is `ALPR`, but a reader tagged
         # `alpr` or `Alpr` is still a reader, and an exact match silently drops it.
         # OVERWATCH classifies the same way (equals("ALPR", ignoreCase = true)).
@@ -349,6 +355,9 @@ def main():
     ap.add_argument("--omnidirectional", action="store_true",
                     help="also include cameras with no direction, as full circles")
     ap.add_argument("--cache", default=None, help="reuse/save raw Overpass JSON here")
+    ap.add_argument("--date", default=None, metavar="ISO8601",
+                    help="fetch the cameras as mapped at this instant, e.g. 2025-07-01T00:00:00Z "
+                         "(Overpass attic data; needs state-sized boxes — see us_state_boxes.json)")
     ap.add_argument("--tile-deg", type=float, default=None,
                     help="fetch in tiles of this many degrees (needed for large regions; "
                          "dense tiles are subdivided automatically)")
@@ -392,10 +401,12 @@ def main():
             if data is None:
                 print(f"querying Overpass for {bbox} ...", flush=True)
                 t0 = time.time()
-                data = fetch_overpass(bbox, timeout_s=600)
+                data = fetch_overpass(bbox, timeout_s=600, date=args.date)
                 print(f"  took {time.time()-t0:.0f}s", flush=True)
                 if cache_path:
                     json.dump(data, open(cache_path, "w"))
+                if args.date:
+                    time.sleep(3)        # historical queries are heavy; be a considerate client
             got = {e["id"]: e for e in data.get("elements", []) if e.get("type") == "node"}
             stamp = (data.get("osm3s") or {}).get("timestamp_osm_base") or ""
             region_stamps.append(stamp)

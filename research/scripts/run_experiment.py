@@ -38,7 +38,7 @@ def load_cones(path):
     return list(getattr(geom, "geoms", [geom]))
 
 
-def route(url, frm, to, multiply, timeout=120):
+def route(url, frm, to, multiply, timeout=120, area="alpr"):
     body = {
         "points": [[frm[1], frm[0]], [to[1], to[0]]],
         "profile": "car",
@@ -46,7 +46,7 @@ def route(url, frm, to, multiply, timeout=120):
         "points_encoded": False,
     }
     if multiply is not None:
-        body["custom_model"] = {"priority": [{"if": "in_alpr", "multiply_by": multiply}]}
+        body["custom_model"] = {"priority": [{"if": f"in_{area}", "multiply_by": multiply}]}
     req = urllib.request.Request(url, data=json.dumps(body).encode(),
                                  headers={"Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=timeout) as r:
@@ -75,6 +75,8 @@ def main():
                     help="skip commutes already present in --out and append to it")
     ap.add_argument("--shuffle", type=int, default=0, metavar="SEED",
                     help="process commutes in seeded random order (0 = file order)")
+    ap.add_argument("--always-route-avoid", action="store_true",
+                    help="request the avoiding route even when the baseline crosses no cone")
     ap.add_argument("--geometry", default=None, metavar="PATH",
                     help="also write route polylines to a gzipped JSONL sidecar")
     args = ap.parse_args()
@@ -135,18 +137,26 @@ def main():
             if base is None:
                 return None, None
             bp, bl = base
-            avoid = route(args.url, frm, to, args.multiply)
-            if avoid is None:
-                return None, None
-            ap_, al = avoid
+            b_hits = exposure(bl, tree, cones)
+            # A route that crosses no cone already IS the avoiding route: the custom model
+            # only makes cone edges dearer, so no other route can undercut it. Verified, not
+            # assumed — all 3,741 such commutes in the 15-state September run got a
+            # byte-identical avoiding route — and skipping the request is most of the cost
+            # saving on sparse, historical camera snapshots.
+            if b_hits == 0 and not args.always_route_avoid:
+                ap_, al = bp, bl
+            else:
+                avoid = route(args.url, frm, to, args.multiply)
+                if avoid is None:
+                    return None, None
+                ap_, al = avoid
         except Exception:
             # A failed route is dropped rather than retried. Failures are dominated by
             # unroutable centroid pairs (islands, centroids landing off-network), which
             # are a property of the sample rather than transient, so retrying just
             # spends time to fail again.
             return None, None
-        b_hits = exposure(bl, tree, cones)
-        a_hits = exposure(al, tree, cones)
+        a_hits = 0 if al is bl else exposure(al, tree, cones)
         # Route geometry is the expensive thing here: it costs two HTTP routes and hours
         # of wall-clock for the full sample, while every question one might later ask of
         # it (exposure to one vendor's cameras only, sensitivity to cone radius or span)

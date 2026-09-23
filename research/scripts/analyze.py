@@ -22,6 +22,7 @@ import csv
 import math
 import random
 import statistics as st
+import sys
 from collections import defaultdict
 
 import numpy as np
@@ -420,5 +421,248 @@ def main():
         open(args.out, "w").write(txt + "\n")
 
 
+
+# =====================================================================================
+# COMMUTER-WEIGHTED REPORT (the 51-state sample) — see wstats.py for why weights and why
+# a stratified bootstrap. Structured like the unweighted report above so the two read
+# side by side; every national figure here is a weighted estimate of American commuters.
+# =====================================================================================
+
+def _wfmt(D, x, label, unit="", mask=None, boot=True):
+    import numpy as np
+    from wstats import ci
+    med = D.quantile(x, 0.5, mask); q1 = D.quantile(x, 0.25, mask); q3 = D.quantile(x, 0.75, mask)
+    mu = D.mean(x, mask)
+    s = f"  {label:34s} median {med:8.2f}{unit}"
+    if boot:
+        lo, hi = ci(D.boot_quantile(x, 0.5, mask))
+        s += f" [95% CI {lo:.2f}–{hi:.2f}]"
+    return s + f"  IQR {q1:.2f}–{q3:.2f}  mean {mu:8.2f}"
+
+
+def _wshare(D, cond, label, mask=None):
+    import numpy as np
+    from wstats import ci
+    lo, hi = ci(D.boot_ratio(np.asarray(cond, float), np.ones(D.n), None if mask is None else [mask])[:, 0])
+    return f"  {label:34s} {100*D.share(cond, mask):5.1f}% [{100*lo:.1f}–{100*hi:.1f}]"
+
+
+def wcontrast(P, D, x, metric, km, extra, title, cutfmt, qlabels, ratio="Q4/Q1"):
+    """Weighted twin of contrast(): weighted quartile cut-points, weighted group means, the
+    per-km control as a peer, and stratified-bootstrap intervals from shared replicates."""
+    import numpy as np
+    from wstats import ci
+    P(f"\n--- {title} ---")
+    valid = ~np.isnan(x)
+    qs = [D.quantile(x, q, valid) for q in (0.25, 0.5, 0.75)]
+    xb = np.where(valid, x, -np.inf)
+    b = 1 + (xb > qs[0]).astype(int) + (xb > qs[1]) + (xb > qs[2])
+    masks = [valid & (b == q) for q in (1, 2, 3, 4)]
+    P("  quartile cut-points (commuter-weighted): " + " / ".join(cutfmt(q) for q in qs))
+    P(f"  {'quartile':12s} {'n':>5s} {'commuters':>9s} {'med cams':>9s} {'mean cams':>10s} "
+      f"{'med +min':>9s} {'cams/km':>9s} {'med km':>8s}")
+    for q, m in zip((1, 2, 3, 4), masks):
+        P(f"  {qlabels[q]:12s} {int(m.sum()):5d} {100*D.weight_share(m):8.1f}% "
+          f"{D.quantile(metric, .5, m):9.1f} {D.mean(metric, m):10.2f} {D.quantile(extra, .5, m):9.2f} "
+          f"{D.ratio(metric, km, m):9.4f} {D.quantile(km, .5, m):8.1f}")
+    mean_reps = D.boot_ratio(metric, np.ones(D.n), masks)
+    rate_reps = D.boot_ratio(metric, km, masks)
+    m1, m4 = D.mean(metric, masks[0]), D.mean(metric, masks[3])
+    (lo1, lo4), (hi1, hi4) = [v[[0, 3]] for v in ci(mean_reps)]
+    disjoint = lo1 > hi4 or lo4 > hi1
+    num, den = (3, 0) if ratio == "Q4/Q1" else (0, 3)
+    rlo, rhi = ci(mean_reps[:, num] / np.maximum(mean_reps[:, den], 1e-12))
+    P(f"  Q1 mean {m1:.2f} [{lo1:.2f}–{hi1:.2f}] vs Q4 mean {m4:.2f} [{lo4:.2f}–{hi4:.2f}]")
+    rat = (m4 / max(m1, 1e-12)) if ratio == "Q4/Q1" else (m1 / max(m4, 1e-12))
+    P(f"  ratio {ratio} = {rat:.2f}x [95% CI {rlo:.2f}–{rhi:.2f}]"
+      + ("  (CIs disjoint)" if disjoint else "  (CIs OVERLAP — not distinguishable)"))
+    r1, r4 = D.ratio(metric, km, masks[0]), D.ratio(metric, km, masks[3])
+    (rl1, rl4), (rh1, rh4) = [v[[0, 3]] for v in ci(rate_reps)]
+    rate_disjoint = rl1 > rh4 or rl4 > rh1
+    P(f"  CONTROL per-km: Q1 {r1:.4f} [{rl1:.4f}–{rh1:.4f}] vs Q4 {r4:.4f} [{rl4:.4f}–{rh4:.4f}] cameras/km")
+    hi_ = "Q4" if r4 > r1 else "Q1"
+    if disjoint and rate_disjoint:
+        verdict = f"total exposure AND per-km density both differ ({hi_} higher on rate)"
+    elif disjoint:
+        verdict = "total differs, per-km density does not — a commute-length artefact"
+    elif rate_disjoint:
+        verdict = (f"total exposure indistinguishable, but per-km density differs ({hi_} higher): "
+                   f"{hi_} commutes are more densely watched per km, offset by length")
+    else:
+        verdict = "neither total exposure nor per-km density distinguishable"
+    P(f"    -> {verdict}")
+
+
+def wwithin(P, D, x, metric, km, county, title, min_n=40):
+    """Weighted twin of within_area_contrast(): quartiles ranked inside each county, then
+    pooled with commuter weights, so a county in California counts for its commuters."""
+    import numpy as np
+    from collections import defaultdict
+    from wstats import ci
+    P(f"\n--- {title} ---")
+    valid = ~np.isnan(x)
+    groups = defaultdict(list)
+    for i in np.flatnonzero(valid):
+        groups[county[i]].append(i)
+    b = np.zeros(D.n, int); used = 0
+    for c, ix in groups.items():
+        if len(ix) < min_n:
+            continue
+        m = np.zeros(D.n, bool); m[ix] = True
+        qs = [D.quantile(x, q, m) for q in (0.25, 0.5, 0.75)]
+        xi = x[ix]
+        b[ix] = 1 + (xi > qs[0]).astype(int) + (xi > qs[1]) + (xi > qs[2])
+        used += 1
+    masks = [b == q for q in (1, 2, 3, 4)]
+    pooled = int(sum(m.sum() for m in masks))
+    P(f"  {used} counties with n>={min_n} contribute {pooled} commutes "
+      f"({100*pooled/D.n:.0f}% of sample, {100*D.weight_share(b > 0):.0f}% of commuters)")
+    if used < 2:
+        P("  insufficient within-county data"); return
+    P(f"  {'quartile':12s} {'n':>5s} {'mean cams':>10s} {'cams/km':>9s}")
+    for q, m in zip((1, 2, 3, 4), masks):
+        P(f"  Q{q:<11d} {int(m.sum()):5d} {D.mean(metric, m):10.2f} {D.ratio(metric, km, m):9.4f}")
+    reps = D.boot_ratio(metric, np.ones(D.n), masks)
+    (lo1, lo4), (hi1, hi4) = [v[[0, 3]] for v in ci(reps)]
+    m1, m4 = D.mean(metric, masks[0]), D.mean(metric, masks[3])
+    rlo, rhi = ci(reps[:, 3] / np.maximum(reps[:, 0], 1e-12))
+    P(f"  Q1 mean {m1:.2f} [{lo1:.2f}–{hi1:.2f}] vs Q4 mean {m4:.2f} [{lo4:.2f}–{hi4:.2f}]")
+    P(f"  ratio Q4/Q1 = {m4/max(m1,1e-12):.2f}x [95% CI {rlo:.2f}–{rhi:.2f}]"
+      + ("  (CIs disjoint)" if lo1 > hi4 or lo4 > hi1 else "  (CIs OVERLAP — not distinguishable)"))
+
+
+def report_weighted(rows, D, vendors, P, by_state_csv=None):
+    import numpy as np
+    from wstats import ci
+    f = lambda k: np.array([float(r[k]) for r in rows])
+    num = lambda k: np.array([float(r[k]) if r.get(k) not in ("", None) else np.nan for r in rows])
+    bc, ac, ev = f("base_cameras"), f("avoid_cameras"), f("cameras_evaded")
+    km, bmin, em, ek = f("base_km"), f("base_min"), f("extra_min"), f("extra_km")
+    ones = np.ones(D.n)
+
+    P("=" * 78)
+    P("ALPR COMMUTE EXPOSURE AND AVOIDANCE COST — COMMUTER-WEIGHTED")
+    P("=" * 78)
+    P(f"\nSample: {D.n} commutes in {len(D.states)} states, standing for "
+      f"{sum(D.W.values())/1e6:.1f}M in-state commuters (LODES). National figures are weighted")
+    P("by each state's commuters and each pair's draw count; 95% CIs from a stratified bootstrap")
+    P(f"(each state resampled at its own size, 2,000 replicates).")
+    P(f"Median commute: {D.quantile(km, .5):.1f} km / {D.quantile(bmin, .5):.1f} min")
+
+    P("\n--- RQ1: EXPOSURE ON THE UNAVOIDED COMMUTE ---")
+    P(_wfmt(D, bc, "cameras passed (baseline)"))
+    lo, hi = ci(D.boot_ratio(bc, ones)[:, 0]); P(f"  {'mean cameras passed':34s} {D.mean(bc):5.2f} [{lo:.2f}–{hi:.2f}]")
+    for k in (1, 5, 10):
+        P(_wshare(D, bc >= k, f"commutes passing >={k} camera{'s' if k > 1 else ''}:"))
+    P(f"  90th / 99th percentile exposure:   {D.quantile(bc, .90):.0f} / {D.quantile(bc, .99):.0f} cameras")
+    lo, hi = ci(D.boot_ratio(bc, km)[:, 0])
+    P(f"  exposure rate:                     {D.ratio(bc, km):.4f} cameras per km driven [{lo:.4f}–{hi:.4f}]")
+
+    P("\n--- RQ2: COST OF AVOIDANCE ---")
+    P(_wfmt(D, em, "extra time", " min"))
+    P(_wfmt(D, ek, "extra distance", " km"))
+    P(f"  {'cameras passed (avoided), mean':34s} {D.mean(ac):5.2f}")
+    P(_wshare(D, ac == 0, "commutes reduced to ZERO cameras:"))
+    lo, hi = ci(D.boot_ratio(ac, bc)[:, 0])
+    P(f"  residual exposure:                 {100*D.ratio(ac, bc):.1f}% of baseline [{100*lo:.1f}–{100*hi:.1f}]")
+    evm = ev > 0
+    per = np.where(evm, em / np.maximum(ev, 1), np.nan)
+    P(_wfmt(D, np.nan_to_num(per), "minutes per camera evaded", " min", mask=evm))
+    ovh = np.where(bmin > 0, 100 * em / np.maximum(bmin, 1e-9), 0.0)
+    P(_wfmt(D, ovh, "avoidance overhead", " %"))
+
+    P("\n--- RQ3a: BY STATE (within-state estimates, draw-weighted) ---")
+    P(f"  {'state':6s} {'n':>5s} {'mean cams':>9s} {'%>=1':>6s} {'%zero':>6s} {'med +min':>9s} {'med +%':>7s} {'cams/km':>8s}")
+    st_rows = []
+    order = sorted(D.states, key=lambda s: -D.mean(bc, D.state == s))
+    ge1_reps = D.boot_ratio((bc >= 1).astype(float), ones, [D.state == s for s in order])
+    lo_all, hi_all = ci(ge1_reps)
+    for j, s in enumerate(order):
+        m = D.state == s
+        rec = {"state": s, "n": int(m.sum()), "commuters": int(D.W[s]),
+               "mean_cameras": D.mean(bc, m), "pct_ge1": 100 * D.share(bc >= 1, m),
+               "pct_ge1_lo": 100 * lo_all[j], "pct_ge1_hi": 100 * hi_all[j],
+               "pct_zero_after": 100 * D.share(ac == 0, m), "median_extra_min": D.quantile(em, .5, m),
+               "median_overhead_pct": D.quantile(ovh, .5, m), "cameras_per_km": D.ratio(bc, km, m),
+               "median_km": D.quantile(km, .5, m)}
+        st_rows.append(rec)
+        P(f"  {s.upper():6s} {rec['n']:5d} {rec['mean_cameras']:9.2f} {rec['pct_ge1']:5.1f}% {rec['pct_zero_after']:5.1f}% "
+          f"{rec['median_extra_min']:9.2f} {rec['median_overhead_pct']:6.1f}% {rec['cameras_per_km']:8.4f}")
+    if by_state_csv:
+        with open(by_state_csv, "w", newline="") as fh:
+            w = csv.DictWriter(fh, fieldnames=list(st_rows[0].keys()))
+            w.writeheader()
+            for r in st_rows:
+                w.writerow({k: (round(v, 4) if isinstance(v, float) else v) for k, v in r.items()})
+        P(f"  (per-state table written to {by_state_csv})")
+
+    inc = num("median_income")
+    pop = num("pop_total")
+    pct = lambda k: np.where(pop > 0, 100 * num(k) / np.where(pop > 0, pop, 1), np.nan)
+    pb, ph = pct("nh_black"), pct("hispanic")
+    county = np.array([r["h_tract"][:5] for r in rows])
+    ql = {1: "Q1 lowest", 2: "Q2", 3: "Q3", 4: "Q4 highest"}
+    qm = {1: "Q1 least", 2: "Q2", 3: "Q3", 4: "Q4 most"}
+    wcontrast(P, D, inc, bc, km, em, "RQ3b: BY ORIGIN-TRACT MEDIAN HOUSEHOLD INCOME",
+              lambda q: f"${q:,.0f}", ql, ratio="Q1/Q4")
+    wcontrast(P, D, pb, bc, km, em, "RQ3c: BY ORIGIN-TRACT RACIAL COMPOSITION (% non-Hispanic Black)",
+              lambda q: f"{q:.1f}%", qm)
+    wcontrast(P, D, ph, bc, km, em, "RQ3d: BY ORIGIN-TRACT HISPANIC SHARE", lambda q: f"{q:.1f}%", qm)
+
+    P("\n" + "=" * 78)
+    P("RQ4: COVERAGE-BIAS SENSITIVITY — quartiles computed WITHIN counties, pooled by commuters")
+    P("=" * 78)
+    wwithin(P, D, inc, bc, km, county, "RQ4a: INCOME, within-county quartiles")
+    wwithin(P, D, pb, bc, km, county, "RQ4b: % NON-HISPANIC BLACK, within-county quartiles")
+
+    if vendors:
+        P("\n" + "=" * 78)
+        P("RQ5: BY CAMERA VENDOR (commuter-weighted)")
+        P("=" * 78)
+        cols = {v: f("base_" + v) for v in vendors}
+        tot = {v: D.mean(c) for v, c in cols.items()}
+        P(f"\n  {'vendor':10s} {'share of exposure':>18s} {'/km':>8s} {'%routes>=1':>11s}")
+        for v in vendors:
+            P(f"  {v:10s} {100*tot[v]/sum(tot.values()):17.1f}% {D.ratio(cols[v], km):8.4f} "
+              f"{100*D.share(cols[v] >= 1):10.1f}%")
+        P("\n  --- evasion under the all-vendor avoidance model ---")
+        for v in vendors:
+            a = D.mean(f("avoid_" + v))
+            P(f"  {v:10s} {100*(tot[v]-a)/max(tot[v],1e-12):5.1f}% of weighted exposure evaded")
+        for v in vendors:
+            wcontrast(P, D, pb, cols[v], km, em, f"RQ5b[{v}]: % NON-HISPANIC BLACK vs {v.upper()} EXPOSURE",
+                      lambda q: f"{q:.1f}%", qm)
+        P("\n" + "-" * 78)
+        P("RQ5c: VENDOR GRADIENTS UNDER WITHIN-COUNTY RANKING")
+        P("-" * 78)
+        for v in vendors:
+            wwithin(P, D, pb, cols[v], km, county, f"RQ5c[{v}]: % NON-HISPANIC BLACK, within-county")
+
+
+def main_weighted():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--results", required=True)
+    ap.add_argument("--frame", required=True, help="sampling_frame.json from build_sample.py")
+    ap.add_argument("--draws", required=True, help="sample_draws.csv from build_sample.py")
+    ap.add_argument("--by-state", default=None, help="write the per-state table as CSV here")
+    ap.add_argument("-o", "--out", default=None)
+    args = ap.parse_args()
+    import sys as _sys, os as _os
+    _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+    from wstats import Design
+    rows = list(csv.DictReader(open(args.results)))
+    vendors = sorted({k[len("base_"):] for k in rows[0] if k.startswith("base_")
+                      and k not in ("base_km", "base_min", "base_cameras")}) if rows else []
+    D = Design(rows, args.frame, args.draws)
+    lines = []
+    report_weighted(rows, D, vendors, lines.append, args.by_state)
+    txt = "\n".join(lines)
+    print(txt)
+    if args.out:
+        open(args.out, "w").write(txt + "\n")
+
+
 if __name__ == "__main__":
-    main()
+    # --frame/--draws select the commuter-weighted report (the 51-state sample); without
+    # them this is the original unweighted report, kept so earlier outputs stay reproducible.
+    main_weighted() if "--frame" in sys.argv else main()

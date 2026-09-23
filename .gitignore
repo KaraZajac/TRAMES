@@ -30,10 +30,14 @@ tile_cache/
 **/custom_areas*/*.geojson
 # study cone-set variants (vendor split, radius sweep) — server/alpr/build-variants.sh
 server/alpr/variants/
+# historical camera sets (fetch-history.sh) — regenerable from Overpass attic data
+server/alpr/history/
 
 # --- research: downloaded inputs and heavy outputs -------------------
 # 583 MB of Census Gazetteer / ACS / LODES. Rebuild: research/data/fetch.sh
-research/data/
+# (the acquisition script itself is tracked — the paper tells readers to run it)
+research/data/*
+!research/data/fetch.sh
 # ~82 MB of route polylines. Regenerable, but only by re-running the
 # full 7-hour experiment — kept out of git because it is over GitHub's
 # comfortable file size, not because it is cheap.

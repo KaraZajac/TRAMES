@@ -1,0 +1,359 @@
+{
+ "ak": {
+  "block_pairs": 198079,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2016,
+  "pairs": 12912,
+  "workers": 258262
+ },
+ "al": {
+  "block_pairs": 1635410,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 383568,
+  "workers": 1793994
+ },
+ "ar": {
+  "block_pairs": 937653,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 169443,
+  "workers": 1064256
+ },
+ "az": {
+  "block_pairs": 2650410,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 700168,
+  "workers": 2877827
+ },
+ "ca": {
+  "block_pairs": 15597977,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 5930618,
+  "workers": 16821903
+ },
+ "co": {
+  "block_pairs": 2341039,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 585023,
+  "workers": 2539994
+ },
+ "ct": {
+  "block_pairs": 1261964,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 288382,
+  "workers": 1409066
+ },
+ "dc": {
+  "block_pairs": 163641,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 23101,
+  "workers": 198753
+ },
+ "de": {
+  "block_pairs": 291669,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 38004,
+  "workers": 337017
+ },
+ "fl": {
+  "block_pairs": 7871382,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 2694186,
+  "workers": 8799948
+ },
+ "ga": {
+  "block_pairs": 3758585,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 1199250,
+  "workers": 4190313
+ },
+ "hi": {
+  "block_pairs": 371166,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 63344,
+  "workers": 548036
+ },
+ "ia": {
+  "block_pairs": 1140316,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 212067,
+  "workers": 1266563
+ },
+ "id": {
+  "block_pairs": 622700,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 78502,
+  "workers": 689596
+ },
+ "il": {
+  "block_pairs": 4946548,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 1459956,
+  "workers": 5291588
+ },
+ "in": {
+  "block_pairs": 2466176,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 546585,
+  "workers": 2723540
+ },
+ "ks": {
+  "block_pairs": 972167,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 186250,
+  "workers": 1084834
+ },
+ "ky": {
+  "block_pairs": 1394004,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 317622,
+  "workers": 1611129
+ },
+ "la": {
+  "block_pairs": 1512248,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 364289,
+  "workers": 1677387
+ },
+ "ma": {
+  "block_pairs": 2866462,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 712345,
+  "workers": 3118754
+ },
+ "md": {
+  "block_pairs": 1917436,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 550208,
+  "workers": 2129852
+ },
+ "me": {
+  "block_pairs": 464893,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 66001,
+  "workers": 518319
+ },
+ "mi": {
+  "block_pairs": 3494414,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2021,
+  "pairs": 1078497,
+  "workers": 3794693
+ },
+ "mn": {
+  "block_pairs": 2261165,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 488989,
+  "workers": 2492596
+ },
+ "mo": {
+  "block_pairs": 2214879,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 488374,
+  "workers": 2391848
+ },
+ "ms": {
+  "block_pairs": 857156,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 169312,
+  "workers": 973548
+ },
+ "mt": {
+  "block_pairs": 360490,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 40133,
+  "workers": 398923
+ },
+ "nc": {
+  "block_pairs": 3805832,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 1113340,
+  "workers": 4209666
+ },
+ "nd": {
+  "block_pairs": 256835,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 25850,
+  "workers": 297104
+ },
+ "ne": {
+  "block_pairs": 731596,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 113552,
+  "workers": 799847
+ },
+ "nh": {
+  "block_pairs": 465899,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 65134,
+  "workers": 523874
+ },
+ "nj": {
+  "block_pairs": 3313365,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 1042071,
+  "workers": 3525339
+ },
+ "nm": {
+  "block_pairs": 640368,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 107960,
+  "workers": 716569
+ },
+ "nv": {
+  "block_pairs": 1102786,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 193300,
+  "workers": 1334669
+ },
+ "ny": {
+  "block_pairs": 7338771,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 2619619,
+  "workers": 8092715
+ },
+ "oh": {
+  "block_pairs": 4451206,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 1228837,
+  "workers": 4842915
+ },
+ "ok": {
+  "block_pairs": 1310103,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 341130,
+  "workers": 1426511
+ },
+ "or": {
+  "block_pairs": 1546691,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 302905,
+  "workers": 1680697
+ },
+ "pa": {
+  "block_pairs": 4842699,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 1363969,
+  "workers": 5158852
+ },
+ "ri": {
+  "block_pairs": 362845,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 42945,
+  "workers": 381444
+ },
+ "sc": {
+  "block_pairs": 1732398,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 397393,
+  "workers": 1928984
+ },
+ "sd": {
+  "block_pairs": 288132,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 27777,
+  "workers": 333713
+ },
+ "tn": {
+  "block_pairs": 2420386,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 504717,
+  "workers": 2749541
+ },
+ "tx": {
+  "block_pairs": 11235061,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 3780753,
+  "workers": 12366006
+ },
+ "ut": {
+  "block_pairs": 1373315,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 229542,
+  "workers": 1492551
+ },
+ "va": {
+  "block_pairs": 2868551,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 782710,
+  "workers": 3297626
+ },
+ "vt": {
+  "block_pairs": 195659,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 19711,
+  "workers": 226420
+ },
+ "wa": {
+  "block_pairs": 2800044,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 666446,
+  "workers": 3187068
+ },
+ "wi": {
+  "block_pairs": 2335813,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 502427,
+  "workers": 2526627
+ },
+ "wv": {
+  "block_pairs": 465522,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 86633,
+  "workers": 522955
+ },
+ "wy": {
+  "block_pairs": 172056,
+  "block_pairs_unmatched_to_tracts": 0,
+  "lodes_year": 2022,
+  "pairs": 14455,
+  "workers": 198447
+ }
+}
