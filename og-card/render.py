@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Stamp the version line and tagline onto the site's Open Graph card.
 
-    ./render-og-card.py --version v1.2.3                       # writes docs/og.png
-    ./render-og-card.py --version v1.2.3 --tagline "Directional cones, not circles  ·  Offline by default"
-    ./render-og-card.py --make-base                            # (re)build docs/og-base.png from docs/og.png
+    ./og-card/render.py --version v1.2.3                       # writes docs/og.png
+    ./og-card/render.py --version v1.2.3 --tagline "Directional cones, not circles · Offline by default"
+    ./og-card/render.py --make-base                            # (re)build og-card/base.png from docs/og.png
 
-docs/og-base.png is the card with its two variable strings erased — the wordmark, the
+og-card/base.png is the card with its two variable strings erased — the wordmark, the
 route illustration and the background tints are the designed artwork and never change.
+It lives here rather than in docs/ because docs/ is published as-is: the server's
+site-deploy rsyncs the whole directory, so anything placed there goes live.
 The two strings are drawn with the site's own fonts (docs/fonts/*.woff2, converted in
 memory) at the positions measured off the original card, so a version bump is a
 one-line command rather than an image-editing session. Every release before this one
@@ -17,8 +19,8 @@ from fontTools.ttLib import TTFont
 from PIL import Image, ImageDraw, ImageFont
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-DOCS = os.path.join(HERE, "docs")
-CARD, BASE = os.path.join(DOCS, "og.png"), os.path.join(DOCS, "og-base.png")
+DOCS = os.path.join(os.path.dirname(HERE), "docs")
+CARD, BASE = os.path.join(DOCS, "og.png"), os.path.join(HERE, "base.png")
 
 # Measured off the v1.1.4 card (1200x630): where the two strings sit and what they wear.
 # The tagline is three segments — "left · right" — laid out by rule (24 px either side of
@@ -98,5 +100,5 @@ if __name__ == "__main__":
         make_base()
     if a.version:
         if not os.path.exists(BASE):
-            raise SystemExit("no docs/og-base.png — run with --make-base first (from a card whose strings are current)")
+            raise SystemExit("no og-card/base.png — run with --make-base first (from a card whose strings are current)")
         render(a.version, a.tagline, a.out)
