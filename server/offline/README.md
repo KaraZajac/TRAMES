@@ -109,16 +109,27 @@ the server venv, which carries only `shapely`).
 ## Hosted maps
 
 All 50 states + DC are published at **https://maps.blackflagintel.com** — 51 full maps
-(rendering + POI + routing), ~23 GB, built 2026-07-29 → 31 from the 120,838-camera
-snapshot. `manifest.json` is `{version, maps: [{name, file, size, date}, …]}`; the `date`
-is the freshness stamp the in-app catalogue shows, and re-downloading a map is how a user
-picks up newly mapped cameras.
+(rendering + POI + routing), ~22 GB, built 2026-09-22 → 23 from the 142,991-camera
+snapshot on fresh Geofabrik extracts (the first set, 2026-07-29 → 31, was built from the
+120,838-camera snapshot). `manifest.json` is `{version, maps: [{name, file, size, date},
+…]}`; the `date` is the freshness stamp the in-app catalogue shows, and re-downloading a
+map is how a user picks up newly mapped cameras.
+
+What a full rebuild costs on a 62 GB / 16-core machine, measured on the September run:
+Texas 3.5 h, California 3.6 h (with an hour lost to swapping — see below), New York
+1.9 h, Florida 1.9 h, the other giants (NC, VA, PA, WA, OH, MI) 65–85 min each, mid-sized
+states 25–50 min, small ones 4–20 min — about 26 hours of build time, done in 20 wall-clock
+hours by running a second builder on the non-giant states. That second builder is safe
+only under a memory watchdog: California's JVM reaches its full 48 GB, and a 10 GB
+sibling beside it filled swap and stalled both for an hour before it was killed.
 
 ## Things that will bite you
 
 - **Full-map state builds are memory-hungry.** California and Texas each need roughly a
-  48 GB JVM heap (`TRAMES_JAVA_OPTS="-Xms1G -Xmx48G"`; the default is 8 GB) and a couple
-  of hours. `--roads-only` is far cheaper if you only need routing and not map display.
+  48 GB JVM heap (`TRAMES_JAVA_OPTS="-Xms1G -Xmx48G"`; the default is 8 GB) and three and
+  a half hours. `--roads-only` is far cheaper if you only need routing and not map display.
+  Never run a second builder while one of them is building: the JVM does not fail when
+  memory runs out, it swaps, and everything on the box slows to a crawl.
 - **Refreshing means rebuilding.** `build_maps.py` skips any state whose output `.obf`
   exists, so a camera-data refresh needs the old outputs moved aside first, then the new
   set published with `deploy.sh` (the host's manifest timer does the rest). There is no
