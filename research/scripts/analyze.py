@@ -614,6 +614,9 @@ def report_weighted(rows, D, vendors, P, by_state_csv=None):
     P("=" * 78)
     wwithin(P, D, inc, bc, km, county, "RQ4a: INCOME, within-county quartiles")
     wwithin(P, D, pb, bc, km, county, "RQ4b: % NON-HISPANIC BLACK, within-county quartiles")
+    # The Hispanic gradient is the strongest national contrast in the 51-state sample, so it
+    # faces the same control as the others; leaving it out would exempt the largest effect.
+    wwithin(P, D, ph, bc, km, county, "RQ4c: HISPANIC SHARE, within-county quartiles")
 
     if vendors:
         P("\n" + "=" * 78)

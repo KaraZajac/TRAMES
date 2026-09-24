@@ -133,6 +133,48 @@ Worth borrowing later: their [`tiles/cameras/layers.json`](https://github.com/Fo
 has reference MapLibre layer definitions including direction-cone rendering config,
 useful when TRAMES draws cones in-app.
 
+## Past-date maps (2024-01-01 … 2026-01-01) — for the paper's trend
+
+The camera map as it stood on a past date, for re-scoring and re-routing the study's
+commutes (`research/scripts/run-history.sh`). Two routes to the same answer:
+
+- **Overpass history queries** — `./fetch-history.sh 2025-07-01 …` runs
+  `build_cones.py --date` once per state box (`us_state_boxes.json`) and merges by node
+  id. Exact (the Georgia box at the July snapshot's timestamp returned that snapshot's
+  9,742 nodes, to the node), but heavy: about an hour per date, and after a night of them
+  overpass-api.de began refusing this machine's connections. DeFlock's mirror keeps no
+  history.
+- **The OSM full-history dump** — `history_from_planet.py` reads `history-YYMMDD.osm.pbf`
+  (~163 GB from planet.openstreetmap.org; fastest from the `osm-planet-us-west-2` S3
+  bucket with parallel ranged requests) in two pyosmium passes of ~9 min each, and writes
+  an Overpass-shaped `tile_planet.json` per date. It puts no load on anyone's server. On
+  2025-07-01, the one date both methods cover, they agree exactly: 22,690 nodes, zero
+  differences in ids, tags or coordinates.
+
+Each date's cones go to `history/<date>/alpr.geojson` with area id `alpr_YYYY_MM_DD`, so
+several dates can share one routing graph and be chosen per request
+(`../graphhopper/config/trames-history.yml`):
+
+```sh
+python3 history_from_planet.py --history osm-history/history-latest.osm.pbf \
+    --dates 2024-01-01 2024-07-01 2025-01-01 2026-01-01 --out history-planet
+cp history-planet/2024-01-01/tile_planet.json history/2024-01-01/
+../.venv/bin/python build_cones.py --bbox 14,-170,72,-52 \
+    --cache history/2024-01-01/tile_planet.json --area-id alpr_2024_01_01 \
+    -o history/2024-01-01/alpr.geojson
+```
+
+| Date | ALPR nodes | With a bearing | Cone parts |
+|---|---|---|---|
+| 2024-01-01 | 1,112 | 89.4% | 746 |
+| 2024-07-01 | 1,420 | 91.5% | 1,040 |
+| 2025-01-01 | 7,583 | 89.5% | 6,246 |
+| 2025-07-01 | 22,690 | 95.9% | 20,298 |
+| 2026-01-01 | 63,526 | 97.2% | 58,066 |
+
+These are what had been *mapped* by each date, not what had been installed: `start_date`
+is on 47 of the 142,991 current nodes.
+
 ## Verified results (Delaware, 529 cameras → 580 cones)
 
 Wilmington → Dover, scored with `score_route.py`:
@@ -190,10 +232,11 @@ nothing.
 
 ## Since validated, and still open
 
-- Dense-metro behaviour: validated on the continental graph above and across 17,580
-  commutes in the study (`research/`) — metros are the cheap case.
-- `--radius`: swept over 30/45/60/90 m in the paper (section 7.3, `build-variants.sh`
-  produces the sets). Exposure is mildly sensitive; the avoidance headline degrades
-  above 60 m.
+- Dense-metro behaviour: validated on the continental graph above and across 56,131
+  commutes in all 50 states and DC in the study (`research/`) — metros tend to be the
+  cheap case, though across whole states the tendency is modest (r = −0.29).
+- `--radius`: swept over 30/45/60/90 m in the paper (its cone-geometry limitation;
+  `build-variants.sh` produces the sets). Exposure is mildly sensitive; the avoidance
+  headline degrades above 60 m.
 - Still open: no dedup against DeFlock's own feed. This reads OSM via Overpass only —
   now with DeFlock's Overpass mirror as a fallback endpoint, which is the same upstream.

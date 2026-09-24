@@ -32,6 +32,9 @@ tile_cache/
 server/alpr/variants/
 # historical camera sets (fetch-history.sh) — regenerable from Overpass attic data
 server/alpr/history/
+# OSM full-history dump (163 GB) and the validation extracts built from it
+server/alpr/osm-history/
+server/alpr/history-planet/
 
 # --- research: downloaded inputs and heavy outputs -------------------
 # 583 MB of Census Gazetteer / ACS / LODES. Rebuild: research/data/fetch.sh
