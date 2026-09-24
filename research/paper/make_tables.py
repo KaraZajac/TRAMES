@@ -62,11 +62,11 @@ def trend():
     T = list(csv.DictReader(open(os.path.join(OUT, "trend.csv"))))
     has = lambda r, k: r.get(k) not in ("", None)
     L = [r"\begin{tabular}{lrrrrrrr}", r"\toprule",
-         r"Map date & Mapped & \multicolumn{2}{c}{Passing $\geq$1 (\%)} & Mean & Zero when & Extra min & Min per \\",
-         r"& ALPR & & [95\% CI] & passed & avoiding (\%) & (exposed) & camera \\",
+         r"Map date & Mapped & \multicolumn{2}{c}{Passing $\geq$1 (\%)} & Mean & Exposed who & Extra min, & Min per \\",
+         r"& ALPR & & [95\% CI] & passed & reach zero (\%) & exposed & camera \\",
          r"\midrule"]
     for r in T:
-        av = (f"{num(float(r['pct_zero_after']), 1)} & {num(float(r['median_extra_min_given_exposed']), 2)} & "
+        av = (f"{num(float(r['pct_zero_after_given_exposed']), 1)} & {num(float(r['median_extra_min_given_exposed']), 2)} & "
               f"{num(float(r['median_min_per_camera']), 2)}") if has(r, "pct_zero_after") else "--- & --- & ---"
         L.append(f"{r['date']} & {num(float(r['cameras_us']))} & {num(float(r['pct_ge1']), 1)} & "
                  f"[{float(r['pct_ge1_lo']):.1f}--{float(r['pct_ge1_hi']):.1f}] & {num(float(r['mean_cameras']), 2)} & {av} \\\\")

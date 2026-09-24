@@ -402,9 +402,19 @@ def fig_states(D, by_state, per100k):
         resid = np.abs(y - (k * x + b))
         label |= {st[i] for i in np.argsort([-D.W[s] for s in st])[:12]}
         label |= {st[i] for i in np.argsort(-np.nan_to_num(resid))[:6]}
+    fig.canvas.draw()
+    placed = []
     for s, xi, yi in zip(st, x, y):
-        if s in label or good.sum() <= 20:
-            ax.annotate(s.upper(), (xi, yi), fontsize=6.5, xytext=(3, 2), textcoords="offset points")
+        if not (s in label or good.sum() <= 20):
+            continue
+        # Try a few offsets and keep the first whose box clears every label already drawn.
+        for dx, dy in ((3, 2), (3, -9), (-14, 2), (-14, -9), (3, 9)):
+            t = ax.annotate(s.upper(), (xi, yi), fontsize=6.5, xytext=(dx, dy), textcoords="offset points")
+            bb = t.get_window_extent(renderer=fig.canvas.get_renderer())
+            if not any(bb.overlaps(o) for o in placed):
+                placed.append(bb)
+                break
+            t.remove()
     ax.set_xlabel("mapped cameras per 100k residents")
     ax.set_ylabel("mean cameras passed per commute")
     ax.set_title("(b) Measured exposure tracks mapping intensity")
@@ -444,9 +454,10 @@ def fig_demographics(rows, D):
 def fig_within_county(rows, D, min_n=40):
     bc, ones = col(rows, "base_cameras"), np.ones(D.n)
     county = np.array([r["h_tract"][:5] for r in rows])
-    fig, axes = plt.subplots(1, 2, figsize=(9.2, 3.4))
+    fig, axes = plt.subplots(1, 3, figsize=(11, 3.4))
     for j, (x, name) in enumerate([(numcol(rows, "median_income"), "median household income"),
-                                   (pct_col(rows, "nh_black"), "% non-Hispanic Black")]):
+                                   (pct_col(rows, "nh_black"), "% non-Hispanic Black"),
+                                   (pct_col(rows, "hispanic"), "% Hispanic")]):
         nat = wquartile_masks(D, x)
         loc, used = wcounty_masks(D, x, county, min_n)
         ax = axes[j]
@@ -460,13 +471,13 @@ def fig_within_county(rows, D, min_n=40):
             ratios[lab.split()[0]] = pts[3] / max(pts[0], 1e-9)
         ax.set_ylim(0, ax.get_ylim()[1] * 1.34)
         ax.annotate(f"Q4/Q1  national {ratios['national']:.2f}$\\times$"
-                    f"   $\\rightarrow$   within-county {ratios['within-county']:.2f}$\\times$",
-                    xy=(0.5, 0.965), xycoords="axes fraction", ha="center", va="top", fontsize=8.5,
+                    f" $\\rightarrow$ within-county {ratios['within-county']:.2f}$\\times$",
+                    xy=(0.5, 0.965), xycoords="axes fraction", ha="center", va="top", fontsize=7.8,
                     bbox=dict(boxstyle="round,pad=0.3", fc="#F5F5F5", ec="#BBBBBB", lw=0.6))
         ax.set_xticks(np.arange(4), ["Q1", "Q2", "Q3", "Q4"])
         ax.set_ylabel("mean cameras passed")
-        ax.set_title(f"({'ab'[j]}) {name}")
-        ax.legend(fontsize=7.5, loc="upper left", bbox_to_anchor=(0.0, 0.87))
+        ax.set_title(f"({'abc'[j]}) {name}")
+        ax.legend(fontsize=7, loc="upper left", bbox_to_anchor=(0.0, 0.87))
     fig.tight_layout()
     save(fig, "fig_within_county")
 
@@ -735,16 +746,26 @@ def fig_trend():
     ax.set_xlim(dt.date(2023, 10, 1), dt.date(2026, 11, 1))
     ax.set_ylabel("% of commuters")
     ax.set_title("(b) Exposure, and what avoidance leaves")
-    ax.legend(fontsize=7.5, loc="upper left")
+    h, l = ax.get_legend_handles_labels()  # errorbar entries list last; exposure reads first
+    order = sorted(range(len(l)), key=lambda i: not l[i].startswith("pass"))
+    ax.legend([h[i] for i in order], [l[i] for i in order], fontsize=7.5, loc="upper left")
     ax.tick_params(axis="x", labelrotation=30, labelsize=7.5)
 
     ax = axes[2]
     if any(has):
-        me = np.array([float(r["median_extra_min_given_exposed"]) for r, h in zip(T, has) if h])
-        mc = np.array([float(r["median_min_per_camera"]) for r, h in zip(T, has) if h])
-        ax.plot(dz, me, marker="o", ms=5, lw=1.6, color=C_AVOID, label="median extra min (exposed commutes)")
-        ax.plot(dz, mc, marker="^", ms=5, lw=1.6, color=C_OTHER, label="median min per camera evaded")
-        ax.set_ylim(0, max(me.max(), mc.max()) * 1.3)
+        top = 0
+        for k, mk, colr, lab in (("median_extra_min_given_exposed", "o", C_AVOID, "median extra min (exposed commutes)"),
+                                 ("median_min_per_camera", "^", C_OTHER, "median min per camera evaded")):
+            v = np.array([float(r[k]) for r, h in zip(T, has) if h])
+            if k + "_lo" in T[0]:
+                lo = np.array([float(r[k + "_lo"]) for r, h in zip(T, has) if h])
+                hi = np.array([float(r[k + "_hi"]) for r, h in zip(T, has) if h])
+                ax.errorbar(dz, v, yerr=[v - lo, hi - v], marker=mk, ms=5, lw=1.6, capsize=3, color=colr, label=lab)
+                top = max(top, hi.max())
+            else:
+                ax.plot(dz, v, marker=mk, ms=5, lw=1.6, color=colr, label=lab)
+                top = max(top, v.max())
+        ax.set_ylim(0, top * 1.3)
     ax.set_xlim(dt.date(2023, 10, 1), dt.date(2026, 11, 1))
     ax.set_ylabel("minutes")
     ax.set_title("(c) The price of refusal")
@@ -752,6 +773,42 @@ def fig_trend():
     ax.tick_params(axis="x", labelrotation=30, labelsize=7.5)
     fig.tight_layout()
     save(fig, "fig_trend")
+
+
+def fig_trend_gradients():
+    """The Q4/Q1 contrasts of fig_within_county, re-asked on every date's map."""
+    path = os.path.join(OUT, "trend.csv")
+    if not os.path.exists(path):
+        return
+    import datetime as dt
+    T = list(csv.DictReader(open(path)))
+    if "black_national" not in T[0]:
+        return
+    dates = [dt.date.fromisoformat(r["date"][:10]) for r in T]
+    fig, axes = plt.subplots(1, 3, figsize=(11, 3.3), sharey=True)
+    for j, (a, name) in enumerate([("black", "% non-Hispanic Black"), ("hispanic", "% Hispanic"),
+                                   ("income", "median household income")]):
+        ax = axes[j]
+        for offs, scope, colr, mk, lab in ((-12, "national", "#0072B2", "o", "national quartiles"),
+                                           (12, "within", "#D55E00", "s", "within-county quartiles")):
+            k = f"{a}_{scope}"
+            v = np.array([float(r[k]) for r in T])
+            lo = np.array([float(r[k + "_lo"]) for r in T]); hi = np.array([float(r[k + "_hi"]) for r in T])
+            ax.errorbar([d + dt.timedelta(days=offs) for d in dates], v, yerr=[v - lo, hi - v], marker=mk,
+                        ms=4.5, lw=1.3, capsize=2.5, color=colr, label=lab)
+        ax.axhline(1, color=C_NEUT, ls="--", lw=0.8)
+        ax.set_yscale("log")
+        ax.set_ylim(0.4, 3.2)
+        ax.set_yticks([0.5, 0.75, 1, 1.5, 2, 3], ["0.5", "0.75", "1", "1.5", "2", "3"])
+        ax.minorticks_off()
+        ax.set_xlim(dt.date(2023, 10, 1), dt.date(2026, 11, 1))
+        ax.tick_params(axis="x", labelrotation=30, labelsize=7.5)
+        ax.set_title(f"({'abc'[j]}) {name}")
+        if j == 0:
+            ax.set_ylabel("Q4/Q1 mean cameras passed")
+            ax.legend(fontsize=7.5, loc="upper right")
+    fig.tight_layout()
+    save(fig, "fig_trend_gradients")
 
 
 def fig_trend_states():
@@ -811,6 +868,7 @@ def main():
         if vrows and "base_flock" in vrows[0]:
             fig_vendor(vrows, Design(vrows, *DESIGN), counts)
     fig_trend()
+    fig_trend_gradients()
     fig_trend_states()
 
 

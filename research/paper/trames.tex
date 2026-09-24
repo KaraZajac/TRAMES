@@ -43,6 +43,8 @@
 \usepackage{xspace}
 \usepackage[super]{nth}
 \newcommand{\alpr}{ALPR\xspace}
+% OSM keys set in \texttt cannot hyphenate; let TeX stretch a line rather than overrun it.
+\setlength{\emergencystretch}{2em}
 
 \title{\bfseries The Cost of Not Being Seen:\\[2pt]
 \large Automated Licence-Plate Reader Exposure on American Commutes\\
@@ -62,36 +64,45 @@ intersections, and a single vendor---Flock Safety---now accounts for
 \SI{80.0}{\percent} of the \num{142991} installations mapped in North America. Public
 argument about this technology is conducted almost entirely in the abstract. We supply a
 measurement instead: how much \alpr surveillance a typical American commuter actually
-drives through, and what it would cost them to refuse it.
+drives through, what it would cost them to refuse it, and how that answer has changed as
+the map of cameras filled in.
 
 We build a continental routing engine that models \alpr fields of view as directional
-geometry---\SI{98.0}{\percent} of mapped cameras carry a bearing---and can be asked for
-the fastest route that crosses none of them. Routing \num{17580} real home--work commutes
-drawn from Census LEHD LODES data across 15 states, twice each, yields both quantities on
-identical road network.
+geometry---\SI{98.0}{\percent} of mapped cameras carry a bearing---and can be asked for the
+fastest route that crosses none of them. We route \num{56131} real home--work commutes,
+drawn from Census LEHD LODES data in all fifty states and the District of Columbia and
+weighted to each state's commuters, twice each on an identical road network.
 
-Three findings. First, \SI{78.7}{\percent} of commutes pass at least one \alpr, a median
-of three and a \nth{99} percentile of thirty-five. Second, refusal is far cheaper than
-expected: \SI{82.1}{\percent} of commutes can be routed to \emph{zero} \alpr exposure for
-a median of \SI{1.98}{\minute}, an overhead of \SI{7.90}{\percent}. Third, and most
+Three findings. First, \SI{75.3}{\percent} of commutes pass at least one \alpr, a median
+of three and a \nth{99} percentile of thirty-four. Second, refusal is far cheaper than
+expected: \SI{84.2}{\percent} of commutes can be routed to \emph{zero} \alpr exposure for
+a median of \SI{1.62}{\minute}, an overhead of \SI{6.71}{\percent}. Third, and most
 consequentially for policy, demographic gradients that appear robust nationally---origin
-tracts in the highest quartile of Black population pass \num{1.36}$\times$ as many
-cameras as the lowest, with disjoint confidence intervals---vanish when tracts are ranked
-within their own county ($\num{1.05}\times$, indistinguishable). Mapped camera density
-varies \num{3.4}$\times$ per capita across the states we study. We therefore
-report the equity result as a between-county phenomenon that this design cannot
+tracts in the highest quartile of Hispanic population pass \num{1.46}$\times$ as many
+cameras as those in the lowest, and of Black population \num{1.39}$\times$, with intervals
+well clear of parity---vanish when tracts are ranked within their own county
+(\num{1.01}$\times$ and \num{1.06}$\times$, indistinguishable). Mapped camera density
+varies \num{7.1}-fold per capita between the \nth{10} and \nth{90} percentile states. We
+therefore report the equity result as a between-county phenomenon that this design cannot
 attribute to siting, mapping effort, or urban form, and we argue that no study built on
 crowdsourced surveillance data should report such a gradient without this check.
 
-Resolving exposure by vendor locates the disparity: tolling and transport-agency cameras
-show a gradient of $\num{1.62}\times$ against $\num{1.28}\times$ for Flock, whose
-installations are four-fifths of the network. Per unit deployed, non-Flock cameras reach
-\num{2.3}$\times$ as many commuters. Flock's gradient dissolves under within-county
-ranking; the transport-agency gradient narrows to $\num{1.20}\times$ and remains
-distinguishable---the one contrast in the paper that survives the control. Routing the
-same commutes against a second snapshot taken two months later, with \SI{18}{\percent}
-more mapped cameras, raised measured exposure in exact proportion and left the marginal
-price of evading a camera unchanged.
+Resolving exposure by vendor sharpens the picture: tolling and transport-agency cameras
+show a national gradient of $\num{1.57}\times$ against $\num{1.34}\times$ for Flock, and per
+unit deployed reach \num{2.3}$\times$ as many commuters. Flock's gradient dissolves under
+within-county ranking; the transport-agency gradient narrows to $\num{1.16}\times$ and sits
+exactly on the line.
+
+Finally, we reconstruct the camera map as it stood on five dates since January 2024 from
+OpenStreetMap's edit history---exactly, node for node---and route the same commutes against
+each. The map grew 128-fold, and measured exposure almost in proportion, from
+\SI{2.2}{\percent} of commuters passing a mapped reader to \SI{75.3}{\percent}. Refusing
+them grew dearer as it did, per camera as well as in total---for commuters with a camera to
+avoid, from a median of \SI{0.8}{\minute} to \SI{3.1}{\minute}---partly because the detours
+were being mapped too. The
+national equity gradients moved with the map---the income contrast was $\num{1.58}\times$ in
+January 2025 and is $\num{1.05}\times$ today---while the within-county ones held at parity or
+converged toward it.
 
 All code, data acquisition, and analysis are reproducible from public sources.
 \end{abstract}
@@ -125,6 +136,13 @@ substantial caveat developed in \Cref{sec:coverage} and quantified in
 \Cref{sec:results:coverage}, which turns out to govern how the demographic results may be
 read.
 
+A third question follows from the data source. The cameras are mapped by volunteers, and
+the map has grown 128-fold since January 2024. OpenStreetMap keeps every edit, so the
+measurement can be repeated on the map as it stood on any past date; we repeat it on five.
+How much surveillance a commuter drives through turns out to be, in large part, a question
+of how much of it had been mapped---and that has consequences for every equity claim made
+from such data.
+
 \subsection{Contributions}
 
 \begin{itemize}
@@ -137,21 +155,24 @@ read.
     compiled into a stock GraphHopper spatial index at import time, so an ordinary
     per-request custom model can reference them by name. No engine patches, no geometry in
     the request.
-  \item \textbf{A commute-weighted rather than area-weighted sample.} \num{17580} real
-    home--work pairs drawn from LEHD LODES with probability proportional to worker count.
+  \item \textbf{A commute-weighted rather than area-weighted sample.} \num{56131} real
+    home--work pairs in all fifty states and the District of Columbia, drawn from LEHD
+    LODES with probability proportional to worker count and weighted to each state's
+    commuters.
   \item \textbf{A vendor-resolved account of exposure.} Flock and the DOT/tolling vendors
     follow different deployment logics---who \emph{buys} surveillance versus where road
     infrastructure sits. Separating them shows the national racial gradient is
     substantially stronger in transport infrastructure than in the vendor that dominates
     both the network and the public argument about it.
   \item \textbf{A coverage-bias control that changes the conclusion.} We show that the
-    national demographic gradient does not survive within-county ranking, quantify the
-    \num{3.4}$\times$ per-capita spread in mapping intensity that plausibly drives it, and
+    national demographic gradients do not survive within-county ranking, quantify the
+    \num{7.1}-fold per-capita spread in mapping intensity that plausibly drives them, and
     argue this check should be mandatory for work of this kind.
-  \item \textbf{A paired re-measurement.} The same commutes routed against a snapshot
-    taken two months later with \SI{18}{\percent} more mapped cameras: exposure rose in
-    proportion, the marginal price of evading a camera did not move, and the states we had
-    flagged as under-mapped are the ones that grew most.
+  \item \textbf{A thirty-three-month trend on a fixed sample.} The camera map, reconstructed
+    exactly from OpenStreetMap's edit history on five dates since January 2024, with the
+    same commutes routed against each: exposure rose almost in proportion to the map,
+    refusal grew dearer per camera as well as in total, and the national equity gradients
+    moved with the map while the within-county ones did not.
 \end{itemize}
 
 \section{System}
@@ -218,14 +239,16 @@ All sources are public and key-free.
 \subsection{ALPR installations}
 \label{sec:data:alpr}
 
-Source: OpenStreetMap via the Overpass API, selecting
-\texttt{man\_made=surveillance} with \texttt{surveillance:type=ALPR}, matched
-case-insensitively (19 readers are tagged \texttt{alpr})---the corpus surfaced by the
+Source: OpenStreetMap, queried through the Overpass API for nodes tagged
+\texttt{man\_made=\allowbreak surveillance} with \texttt{surveillance:\allowbreak type=ALPR},
+matched case-insensitively (19 readers are tagged \texttt{alpr})---the corpus surfaced by the
 DeFlock project, taken from the upstream rather than a mirror. Retrieved in five regional
 queries (continental US, Alaska, Hawaii, Canada, Mexico) and deduplicated by OSM node id.
 The results in this paper rest on the snapshot of \textbf{2026-09-22: \num{142991} unique
-camera nodes} (\Cref{fig:map}). A first snapshot, taken 2026-07-24, held \num{120838};
-\Cref{sec:results:refresh} routes the same commutes against both.
+camera nodes}, \num{142257} of them in the 50 states and the District of Columbia
+(\Cref{fig:map}); the rest fall in the parts of Canada and Mexico the regional queries
+cover. A first snapshot, taken 2026-07-24, held \num{120838} (\num{120272} in the states),
+and \Cref{sec:data:history} reconstructs five earlier dates.
 
 A fetch that fails over between Overpass mirrors has to check the mirror's database
 date. On the first attempt at the September snapshot one regional query fell through to
@@ -239,7 +262,7 @@ the snapshot used here falls within a 13-minute window.
 \begin{table}[t]
 \centering
 \small
-\caption{Directional and vendor tagging across the two snapshots. The direction-key rows
+\caption{Directional and vendor tagging across the two 2026 snapshots. The direction-key rows
 overlap (392 and 415 nodes carry both keys). Vendors are matched as case-insensitive
 substrings under any of the four vendor keys, in both columns.}
 \label{tab:tags}
@@ -329,8 +352,8 @@ No vendor tag      & \num{5997}   & \num{6590}   & 1.10 & \num{5211} \\
 \end{table}
 
 Assigning vendor requires care. Vendor appears under four keys
-(\texttt{manufacturer}, \texttt{surveillance:manufacturer}, \texttt{brand},
-\texttt{surveillance:brand}) and is spelled inconsistently. An exact match on
+(\texttt{manufacturer}, \texttt{surveillance:\allowbreak manufacturer}, \texttt{brand},
+\texttt{surveillance:\allowbreak brand}) and is spelled inconsistently. An exact match on
 \texttt{manufacturer = "Flock Safety"} finds \num{109892} cameras; a case-insensitive
 substring search across all four finds \num{114360}. The \num{4468} difference is mostly
 \num{4711} nodes carrying the vendor under \texttt{brand}, plus variants (``Flock Group
@@ -345,11 +368,51 @@ with the caveat that their direction coverage is lower (\SI{88.0}{\percent} agai
 down from \SI{98.5}{\percent} in July, as newly mapped Axis units often arrive without a
 bearing).
 
+\subsection{Camera maps of earlier dates}
+\label{sec:data:history}
+
+OpenStreetMap keeps every edit, so the camera map can be reconstructed as it stood on any
+past date. The public Overpass server answers a query carrying a \texttt{[date:\ldots]}
+qualifier from its history: nodes deleted since are restored, nodes added since are absent,
+and every tag has its value from that day. Asked for Georgia at the July snapshot's
+timestamp it returned \num{9742} nodes, the snapshot's own count to the node. History
+queries for the whole continent exceed the server's fifteen-minute limit, so a date is
+fetched state by state and merged by node identifier; DeFlock's own Overpass mirror keeps
+no history and cannot serve them. They are heavy, and after one complete date the public
+server began refusing our connections.
+
+The remaining dates were therefore reconstructed locally, from OpenStreetMap's full-history
+dump (\SI{163}{\giga\byte}, 14 September 2026, checked against its published MD5), with
+Overpass's semantics: every version of every node that was ever tagged as an \alpr,
+including the later versions that deleted or retagged it, and for each date the latest
+version at or before midnight UTC, kept if it was visible and still tagged. On the one date
+both sources cover, 1 July 2025, they agree exactly---\num{22690} nodes, the same
+identifiers, the same tags, the same coordinates.
+
+We reconstruct five dates---1 January and 1 July of 2024 and of 2025, and 1 January
+2026---and set them beside the study's July and September 2026 snapshots, seven maps in
+all. Cones are built from each exactly as from the current map (\Cref{sec:data:cones}).
+The share of mapped cameras carrying a bearing, and so receiving a cone, was about
+\SI{90}{\percent} in 2024 and \SI{98}{\percent} in 2026: the earliest maps are slightly
+less complete even on their own terms. Monthly counts between the dates come from
+the ohsome history API, which aggregates but will not release individual records; it
+agrees with our July snapshot to 21 nodes, exactly the readers tagged lowercase
+\texttt{alpr} that the July fetch's case-sensitive match omitted.
+
+One caveat governs everything built on these maps. OpenStreetMap records when a camera was
+\emph{mapped}, not when it was installed: an installation date is present on 47 of
+\num{142991} nodes. A camera first mapped in 2026 may have been on its pole since 2021. A
+past map is therefore what a study run on that day would have seen, and the trend of
+\Cref{sec:results:trend} describes how the measured picture changed as volunteers filled
+in the map---most of it after DeFlock was founded in October
+2024\footnote{\url{https://deflock.me}; founding date per
+\url{https://deflockilm.org/what-is-deflock/}.}---not how fast cameras were deployed.
+
 \subsection{Road network}
 
 Geofabrik North America extract, \SI{18}{\giga\byte}, retrieved 2026-07-24 and held
-fixed for both snapshots, so that \Cref{sec:results:refresh} isolates the camera data:
-every unavoided route is identical between the two runs to the metre. Imported with
+fixed for every camera map, so that the trend of \Cref{sec:results:trend} isolates the
+camera data: every unavoided route is the same route on every date. Imported with
 \texttt{ignored\_highways = footway,construction,cycleway,path,steps}. \texttt{track} is
 deliberately retained: unpaved tracks are plausible avoidance routes, and excluding them
 would bias the cost estimate downward by removing options a determined driver has.
@@ -357,9 +420,12 @@ would bias the cost estimate downward by removing options a determined driver ha
 \subsection{Commute sample}
 \label{sec:data:commutes}
 
-Source: LEHD \textbf{LODES8}, \texttt{od\_main\_JT00}, 2022---all jobs, both ends
-in-state, built from unemployment-insurance wage records linked to employer
-establishments. These are administrative counts of real jobs, not survey estimates.
+Source: LEHD \textbf{LODES8}, \texttt{od\_main\_JT00}---all jobs, both ends in-state, built
+from unemployment-insurance wage records linked to employer establishments. These are
+administrative counts of real jobs, not survey estimates. The year is 2022 for 49 of the 51
+jurisdictions; LODES has not published 2022 for Michigan, which uses 2021, or for Alaska,
+whose latest year is 2016. LODES8 codes every year against 2020 census geography, so an
+older year still names current tracts.
 
 Sampling design carries more weight here than sample size. Uniform random points would
 over-represent empty rural space where nobody commutes and no cameras exist, understating
@@ -372,24 +438,30 @@ Block-level LODES geocodes are aggregated to \textbf{tract} (first 11 digits)---
 resolution at which ACS demographics are reliable, and finer than the routing's effective
 precision. Same-tract commutes are dropped: origin and destination centroids coincide, so
 there is no route to measure. Georgia alone yields \num{1199250} distinct tract pairs
-covering \num{4190313} workers.
+covering \num{4190313} workers; across the 50 states and the District of Columbia the frame
+holds \num{132822679} commuters over \num{34420305} tract pairs.
 
-\num{1200} pairs are requested per state; duplicate draws are collapsed, costing
-\SI{0.53}{\percent}, for \textbf{\num{17904} sampled commutes} across 15 states (AZ, CA,
-CO, FL, GA, IL, MO, NC, NY, OH, PA, TN, TX, VA, WA). Seed \texttt{20260725}; the sample is
-reproducible. The sampled pairs represent \num{600899} workers; the median pair carries 10
-and the largest \num{2832}.
+Connecticut needed one repair. In 2022 it replaced its eight counties with nine planning
+regions, and every tract identifier changed with them. LODES still names tracts by the old
+counties while the 2024 Gazetteer and ACS 2022 use the new ones, so without a crosswalk no
+Connecticut tract matches and the state silently drops out of the sample. The tracts were
+reassigned, not redrawn: each six-digit tract code maps to exactly one new identifier, and
+all 879 in the flows do.
 
-Because draws are taken with replacement and then deduplicated, each pair appears once and
-every row is weighted equally downstream. That is valid only while inclusion probability
-remains proportional to worker count, which decays once a pair is likely to be drawn more
-than once. Measured on Georgia, the largest state sample, the highest-flow pair has an
-expected \num{0.22} draws per \num{1200} and a median pair \num{0.0036}: the design is
-probability-proportional-to-size with distortion confined to the extreme upper tail
-(roughly \SI{11}{\percent} under-representation for the single largest pair, negligible
-below it). The \texttt{workers} and \texttt{flow\_share} columns are carried through the
-pipeline but deliberately unused---equal weighting already yields the worker-weighted
-distribution, and weighting again would apply the flow twice.
+\num{1200} pairs are drawn per jurisdiction, \num{61200} in all, with replacement from a
+single seeded stream (seed \texttt{20260725}), giving \textbf{\num{58421} distinct commutes}.
+The fifteen states of the study's earlier rounds are drawn first, so their \num{17904}
+commutes are reproduced exactly and their routes carry over. The sampled pairs represent
+\num{2842747} workers; the median pair carries 16 and the largest \num{2832}.
+
+A pair drawn more than once is routed once, since its route is the same, but it stands for
+every draw: \textbf{each commute carries its draw count as a weight}. In the fifteen large
+states this is immaterial---\SI{0.53}{\percent} of draws are repeats---but in small ones it
+is not. Wyoming's \num{1200} draws hold 832 distinct pairs (\SI{30.7}{\percent} repeats),
+Alaska's and the Dakotas' repeat a fifth of the time or more, and one Vermont pair was drawn
+nine times. Collapsing repeats at equal weight, as this study's earlier rounds did,
+under-represents precisely the heaviest flows; keeping the counts restores
+probability-proportional-to-workers sampling inside every state.
 
 \subsection{Demographics and geography}
 
@@ -410,6 +482,15 @@ Each sampled pair is routed twice against the same graph: a \textbf{baseline} wi
 custom model, and an \textbf{avoided} route applying
 \texttt{priority: [\{if: "in\_alpr", multiply\_by: 0.01\}]}. Both disable CH, which
 per-request custom models require.
+
+Both use GraphHopper's stock car model, which weighs distance as well as time
+(\texttt{distance\_\allowbreak influence} 90: a route \SI{1}{\kilo\metre} shorter is preferred if it
+costs under \SI{90}{\second} more). The baseline is therefore the router's preferred route
+rather than strictly the fastest, and for \SI{4.5}{\percent} of commuters the avoiding
+route---in every such case the longer one---is the quicker, by a median of
+\SI{0.9}{\minute}. Extra time is reported as measured, negative values included; clipping
+them at zero leaves every median unchanged and raises the mean extra time from
+\SI{5.62}{\minute} to \SI{5.70}{\minute}.
 
 \num{0.01} is the \emph{maximum} avoidance strength, not a typical setting. Results
 therefore describe an \textbf{upper bound on both the benefit and the cost} of
@@ -441,6 +522,35 @@ all-vendor union, because cones from different vendors that overlap merge into o
 the union and are counted once while the split sets count them separately. Measured excess
 is \SI{1.0}{\percent}: right sign, plausible magnitude.
 
+\subsection{Earlier camera maps need no new baselines}
+\label{sec:method:history}
+
+The unavoided route does not depend on the cameras. Routed two months apart against graphs
+carrying different camera maps, all \num{17580} commutes of the study's earlier rounds took
+identical baseline routes, to the metre and the second. Exposure on an earlier date is
+therefore a re-scoring of each saved route against that date's cones, with no routing.
+
+Avoidance does need routing against that date's cameras, and two properties keep it
+tractable. First, one graph serves every date: each date's cone set is imported as its own
+custom area (\texttt{alpr\_2025\_07\_01}, \ldots), and each request names the one it avoids
+---a single import of about two hours rather than one per date, checked on a test graph to
+route each area independently. Second, only commutes that pass a camera on that date are
+routed. A route that crosses no cone is already the avoiding route, since the custom model
+only makes cone edges dearer and nothing can undercut it; this was checked rather than
+assumed, and all \num{3741} such commutes of the fifteen-state run received an identical
+avoiding route. The same shortcut serves the main run.
+
+Re-scoring uses route geometry stored at five decimal places, about a metre. Against live
+scoring on the current map it moves \SI{1.7}{\percent} of commutes by one camera, in the two
+directions about equally, changes whether 5 of \num{17580} (\SI{0.03}{\percent}) pass any
+camera at all, and leaves national totals within \SI{0.1}{\percent}. On the full sample the
+re-scored national figures match the live ones to the precision reported
+(\SI{75.3}{\percent} passing a camera, a mean of \num{5.14}). Within the trend every date,
+the current one included, is scored the same way. The July 2026 snapshot enters the trend
+re-scored only: routing its avoidance in all fifty-one states would have added most of a day
+of computation to a step that the fifteen-state paired comparison already covers
+(\Cref{sec:results:trend}).
+
 \subsection{Statistical reporting}
 \label{sec:method:stats}
 
@@ -448,8 +558,21 @@ is \SI{1.0}{\percent}: right sign, plausible magnitude.
   \item \textbf{Medians lead, means accompany.} Both distributions are heavily
     right-skewed; a minority of long commutes through dense corridors pull the mean well
     above the typical experience.
-  \item \textbf{Bootstrap confidence intervals} (percentile, \num{2000} resamples, seed
-    \texttt{20260725}). Camera counts are discrete and zero-inflated, nowhere near normal.
+  \item \textbf{National figures are weighted by commuters.} Every jurisdiction was sampled
+    at the same size, so an unweighted pool would count Wyoming's \num{198447} in-state
+    commuters as heavily as California's \num{16821903}. Each routed commute carries its
+    state's commuter total from the LODES frame, shared among that state's routed commutes in
+    proportion to draw count, and quartile cut-points and medians are weighted quantiles.
+    State figures are within-state estimates and need only the draw counts. The weights
+    matter even on the fifteen states of the earlier rounds: weighting alone moves the share
+    of commuters passing a reader there from \SI{78.7}{\percent} to \SI{81.1}{\percent},
+    because the populous states are the more surveilled ones.
+  \item \textbf{Confidence intervals from a bootstrap stratified by state} (percentile,
+    \num{2000} replicates, seed \texttt{20260725}). Each replicate resamples every state at
+    its own size and re-derives its weights, as the sample was drawn; a plain bootstrap over
+    pooled rows would let one replicate hold \num{1400} Texans and 900 Californians,
+    variation the design does not have. Camera counts are discrete and zero-inflated,
+    nowhere near normal, so no interval is assumed symmetric.
   \item \textbf{Quartile contrasts, not regressions.} With tract-level aggregates a
     regression coefficient invites a causal reading the design cannot support.
   \item \textbf{Total exposure and per-kilometre density are reported as peers.} A raw
@@ -471,20 +594,29 @@ than \SI{576}{\second} on the identical set---past about twelve, contention outw
 concurrency. Routing dominates cost overwhelmingly; the geometric exposure test is
 \SI{0.2}{\percent} of per-commute work.
 
-Failed routes are dropped rather than retried: failures are dominated by unroutable
-centroid pairs (islands, centroids landing off-network), properties of the sample rather
-than transient faults. \textbf{\num{17580} of \num{17904} commutes routed successfully
-(\SI{1.8}{\percent} dropped)}---the same \num{324} failures in both snapshots. The
-September run took \SI{10.6}{\hour} against \SI{5.4}{\hour} for July on the same
-hardware: with a fifth more penalised edges, the avoiding search visits more of the graph.
+Failed routes are dropped rather than retried, and \textbf{\num{56131} of \num{58421}
+commutes routed (\SI{3.9}{\percent} dropped)}. The failures are not spread evenly, and not
+mostly what they seem. Nine in ten are points the router cannot snap to any road: a tract's
+internal point can lie deep inside a national park, a reservation or a wilderness tract,
+beyond the router's road search. The rest are genuinely unconnected---commutes between
+Hawaiian islands, or to Alaskan towns off the road network. Five states lose more than a
+tenth of their sample (Alaska \SI{33}{\percent}, Hawaii \SI{24}{\percent}, Montana and
+Wyoming \SI{21}{\percent}, New Mexico \SI{14}{\percent}); the median state loses
+\SI{2.0}{\percent}. Those five hold \SI{1.6}{\percent} of the nation's commuters, so the
+national figures barely register the loss, but their own estimates describe the routable
+part of each state---probably its less remote part, and so probably overstate its
+exposure. A wider road search would recover most of them, but it also moved 5 of 100
+already-routed commutes to a different road (the default search sometimes stops at a road
+that is not the nearest), and the trend of \Cref{sec:results:trend} pairs every saved route
+with new ones. Consistency was kept over coverage.
 
 Commutes are processed in seeded random order. The sample is grouped by state and the
 executor preserves input order, so in file order results arrive one state at a time: an
 interruption would leave some states complete and others absent, and no partial output
 could support a national estimate. Shuffling makes any prefix a near-uniform sample of the
-whole. This proved material rather than hypothetical---an earlier single-state interim
-read gave a median avoidance overhead of \SI{22.7}{\percent} against that run's national
-\SI{5.96}{\percent}.
+whole. This proved material rather than hypothetical---in the study's first round an
+interim read of a single state gave a median avoidance overhead of \SI{22.7}{\percent}
+against that round's national \SI{5.96}{\percent}.
 
 \section{Results}
 \label{sec:results}
@@ -495,29 +627,30 @@ read gave a median avoidance overhead of \SI{22.7}{\percent} against that run's 
 \begin{table}[t]
 \centering
 \small
-\caption{Exposure and the cost of avoidance over \num{17580} commute-weighted
-origin--destination pairs in 15 states. Median commute \SI{24.4}{\kilo\metre} /
-\SI{24.1}{\minute}.}
+\caption{Exposure and the cost of avoidance for American commuters: \num{56131} routed
+commutes in the 50 states and the District of Columbia, weighted to the \num{132.8}
+million in-state commuters they represent. Medians are weighted; intervals come from a
+bootstrap stratified by state. Median commute \SI{23.6}{\kilo\metre} / \SI{23.4}{\minute}.}
 \label{tab:headline}
 \begin{tabular}{lrr}
 \toprule
 & Median [\SI{95}{\percent} CI] & Mean \\
 \midrule
 \multicolumn{3}{l}{\itshape Unavoided route} \\
-Cameras passed              & 3 [3--3]            & 5.63 \\
-Commutes passing $\geq$1    & \multicolumn{2}{r}{\SI{78.7}{\percent}} \\
-Commutes passing $\geq$5    & \multicolumn{2}{r}{\SI{39.7}{\percent}} \\
-Commutes passing $\geq$10   & \multicolumn{2}{r}{\SI{18.3}{\percent}} \\
-\nth{90} / \nth{99} percentile & \multicolumn{2}{r}{14 / 35 cameras} \\
-Exposure rate               & \multicolumn{2}{r}{\num{0.105} cameras/\si{\kilo\metre}} \\
+Cameras passed              & 3 [3--3]            & 5.14 \\
+Commuters passing $\geq$1   & \multicolumn{2}{r}{\SI{75.3}{\percent} [74.8--75.8]} \\
+Commuters passing $\geq$5   & \multicolumn{2}{r}{\SI{36.5}{\percent}} \\
+Commuters passing $\geq$10  & \multicolumn{2}{r}{\SI{16.3}{\percent}} \\
+\nth{90} / \nth{99} percentile & \multicolumn{2}{r}{13 / 34 cameras} \\
+Exposure rate               & \multicolumn{2}{r}{\num{0.096} cameras/\si{\kilo\metre}} \\
 \midrule
 \multicolumn{3}{l}{\itshape ALPR-avoiding route} \\
-Cameras passed              & 0 [0--0]            & 0.30 \\
-\textbf{Reduced to zero}    & \multicolumn{2}{r}{\textbf{\SI{82.1}{\percent}}} \\
-Extra time (\si{\minute})   & \textbf{1.98} [1.89--2.07] & 5.97 \\
-Extra distance (\si{\kilo\metre}) & 0.76 [0.72--0.79] & 2.69 \\
-Avoidance overhead          & \SI{7.90}{\percent} [7.60--8.17] & \SI{14.22}{\percent} \\
-Minutes per camera evaded   & 0.78 [0.77--0.80]   & 1.31 \\
+Cameras passed              & 0 [0--0]            & 0.26 \\
+\textbf{Reduced to zero}    & \multicolumn{2}{r}{\textbf{\SI{84.2}{\percent}} [83.7--84.7]} \\
+Extra time (\si{\minute})   & \textbf{1.62} [1.57--1.68] & 5.62 \\
+Extra distance (\si{\kilo\metre}) & 0.57 [0.55--0.60] & 2.53 \\
+Avoidance overhead          & \SI{6.71}{\percent} [6.50--6.93] & \SI{13.27}{\percent} \\
+Minutes per camera evaded   & 0.76 [0.75--0.78]   & 1.30 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -525,15 +658,19 @@ Minutes per camera evaded   & 0.78 [0.77--0.80]   & 1.31 \\
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/fig_exposure.pdf}
-\caption{Exposure before and after \alpr-avoiding routing. (a) Distributions; (b)
-cumulative, log-scaled abscissa; (c) share of commutes exceeding a threshold. The
-zero-exposure mass moves from \SI{21.3}{\percent} to \SI{82.1}{\percent}.}
+\caption{Exposure before and after \alpr-avoiding routing, as shares of commuters. (a)
+Distributions; (b) cumulative, log-scaled abscissa; (c) share of commuters exceeding a
+threshold. The zero-exposure mass moves from \SI{24.7}{\percent} to \SI{84.2}{\percent}.}
 \label{fig:exposure}
 \end{figure}
 
-\textbf{\SI{78.7}{\percent} of American commutes pass at least one \alpr.} The median
-commuter is read three times each way; the \nth{90} percentile fourteen times and the
-\nth{99} thirty-five. Aggregate exposure is \num{0.105} cameras per kilometre driven.
+\textbf{\SI{75.3}{\percent} of American commuters pass at least one \alpr} on the way to
+work. The median commuter is read three times each way; the \nth{90} percentile thirteen
+times and the \nth{99} thirty-four. Aggregate exposure is \num{0.096} cameras per
+kilometre driven. Across the fifteen states of the study's earlier rounds the same weighted
+share is \SI{81.1}{\percent}: the thirty-six states and the District added here are, on
+the map, far less surveilled---a difference \Cref{sec:results:geo,sec:results:coverage}
+will not let us attribute to the roads rather than to the map.
 
 \subsection{The cost of refusal}
 \label{sec:results:cost}
@@ -541,27 +678,28 @@ commuter is read three times each way; the \nth{90} percentile fourteen times an
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/fig_cost.pdf}
-\caption{The price of complete avoidance. (a) Absolute extra time; (b) overhead as a
-percentage of baseline, by percentile; (c) marginal minutes per camera evaded. All three
-are heavily right-skewed---a small tail of commutes pays a great deal, while the typical
-commute pays almost nothing.}
+\caption{The price of complete avoidance, as shares of commuters. (a) Absolute extra time;
+(b) overhead as a percentage of baseline, by percentile; (c) marginal minutes per camera
+evaded. All three are heavily right-skewed---a small tail of commutes pays a great deal,
+while the typical commute pays almost nothing.}
 \label{fig:cost}
 \end{figure}
 
-\textbf{\SI{82.1}{\percent} of commutes can be routed to zero \alpr exposure}, at a median
-cost of \SI{1.98}{\minute} and \SI{0.76}{\kilo\metre}---an overhead of
-\SI{7.90}{\percent}. The median marginal price is \SI{0.78}{\minute} per camera evaded.
+\textbf{\SI{84.2}{\percent} of American commuters could be routed to zero \alpr
+exposure}, at a median cost of \SI{1.62}{\minute} and \SI{0.57}{\kilo\metre}---an
+overhead of \SI{6.71}{\percent}. The median marginal price is \SI{0.76}{\minute} per camera
+evaded.
 
-For four American commuters in five, then, complete avoidance of licence-plate
-surveillance costs about two minutes. This figure is conditional on the assumed camera
-field of view: it is stable if the true radius is smaller than the \SI{60}{\metre} assumed
-here and degrades if it is substantially larger, which \Cref{sec:lim:geom} quantifies. This is the paper's central quantitative claim,
-and it is considerably more favourable than the metropolitan spot-checks that motivated
-the study suggested.
+For five commuters in six, then, complete avoidance of licence-plate surveillance costs
+about a minute and a half. This figure is conditional on the assumed camera field of view:
+it is stable if the true radius is smaller than the \SI{60}{\metre} assumed here and
+degrades if it is substantially larger, which \Cref{sec:lim:geom} quantifies. It is the
+paper's central quantitative claim, and it is considerably more favourable than the
+metropolitan spot-checks that motivated the study suggested.
 
-The distribution matters as much as the median. The mean overhead is \SI{14.22}{\percent}
-against a median of \SI{7.90}{\percent}, and the interquartile range runs from
-\SI{0}{\percent} to \SI{20.6}{\percent}: a quarter of commutes need no detour whatsoever,
+The distribution matters as much as the median. The mean overhead is \SI{13.27}{\percent}
+against a median of \SI{6.71}{\percent}, and the interquartile range runs from
+\SI{0}{\percent} to \SI{18.9}{\percent}: a quarter of commuters need no detour whatsoever,
 while a tail pays substantially. \Cref{fig:route} shows one such case.
 
 \begin{figure}[t]
@@ -575,29 +713,45 @@ are grey and cost nothing.}
 \label{fig:route}
 \end{figure}
 
-\subsection{Geographic variation}
+\subsection{Fifty states and the District of Columbia}
 \label{sec:results:geo}
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/fig_states.pdf}
-\caption{(a) Mean exposure by state with median avoidance overhead overlaid. (b) State
-exposure against mapped cameras per \num{100000} residents. The relationship is close to
-linear, which is the central interpretive problem of \Cref{sec:results:coverage}: we
-cannot separate ``more cameras'' from ``more mappers''.}
+\caption{(a) Share of each state's commuters whose unavoided route passes at least one
+mapped \alpr. (b) Mean cameras passed against mapped cameras per \num{100000} residents,
+points sized by commuters. Mapping intensity alone tracks most of the variation between
+states ($r=0.82$)---the central interpretive problem of \Cref{sec:results:coverage}.}
 \label{fig:states}
 \end{figure}
 
-State-level variation is extreme. Georgia commuters pass a median of eight cameras and pay
-\SI{25.8}{\percent} overhead to avoid them; Pennsylvania commuters pass a median of one
-and pay \SI{1.3}{\percent}, with \SI{60}{\percent} passing any camera at all---up from
-\SI{41}{\percent} two months earlier (\Cref{sec:results:refresh}).
+State-level variation is extreme (\Cref{fig:states}; every state is tabulated in
+\Cref{tab:bystate}). In Georgia \SI{91.9}{\percent} of commuters pass a mapped reader, a
+mean of \num{11.8} each way, and avoiding them costs a median \SI{25.7}{\percent} overhead;
+in Illinois \SI{90.6}{\percent} do, in California \SI{86.7}{\percent}. At the other end
+\SI{14.8}{\percent} of New Hampshire's commuters pass one, \SI{11.8}{\percent} of
+Montana's, \SI{5.4}{\percent} of Vermont's, and none of Alaska's sampled commuters. In
+fifteen jurisdictions the median extra time is zero: most of their commuters have nothing
+on the map to avoid.
 
-A robust secondary finding: \textbf{avoidance is cheapest where cameras are densest}.
-Dense metropolitan grids offer a parallel street one block over, so the detour is short;
-rural and intercity routes often have one viable road, so avoidance means a genuine
-detour. The burden of refusal therefore falls hardest on drivers who have the fewest
-cameras to refuse---the reverse of the natural guess.
+These are differences in the map at least as much as on the roads. Mapped density runs
+from \num{0.7} cameras per \num{100000} residents in Alaska, and under five in Vermont,
+Maine and New Hampshire, to \num{92.8} in Georgia---a \num{7.1}-fold spread between the
+\nth{10} and \nth{90} percentile states---and state exposure tracks it at $r=0.82$. The
+departures from the line are what a statewide rate would produce: New York's commuters pass
+more cameras than its statewide density predicts, because commuting concentrates where
+cameras do while the density is averaged over the whole state; Kansas's pass fewer.
+
+Per camera, evasion tends to be cheaper where cameras are denser. Across the 48 states with
+at least 100 evading commuters, the median price per camera falls as cameras per kilometre
+rise ($r=-0.29$ on a log scale), from \SI{2.49}{\minute} in New Hampshire to
+\SI{0.17}{\minute} in the District of Columbia. Dense grids offer a parallel street one
+block over; rural and intercity routes often have one road. Across states the relationship
+is weaker than the metropolitan spot-checks suggested---Georgia, the most densely watched
+large state, still pays \SI{1.11}{\minute} a camera---so we state it as a tendency, not a
+law: the burden of refusal falls, if anything, hardest on drivers with the fewest cameras
+to refuse.
 
 \subsection{Demographic contrasts}
 \label{sec:results:demo}
@@ -605,34 +759,38 @@ cameras to refuse---the reverse of the natural guess.
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/fig_demographics.pdf}
-\caption{Origin-tract quartile contrasts, \SI{95}{\percent} bootstrap CIs. Top row: mean
-cameras passed. Bottom row: cameras per kilometre driven. Income shows a per-km gradient
-with no count gradient---higher-income origins have denser but shorter commutes.}
+\caption{Origin-tract quartile contrasts, commuter-weighted, with \SI{95}{\percent}
+stratified-bootstrap intervals. Top row: mean cameras passed. Bottom row: cameras per
+kilometre driven. Income shows a per-km gradient with no count gradient---higher-income
+origins have denser but shorter commutes.}
 \label{fig:demo}
 \end{figure}
 
 \begin{table}[t]
 \centering
 \small
-\caption{National quartile contrasts. ``Disjoint'' marks non-overlapping
-\SI{95}{\percent} bootstrap CIs.}
+\caption{National quartile contrasts, commuter-weighted. Each ratio carries its own
+stratified-bootstrap interval; ``disjoint'' marks non-overlapping \SI{95}{\percent}
+intervals on the two quartile means, the criterion used throughout.}
 \label{tab:demo}
 \begin{tabular}{lrrl}
 \toprule
-Contrast & Ratio & Cameras/\si{\kilo\metre} (Q1 vs Q4) & Verdict \\
+Contrast & Ratio [\SI{95}{\percent} CI] & Cameras/\si{\kilo\metre} (Q1 vs Q4) & Verdict \\
 \midrule
-Income Q1/Q4          & 1.00 & \num{0.0933} vs \num{0.1246} & count overlaps; rate disjoint \\
-\% non-Hisp.\ Black Q4/Q1 & \textbf{1.36} & \num{0.0848} vs \num{0.1393} & both disjoint \\
-\% Hispanic Q4/Q1     & \textbf{1.15} & \num{0.0933} vs \num{0.1116} & both disjoint \\
+Income Q1/Q4              & 0.96 [0.90--1.01] & \num{0.0846} vs \num{0.1174} & count overlaps; rate disjoint \\
+\% non-Hisp.\ Black Q4/Q1 & \textbf{1.39} [1.32--1.47] & \num{0.0733} vs \num{0.1238} & both disjoint \\
+\% Hispanic Q4/Q1         & \textbf{1.46} [1.39--1.54] & \num{0.0769} vs \num{0.1074} & both disjoint \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Both racial contrasts are statistically distinguishable nationally. Income is not, in
-counts---but higher-income origin tracts show materially \emph{denser} per-kilometre
-exposure (\num{0.1246} against \num{0.0933}) offset by shorter commutes. Only reporting
-count and rate as peers surfaces that; a design treating the rate as a mere control would
-have discarded it.
+Both ethnic and racial contrasts are statistically distinguishable nationally, and the
+Hispanic one is now the larger: commuters from the most Hispanic quartile of origin tracts
+pass \num{1.46} times as many cameras as those from the least. Income is not
+distinguishable in counts---but higher-income origin tracts show materially \emph{denser}
+per-kilometre exposure (\num{0.1174} against \num{0.0846}) offset by shorter commutes. Only
+reporting count and rate as peers surfaces that; a design treating the rate as a mere
+control would have discarded it.
 
 \subsection{Coverage-bias sensitivity, and why it governs the reading}
 \label{sec:results:coverage}
@@ -641,26 +799,31 @@ have discarded it.
 \centering
 \includegraphics[width=\linewidth]{figures/fig_within_county.pdf}
 \caption{The central negative result. Ranking origin tracts within their own county rather
-than nationally collapses both demographic gradients to indistinguishability. \num{100}
-counties with $n\geq40$ contribute \SI{60}{\percent} of the sample.}
+than nationally collapses every demographic gradient to indistinguishability. \num{321}
+counties with $n\geq40$ contribute \SI{68}{\percent} of the sample and \SI{63}{\percent} of
+its commuters.}
 \label{fig:within}
 \end{figure}
 
 \Cref{fig:within} is the most consequential figure in the paper. Recomputing quartiles
-\emph{within each county} and pooling---so tracts are ranked only against neighbours
-subject to the same local mapping effort and broadly the same urban form---collapses the
-racial gradient from \num{1.36}$\times$ (disjoint CIs) to \num{1.05}$\times$
-(indistinguishable), and leaves income at \num{0.92}$\times$ (indistinguishable).
-Within-county per-kilometre rates are close: \num{0.1311} against \num{0.1423}.
+\emph{within each county} and pooling by commuters---so tracts are ranked only against
+neighbours subject to the same local mapping effort and broadly the same urban form---
+collapses every demographic gradient. The racial gradient falls from \num{1.39}$\times$
+(disjoint intervals) to \num{1.06}$\times$ [0.99--1.13]; the Hispanic gradient, the largest
+nationally, from \num{1.46}$\times$ to \num{1.01}$\times$ [0.94--1.08]; income stays
+indistinguishable, its highest quartile against its lowest at \num{0.94}$\times$
+[0.88--1.01]. Within-county per-kilometre rates are
+close: \num{0.1163} against \num{0.1268} by racial composition.
 
-The demographic gradients are therefore \textbf{entirely a between-county phenomenon}.
+On the current map the demographic gradients are therefore \textbf{entirely a
+between-county phenomenon}---a statement that, as \Cref{sec:results:trend} shows, could not
+have been made of the sparser maps before it.
 
-Mapped camera density varies enormously across the states studied---from roughly 108 per
-\num{100000} residents in Georgia to 32 in Washington, a \textbf{\num{3.4}$\times$
-spread} (\num{3.9}$\times$ in July, before Pennsylvania's mapped density rose by
-half)---and state mean exposure tracks it closely (\Cref{fig:states}b). From one snapshot
-we cannot distinguish ``Pennsylvania has few cameras'' from ``Pennsylvania has few
-mappers''; \Cref{sec:results:refresh} shows what two snapshots can say.
+Mapped camera density varies enormously across the states---\num{7.1}-fold between the
+\nth{10} and \nth{90} percentile states, and far more at the extremes---and state exposure
+tracks it at $r=0.82$ (\Cref{fig:states}b). From any single map we cannot distinguish
+``Pennsylvania has few cameras'' from ``Pennsylvania has few mappers''; the map's history in
+\Cref{sec:results:trend} shows what can be said.
 
 Three explanations remain consistent with these data, and this design separates none of
 them:
@@ -668,9 +831,9 @@ them:
   \item \textbf{Differential mapping effort.} Volunteer contributors are unevenly
     distributed, and where they are absent cameras are absent from the map but present on
     the pole.
-  \item \textbf{Urban form.} High-\%Black tracts are disproportionately urban and urban
-    roads carry more cameras per kilometre, so the national contrast is substantially an
-    urban/rural contrast.
+  \item \textbf{Urban form.} High-\%Black and high-\%Hispanic tracts are disproportionately
+    urban and urban roads carry more cameras per kilometre, so the national contrast is
+    substantially an urban/rural contrast.
   \item \textbf{Genuine between-jurisdiction procurement differences.} Municipalities
     really do differ in what they buy.
 \end{enumerate}
@@ -685,39 +848,40 @@ observable data, it is between-county, and it does not survive local ranking.
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/fig_vendor.pdf}
-\caption{Vendor-resolved exposure. (a) Flock's share of exposure falls well below its share
-of installations. (b) Per unit deployed, non-Flock cameras reach far more commuters. (c)
-Both are avoided at comparable rates under the all-vendor model.}
+\caption{Vendor-resolved exposure, commuter-weighted. (a) Flock's share of exposure falls
+well below its share of installations. (b) Reach per unit deployed: share of exposure
+divided by share of installations. (c) Both are avoided at comparable rates under the
+all-vendor model.}
 \label{fig:vendor}
 \end{figure}
 
 \begin{table}[t]
 \centering
 \small
-\caption{Vendor-resolved exposure over all \num{17580} routes (\num{98898} camera
-encounters). Installation shares are of the \num{140043} cameras that contribute cones,
-so they differ slightly from the \num{142991}-node denominator of \Cref{tab:tags}. Flock
-holds four-fifths of installations and supplies two-thirds of exposure; per unit deployed,
-non-Flock cameras reach \num{2.3}$\times$ as many commuters.}
+\caption{Vendor-resolved exposure, commuter-weighted over the 51-state sample. Installation
+shares are of the \num{139391} cameras in the 50 states and the District of Columbia that
+contribute cones. Reach is share of exposure divided by share of installations: Flock holds
+four-fifths of installations and supplies two-thirds of exposure, and per unit deployed
+non-Flock cameras reach \num{2.26}$\times$ as many commuters.}
 \label{tab:vendorexp}
 \begin{tabular}{lrrrrr}
 \toprule
-Set & Installations & Exposures & Exposures/\num{1000} cameras & Routes $\geq$1 & Evaded \\
+Set & Installations & Share of exposure & Reach & Commuters $\geq$1 & Evaded \\
 \midrule
-Flock Safety  & \SI{81.1}{\percent} & \SI{66.5}{\percent} & \num{585}  & \SI{68.7}{\percent} & \SI{94.8}{\percent} \\
-Other vendor  & \SI{14.6}{\percent} & \SI{27.7}{\percent} & \textbf{\num{1356}} & \SI{33.9}{\percent} & \SI{93.2}{\percent} \\
-No vendor tag & \SI{4.3}{\percent}  & \SI{5.8}{\percent}  & \num{964}  & \SI{12.6}{\percent} & \SI{96.9}{\percent} \\
+Flock Safety  & \SI{81.5}{\percent} & \SI{67.8}{\percent} & \num{0.83} & \SI{65.5}{\percent} & \SI{95.2}{\percent} \\
+Other vendor  & \SI{14.3}{\percent} & \SI{26.8}{\percent} & \textbf{\num{1.88}} & \SI{32.0}{\percent} & \SI{93.0}{\percent} \\
+No vendor tag & \SI{4.2}{\percent}  & \SI{5.4}{\percent}  & \num{1.27} & \SI{11.6}{\percent} & \SI{96.8}{\percent} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Flock Safety holds \SI{81.1}{\percent} of mapped installations but supplies only
-\SI{66.5}{\percent} of measured commute exposure. Per unit deployed, non-Flock cameras
-generate \textbf{\num{2.3}$\times$} more exposure (\Cref{tab:vendorexp}). The mechanism
-is visible in the cone geometry of \Cref{tab:vendorsets}: non-Flock units are multi-head
-more than six times as often, and DOT and tolling installations sit on the limited-access
-corridors commuters actually use, while a Flock unit watches one residential approach that
-fewer commutes cross.
+Flock Safety holds \SI{81.5}{\percent} of mapped installations in the fifty states and the
+District but supplies only \SI{67.8}{\percent} of commuter exposure. Per unit deployed,
+non-Flock cameras generate \textbf{\num{2.26}$\times$} the exposure
+(\Cref{tab:vendorexp}). The mechanism is visible in the cone geometry of
+\Cref{tab:vendorsets}: non-Flock units are multi-head more than six times as often, and DOT
+and tolling installations sit on the limited-access corridors commuters actually use,
+while a Flock unit watches one residential approach that fewer commutes cross.
 
 This reframes the vendor's dominance. Flock wins on count and loses on reach: its
 deployment model puts many cameras where comparatively few commuters pass, consistent with
@@ -732,26 +896,30 @@ Splitting \Cref{sec:results:demo} by vendor locates where the national disparity
 \centering
 \small
 \caption{Racial composition contrast (\% non-Hispanic Black, Q4/Q1) resolved by vendor and
-then subjected to the within-county control of \Cref{sec:results:coverage}.}
+then subjected to the within-county control of \Cref{sec:results:coverage}, with
+stratified-bootstrap intervals on each ratio. Verdicts apply the criterion used throughout
+(non-overlapping intervals on the two quartile means); two ratio intervals exclude 1
+although their quartile intervals overlap---the untagged national contrast, barely, and
+the transport-agency within-county contrast.}
 \label{tab:vendordemo}
 \begin{tabular}{lccl}
 \toprule
-Camera set & National & Within-county & National verdict \\
+Camera set & National & Within-county & Verdict \\
 \midrule
-Flock Safety  & \num{1.28} & \num{0.98} & CIs disjoint \\
-Other vendor  & \textbf{\num{1.62}} & \textbf{\num{1.20}} & \textbf{CIs disjoint, both} \\
-No vendor tag & \num{1.07} & \num{1.03} & indistinguishable \\
+Flock Safety  & \num{1.34} [1.26--1.42] & \num{1.02} [0.94--1.11] & national only \\
+Other vendor  & \textbf{\num{1.57}} [1.42--1.75] & \textbf{\num{1.16}} [1.04--1.29] & national; within-county borderline \\
+No vendor tag & \num{1.18} [1.01--1.37] & \num{1.02} [0.85--1.22] & neither \\
 \midrule
-All vendors   & \num{1.36} & \num{1.05} & CIs disjoint \\
+All vendors   & \num{1.39} [1.32--1.47] & \num{1.06} [0.99--1.13] & national only \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Both major camera populations show a statistically distinguishable national gradient, but
-they are not equal: transport-agency and tolling cameras reach commuters from the highest
-quartile of Black population at \num{1.62}$\times$ the rate of the lowest, against
-\num{1.28}$\times$ for Flock. The disparity is roughly a quarter larger in infrastructure
-that no municipal council votes on.
+Both major camera populations show a distinguishable national gradient, but they are not
+equal: transport-agency and tolling cameras reach commuters from the highest quartile of
+Black population at \num{1.57}$\times$ the rate of the lowest, against \num{1.34}$\times$
+for Flock---an excess of \SI{57}{\percent} against \SI{34}{\percent}, in infrastructure that
+no municipal council votes on.
 
 A historical reading suggests itself. Mid-century urban highway construction routed
 limited-access corridors through Black neighbourhoods on a scale that is extensively
@@ -760,21 +928,20 @@ that account the stronger gradient would be a decades-old artefact of road build
 than a contemporary artefact of camera procurement. We note the hypothesis; this design
 cannot test it.
 
-And the discipline of \Cref{sec:results:coverage} applies here, with one exception the
-July snapshot did not show. Under within-county ranking Flock's gradient vanishes
-(\num{0.98}$\times$) and so does the untagged set's (\num{1.03}$\times$), both with
-overlapping intervals. The transport-agency gradient narrows from \num{1.62}$\times$ to
-\num{1.20}$\times$---and stays distinguishable, with intervals of \num{1.52}--\num{1.79}
-against \num{1.82}--\num{2.15}. It is the only demographic contrast in this paper that
-survives the control, and it survives narrowly: two months earlier, on \SI{18}{\percent}
-fewer mapped cameras, the same contrast stood at \num{1.18}$\times$ with overlapping
-intervals. We report it as what it is: a within-county gradient in tolling and DOT
-exposure that is small, present in the September data, and consistent with the corridor
-reading above, since a limited-access highway routed through a Black neighbourhood is an
-intra-county pattern in a way that a municipality's purchasing decision is not. Holding
-RQ5 to a weaker evidentiary standard than RQ3 would have let a between-county artefact
-return wearing a vendor label; holding it to the same standard is what lets this one
-through.
+And the discipline of \Cref{sec:results:coverage} applies here too. Under within-county
+ranking Flock's gradient vanishes (\num{1.02}$\times$) and so does the untagged set's
+(\num{1.02}$\times$). The transport-agency gradient narrows from \num{1.57}$\times$ to
+\num{1.16}$\times$, and here the evidence is genuinely on the line. By the criterion used
+throughout it is not distinguishable---quartile means of \num{1.49} [1.39--1.60] against
+\num{1.72} [1.59--1.86]---yet the interval on the ratio itself, 1.04--1.29, excludes
+parity. Across the fifteen states of the study's September round it passed the criterion
+narrowly (\num{1.20}$\times$); across all fifty-one it narrowly fails. We report a small
+within-county gradient in tolling and DOT exposure that the evidence neither establishes
+nor excludes, and that is consistent with the corridor reading above: a limited-access
+highway routed through a Black neighbourhood is an intra-county pattern in a way that a
+municipality's purchasing decision is not. Holding RQ5 to a weaker evidentiary standard
+than RQ3 would let a between-county artefact return wearing a vendor label; holding it to
+the same standard leaves this one exactly on the line.
 
 \paragraph{A correction, and what it cost.}
 An earlier pass of this analysis ran on \num{15043} of the \num{17580} routes and reported
@@ -789,90 +956,171 @@ a considerably stronger and more quotable claim than the data sustain. We record
 because a silent truncation that returns success is the failure mode least likely to be
 caught by inspection, and because the corrected finding is the less convenient one.
 
-\subsection{Two months later: the same commutes against a fifth more cameras}
-\label{sec:results:refresh}
+\subsection{Thirty-three months of mapping}
+\label{sec:results:trend}
 
-Between the two snapshots---2026-07-24 and 2026-09-22---the mapped network grew from
-\num{120838} to \num{142991} nodes, \SI{18.3}{\percent}. We re-ran the experiment against
-the September cones on the identical \num{17904}-commute sample and the identical road
-extract. The same \num{17580} commutes routed (the same 324 did not), and every unavoided
-route was identical to the metre and the second, so the comparison is paired and
-everything that differs is camera data. Every other number in this paper is from the
-September run; this section is what changed.
+Everything above describes the map of 22 September 2026. We re-asked the same questions of
+the map as it stood on five earlier dates, reconstructed exactly from OpenStreetMap's
+history (\Cref{sec:data:history}), and of the July 2026 snapshot: the same \num{56131}
+commutes on the same roads, each saved route re-scored against each date's cones, and every
+commute that passed a camera on a date routed again to avoid that date's cameras
+(\Cref{sec:method:history}; the July snapshot was re-scored only). \Cref{tab:trend} and
+\Cref{fig:trend} give the national picture, \Cref{fig:trend_states} every state. Each date
+should be read as what had been \emph{mapped} by then, not what had been installed.
 
 \begin{table}[t]
 \centering
 \small
-\caption{The same \num{17580} commutes against the two snapshots. Encounters grew by
-exactly the growth in mapped cameras; the marginal price of evading one did not move.}
-\label{tab:refresh}
-\begin{tabular}{lrr}
-\toprule
-& 2026-07-24 & 2026-09-22 \\
-\midrule
-Mapped cameras / cone parts        & \num{120838} / \num{114172} & \num{142991} / \num{135210} \\
-Camera encounters, all routes      & \num{83565} & \num{98898} (\SI{+18.3}{\percent}) \\
-Commutes passing $\geq$1 / $\geq$5 / $\geq$10 & \SI{74.8}{\percent} / \SI{34.6}{\percent} / \SI{14.6}{\percent} & \SI{78.7}{\percent} / \SI{39.7}{\percent} / \SI{18.3}{\percent} \\
-Cameras passed, median / mean      & 3 / 4.75 & 3 / 5.63 \\
-\nth{90} / \nth{99} percentile     & 12 / 31 & 14 / 35 \\
-Exposure rate (cameras/\si{\kilo\metre}) & \num{0.089} & \num{0.105} \\
-\midrule
-Reduced to zero                    & \SI{84.6}{\percent} & \SI{82.1}{\percent} \\
-Extra time, median                 & \SI{1.50}{\minute} & \SI{1.98}{\minute} \\
-Avoidance overhead, median         & \SI{5.96}{\percent} & \SI{7.90}{\percent} \\
-Minutes per camera evaded, median  & 0.78 & 0.78 \\
-\bottomrule
-\end{tabular}
+\caption{The same \num{56131} commutes on the same roads against the camera map of each
+date, commuter-weighted. Exposure from re-scoring each saved route; avoidance from routing
+every commute exposed on that date, with the share reaching zero and the median extra time
+given for those commuters. The July 2026 snapshot was re-scored, not re-routed.}
+\label{tab:trend}
+\input{tables/trend.tex}
 \end{table}
 
-Paired, the mean change is \num{+0.87} cameras per commute (\SI{95}{\percent} CI
-\num{0.84}--\num{0.91}). \SI{35.5}{\percent} of commutes became more exposed,
-\SI{59.7}{\percent} were unchanged, and \SI{4.8}{\percent} became \emph{less} exposed as
-cameras were retagged or removed; \num{830} commutes (\SI{4.7}{\percent}) that passed no
-camera in July pass at least one in September, and \num{133} went the other way. The
-zero-exposure set kept \num{14251} commutes, lost \num{630} and gained \num{179}. The
-paired change in avoidance cost is \num{+0.95}~minutes on average (CI \num{0.88}--\num{1.02}),
-and a median of zero: most commutes pay exactly what they paid before.
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_trend.pdf}
+\caption{(a) Mapped \alpr in the fifty states and DC: monthly from the ohsome history API,
+and the study's seven maps. (b) Share of commuters passing at least one mapped reader
+(\SI{95}{\percent} CIs), and the share still passing one on the avoiding route. (c) For
+commuters exposed on each date, the median extra minutes to avoid every camera, and the
+median minutes per camera evaded.}
+\label{fig:trend}
+\end{figure}
 
-Three things follow.
+\paragraph{The map filled in.} On 1 January 2024 OpenStreetMap held \num{1112} \alpr
+installations in the fifty states and the District of Columbia, four-fifths of them with no
+vendor tag, and twenty-six jurisdictions had none at all. Growth was slow until DeFlock was
+founded in October 2024 and abrupt after it: \num{7583} by January 2025, \num{22690} by
+July, \num{63522} by January 2026 and \num{142257} by September, a 128-fold increase in
+thirty-three months (\Cref{fig:trend}a). By July 2025 only Hawaii, Vermont and Alaska had
+none; by September 2026 every state had some. Flock's share of the mapped network went from
+\SI{17}{\percent} to \SI{72}{\percent} during 2024 and has stayed near four-fifths since,
+while the untagged share fell from \SI{81}{\percent} to \SI{5}{\percent} and the named
+non-Flock vendors rose from \SI{1}{\percent} to \SI{15}{\percent} as contributors tagged them.
 
-\textbf{Measured exposure is linear in mapping effort.} Encounters grew by
-\SI{18.3}{\percent} against \SI{18.3}{\percent} more mapped cameras. The new cameras were
-neither preferentially on commute routes nor preferentially off them, which is what one
-expects when the additions are contributors filling in coverage rather than a vendor
-targeting corridors. It also says plainly what \Cref{sec:coverage} argues: the absolute
-exposure figures are a lower bound that rises with the map, and will keep rising.
+\paragraph{Exposure followed the map, almost in proportion.} The share of commuters passing
+at least one mapped reader went from \SI{2.2}{\percent} to \SI{12.3}{\percent},
+\SI{29.4}{\percent}, \SI{55.9}{\percent} and \SI{75.3}{\percent}; the mean from \num{0.05}
+cameras to \num{5.14}. Against the number of mapped cameras the elasticity is \num{0.92}
+across the seven maps. Per camera mapped, exposure has fallen by about a quarter since
+January 2024, from \num{0.049} to \num{0.036} encounters per commute per thousand cameras:
+the cameras mapped later lie on commute routes slightly less often than those mapped first,
+but not much less. Nor is there a sign of saturation. The last two months alone brought
+\SI{18.3}{\percent} more mapped cameras and \SI{17.0}{\percent} more encounters.
 
-\textbf{Refusal got dearer because there is more to refuse, not because each camera is
-harder to evade.} The median cost rose by half a minute and the overhead by two points,
-while the median price per camera evaded stayed at \SI{0.78}{\minute} to the second
-decimal. The road network's capacity to route around a camera did not change; the count
-of cameras did. Four commuters in five still reach zero exposure for under two minutes.
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_trend_states.pdf}
+\caption{Share of each state's commuters passing at least one mapped \alpr on each map,
+states ordered by the latest.}
+\label{fig:trend_states}
+\end{figure}
 
-\textbf{The states that grew most are the ones we flagged as under-mapped.} Pennsylvania's
-mean exposure rose \SI{88}{\percent}, its share of commutes passing any camera from
-\SI{40.6}{\percent} to \SI{60.2}{\percent}; Virginia rose \SI{56}{\percent}, North
-Carolina \SI{29}{\percent}, Texas \SI{24}{\percent}. Georgia, Illinois, New York and
-California---already densely mapped in July---rose \SI{9}{\percent} to
-\SI{15}{\percent}. Two months earlier, \Cref{sec:results:coverage} could not distinguish
-``Pennsylvania has few cameras'' from ``Pennsylvania has few mappers''. The map now
-answers, at least in part: the low-density states were the under-mapped ones, and a
-state's July ranking said as much about its contributors as about its cameras. That is
-the within-dataset evidence for treating every cross-sectional demographic contrast in
-crowdsourced surveillance data as provisional.
+\paragraph{The states filled in at different times.} In January 2024 Illinois was the only
+state where more than a tenth of commuters passed a mapped reader (\SI{23.5}{\percent}); by
+January 2025 fifteen were, by July 2025 thirty-one, by January 2026 forty-seven
+(\Cref{fig:trend_states}). In July 2025 Michigan's commuters were the most exposed of any
+state's (\SI{62.8}{\percent}), while Pennsylvania (\SI{2.4}{\percent}), Nevada
+(\SI{3.8}{\percent}), New Jersey (\SI{4.4}{\percent}) and North Carolina (\SI{8.2}{\percent})
+would have looked nearly camera-free; all four are between \SI{60}{\percent} and
+\SI{68}{\percent} today. A state's rank on the January 2025 map predicts its rank today only
+moderately (Spearman $\rho=0.80$ on mean exposure; from January 2024, $0.54$). Nor does the
+map only grow. Wisconsin and Iowa each gained cameras on net between July and September 2026
+yet lost about three points of exposure: 190 and 123 of their July cameras left the map,
+deleted or retagged, and the cameras newly mapped added less exposure than was lost.
+
+\paragraph{Refusal got dearer, and not only because there was more to refuse.} On the
+sparse maps of 2024 a commuter who passed a mapped camera could almost always get around it:
+\SI{95.0}{\percent} [92.7--96.9] of exposed commuters could reach zero, for a median of
+\SI{0.77}{\minute}. On the September 2026 map \SI{79.0}{\percent} [78.4--79.7] can, for a
+median of \SI{3.14}{\minute}, having declined on every map since mid-2024 (\Cref{tab:trend};
+\Cref{fig:trend}c). Most of that rise is the number of cameras on each trip, but the price of
+evading each one rose too, from \SI{0.42}{\minute} [0.38--0.47] to \SI{0.76}{\minute}
+[0.75--0.78]. Two things moved it, and a fixed sample can separate them. One is who was
+exposed: the early maps covered dense metropolitan grids, where \Cref{sec:results:geo} finds
+evasion cheapest, and the later ones reached rural and intercity roads. The other happened on
+the same trips. Followed from the July 2025 map to September 2026's, the \num{12647} commutes
+exposed in July came to pass \num{9.9} cameras on average instead of \num{3.2}; the share of
+them that can reach zero fell from \SI{92.4}{\percent} to \SI{72.6}{\percent}, and the price
+per camera rose from \SI{0.65}{\minute} [0.63--0.68] to \SI{0.81}{\minute} [0.79--0.84].
+Every cohort followed for fifteen months or more shows the same---\SIrange{25}{36}{\percent}
+more per camera by September 2026, each interval clear of its starting one: as more of a
+trip's cameras, and of its alternatives', are mapped, each costs more to avoid. Over the two months between the 2026 snapshots the change is too small to
+see, which is why the fifteen-state comparison below finds the price per camera
+unchanged.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_trend_gradients.pdf}
+\caption{The demographic contrasts of \Cref{fig:within} on every map: mean cameras passed
+from the highest quartile of origin tracts over the lowest (for income, the richest over the
+poorest), with quartiles ranked nationally and within county, and \SI{95}{\percent} CIs on
+the ratio. Log scale; the dashed line is parity.}
+\label{fig:trend_gradients}
+\end{figure}
+
+\paragraph{The national equity gradients moved with the map.} \Cref{fig:trend_gradients}
+repeats the contrasts of \Cref{sec:results:demo,sec:results:coverage} on every map. A study
+run on the January 2025 map would have reported that commuters from the richest quartile of
+tracts pass \num{1.58}$\times$ [1.30--1.93] as many cameras as those from the poorest; today
+the ratio is \num{1.05}$\times$ [0.99--1.11]. The Hispanic contrast was \num{0.80}$\times$
+[0.59--1.08] in January 2024, \num{1.48}$\times$ [1.22--1.77] a year later,
+\num{1.10}$\times$ [0.99--1.21] in July 2025, and \num{1.46}$\times$ from January 2026 on.
+Each would have been reported with a confidence interval, three of the six quoted here
+excluding parity, and each describes at least in part where contributors had reached. Ranked
+within county, the Hispanic contrast lies between \num{0.95} and \num{1.03} on every map, and
+the income contrast between \num{0.74} and \num{0.94}---at or below parity---on every map.
+
+The Black contrast is the instructive exception. Nationally it fell from \num{1.89}$\times$
+to \num{1.25}$\times$ by July 2025 and has risen since, to \num{1.39}$\times$. Within
+counties it was \num{1.60}$\times$ [1.12--2.24] on the January 2024 map---\num{1112}
+cameras, four-fifths without a vendor tag, past which \SI{2.2}{\percent} of commuters
+drove---and it has fallen steadily since: \num{1.34} and \num{1.26} on the next two maps,
+\num{1.17} [1.03--1.32] in July 2025, \num{1.09} in January 2026, and \num{1.05} and
+\num{1.06} [0.99--1.13] on the two 2026 snapshots. On a sparse map the
+within-county control is not enough. It removes differences in mapping effort between
+counties, but when a county's map holds a handful of cameras, which of its neighbourhoods
+they stand in is itself the choice of a few contributors, or reflects the few agencies whose
+cameras were mapped first. The check we recommend is therefore necessary rather than
+sufficient: it becomes informative as the map within counties approaches completeness, and
+the convergence toward parity across seven maps is the best evidence available that the
+current map is nearer that point than any earlier one.
+
+\paragraph{Fifteen states, fully re-routed.} The trend's last step can be checked against a
+comparison that re-routed everything. For the fifteen states of the study's earlier rounds,
+the same \num{17580} commutes were routed in full against both 2026 snapshots on the same
+road extract, and every baseline route was identical to the metre and the second. Camera
+encounters grew by \SI{18.3}{\percent} against \SI{18.3}{\percent} more mapped cameras, the
+median price of evading one stayed at \SI{0.78}{\minute} to the second decimal, and
+Pennsylvania's mean exposure rose \SI{88}{\percent} in two months.
+
+\paragraph{What follows.} Three things. The absolute exposure figures of this paper are a
+lower bound that has risen with every map and will keep rising; any study built on
+crowdsourced surveillance data dates, and should say when its map was drawn. The price of
+refusal dates as well: it has risen with every map, per camera as well as in total, and
+today's figures describe a map that is still filling in. And no
+national equity gradient measured from these data is a finding about cameras until it has
+survived both the within-county control and the question of how complete the map was when it
+was measured. Over thirty-three months the national gradients rose, fell and changed
+direction, while the within-county ones held at parity or converged toward it.
 
 \section{Discussion}
 \label{sec:discussion}
 
 \subsection{Refusal is cheap, and that is the policy-relevant fact}
 
-The strongest result here is also the simplest: for \SI{82.1}{\percent} of American
+The strongest result here is also the simplest: for \SI{84.2}{\percent} of American
 commuters, complete avoidance of licence-plate surveillance costs a median of
-\SI{1.98}{\minute}. Arguments for \alpr deployment often rest implicitly on ubiquity---the
+\SI{1.62}{\minute}. Arguments for \alpr deployment often rest implicitly on ubiquity---the
 idea that the network is comprehensive enough that avoidance is futile and therefore the
 privacy loss is unavoidable rather than chosen. At current mapped density that premise is
-false for four commuters in five---and two months of additional mapping moved that from
-five in six without touching the marginal price of a detour.
+false for five commuters in six. It has been false on every map since 2024, but it is
+becoming less so: as the map filled in, the share of exposed commuters who can reach zero
+fell from \SI{95}{\percent} to \SI{79}{\percent}, and the median cost for those with a camera
+to avoid quadrupled (\Cref{sec:results:trend}).
 
 The corollary cuts the other way. If avoidance is this cheap, it is also cheap for people
 with reason to evade legitimate investigation, which bounds how much investigative value a
@@ -882,16 +1130,28 @@ every unmotivated one.
 \subsection{The equity question is not answerable from crowdsourced data}
 
 We set out to measure whether surveillance burden falls unevenly, and we can report only
-that the question is harder than it appears. The national gradient is real in the data,
-substantial (\num{1.36}$\times$), and statistically clean---and it evaporates under a
-control that any careful reviewer would demand, in every camera population but one, where
-a much smaller gradient remains.
+that the question is harder than it appears. The national gradients are real in the data,
+substantial (\num{1.39}$\times$ by Black and \num{1.46}$\times$ by Hispanic share of the
+origin tract), and statistically clean---and they evaporate under a control that any
+careful reviewer would demand. Of every camera population, only transport-agency cameras
+retain a within-county gradient, small, with evidence that sits exactly on the line.
+
+The map's own history makes the point without any control at all. Run on the map of January
+2025, this study would have found that the richest quartile of tracts passes
+\num{1.58}$\times$ as many cameras as the poorest; run six months later, that the Hispanic
+gradient had shrunk to \num{1.10}$\times$ from \num{1.48}$\times$; run today, that there is
+no income gradient and that the Hispanic one is back at \num{1.46}$\times$. Each
+answer would have carried a clean confidence interval, and each was a photograph of a
+mapping effort in progress (\Cref{sec:results:trend}).
 
 We think this generalises. A considerable amount of accessible research on surveillance
 infrastructure necessarily rests on volunteer-mapped data, because no authoritative
 national inventory exists. Any such study that reports a demographic correlation without
 a within-locality control is at serious risk of reporting the demography of \emph{mappers}
-rather than of the surveilled. We would encourage that control to become routine.
+rather than of the surveilled, and a study that reports one from a sparse map is at risk
+even with the control. We would encourage the control to become routine, together with the
+date of the map and, where the edit history allows, a check of how the result moves as the
+map fills in.
 
 \subsection{Attention and exposure are aimed at different infrastructure}
 
@@ -899,7 +1159,7 @@ Flock Safety is the name in municipal council debates, in local journalism, and 
 activist mapping effort that produced the data underlying this paper. It holds four-fifths
 of mapped installations. Yet per unit deployed its cameras reach fewer than half as many
 commuters as a tolling or transport-agency camera, and the racial gradient in its exposure
-is roughly a quarter weaker.
+is weaker (\num{1.34}$\times$ against \num{1.57}$\times$).
 
 We do not read this as exonerating, for a reason the measurement itself makes clear. A
 camera at the entrance of a residential subdivision does something qualitatively different
@@ -913,17 +1173,19 @@ to.
 What the result does establish is that a distributional concern has been attached
 disproportionately to one vendor. The infrastructure with the steeper measured gradient is
 installed by transport agencies, largely absent from the municipal debate, and sited on
-corridors laid down decades before \alpr existed---and it is the one gradient that
-persists once tracts are compared only with their neighbours. Regulation aimed only at the vendor
-currently in the news would leave the larger measured disparity untouched.
+corridors laid down decades before \alpr existed---and it is the one gradient whose
+within-county ratio still excludes parity once tracts are compared only with their
+neighbours. Regulation aimed only at the vendor currently in the news would leave the larger
+measured disparity untouched.
 
 \subsection{Where the burden actually concentrates}
 
-The one distributional finding that does survive is geographic rather than demographic,
-and it is counter-intuitive: avoidance is cheapest in dense metropolitan grids and
-expensive in rural and intercity travel. Network topology, not camera count, sets the
-price of refusal. This is robust to the coverage critique in a way the demographic results
-are not, because it depends on road-network structure---which OSM maps close to
+The distributional finding that best survives the coverage critique is geographic rather
+than demographic, and it is counter-intuitive: per camera, avoidance tends to be cheapest in
+dense metropolitan grids and dearest in rural and intercity travel. Network topology, not
+camera count alone, sets the price of refusal. The tendency is modest across whole states
+(\Cref{sec:results:geo}), but it is robust to the coverage critique in a way the demographic
+results are not, because it rests on road-network structure---which OSM maps close to
 completely---rather than on camera counts, which it does not.
 
 \section{Limitations}
@@ -933,7 +1195,10 @@ completely---rather than on camera counts, which it does not.
 
 Every route runs centroid to centroid; real commutes begin in a driveway. In large or
 irregular tracts the centroid can sit far from any residence. This adds noise in both
-directions and is the main reason we report distributions rather than point estimates.
+directions and is the main reason we report distributions rather than point estimates. It
+also costs coverage: where a tract's internal point lies too far from any road to snap to,
+the commute cannot be routed at all, which removes a fifth or more of the sample in Alaska,
+Hawaii, Montana and Wyoming (\Cref{sec:method:exec}).
 
 The stricter caution: tract demographics describe tracts, not the people routed.
 ``Commutes originating in high-poverty tracts pass more cameras'' is supportable; ``poor
@@ -955,22 +1220,25 @@ The \SI{60}{\metre} radius was chosen by reasoning---a pole set back from the ke
 cone long enough to reach the carriageway it watches---and the \ang{45} default span from
 the \SI{82}{\percent} of explicit arcs that span exactly that. Neither was measured. We
 therefore swept the radius over $\{30, 45, 60, 90\}\,\si{\metre}$, rebuilding the cone
-geometry at each and re-scoring all \num{17580} routes (\Cref{fig:radius}).
+geometry at each and re-scoring all \num{56131} routes (\Cref{fig:radius}).
 
 \begin{table}[h]
 \centering
 \small
-\caption{Cone-radius sensitivity. Exposure is mildly sensitive to the assumption; the
-avoidance result is not, until the radius grows by half.}
+\caption{Cone-radius sensitivity, commuter-weighted. Exposure is mildly sensitive to the
+assumption; the avoidance result is not, until the radius grows by half. At the assumed
+\SI{60}{\metre} the clean share is \SI{83.7}{\percent} rather than the \SI{84.2}{\percent}
+of \Cref{tab:headline} because the sweep re-scores stored route geometry
+(\Cref{sec:method:history}).}
 \label{tab:radius}
 \begin{tabular}{lrrrr}
 \toprule
 Radius & Mean cameras & vs \SI{60}{\metre} & Avoided routes still clean & Residual \\
 \midrule
-\SI{30}{\metre} & \num{4.21} & \num{0.75}$\times$ & \SI{85.5}{\percent} & \SI{5.6}{\percent} \\
-\SI{45}{\metre} & \num{5.09} & \num{0.90}$\times$ & \SI{83.6}{\percent} & \SI{5.4}{\percent} \\
-\SI{60}{\metre} & \num{5.62} & assumed            & \SI{81.6}{\percent} & \SI{5.6}{\percent} \\
-\SI{90}{\metre} & \num{6.29} & \num{1.12}$\times$ & \textbf{\SI{52.4}{\percent}} & \SI{21.0}{\percent} \\
+\SI{30}{\metre} & \num{3.82} & \num{0.74}$\times$ & \SI{87.4}{\percent} & \SI{5.4}{\percent} \\
+\SI{45}{\metre} & \num{4.62} & \num{0.90}$\times$ & \SI{85.6}{\percent} & \SI{5.2}{\percent} \\
+\SI{60}{\metre} & \num{5.14} & assumed            & \SI{83.7}{\percent} & \SI{5.3}{\percent} \\
+\SI{90}{\metre} & \num{5.88} & \num{1.14}$\times$ & \textbf{\SI{55.1}{\percent}} & \SI{21.7}{\percent} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -979,7 +1247,7 @@ Radius & Mean cameras & vs \SI{60}{\metre} & Avoided routes still clean & Residu
 \centering
 \includegraphics[width=\linewidth]{figures/fig_radius.pdf}
 \caption{Sensitivity to the assumed cone radius. (a) Measured exposure scales gently---
-halving the radius removes only a quarter of it. (b) The share of commutes reaching zero
+halving the radius removes only a quarter of it. (b) The share of commuters reaching zero
 exposure is flat below the assumed value and falls sharply above it. (c) Residual exposure
 as a fraction of unavoided, by radius.}
 \label{fig:radius}
@@ -988,23 +1256,23 @@ as a fraction of unavoided, by radius.}
 Two things follow, and they point in opposite directions.
 
 \textbf{Exposure is robust.} Halving the radius removes only a quarter of the measured
-exposure, and \SI{90}{\metre} adds \SI{12}{\percent}. Cones are small relative to the road
+exposure, and \SI{90}{\metre} adds \SI{14}{\percent}. Cones are small relative to the road
 network at any of these values, so \Cref{sec:results:exposure} does not rest on the choice.
 
 \textbf{The avoidance headline does depend on it.} Routes planned against \SI{60}{\metre}
 cones remain clean when re-scored at \SI{45}{\metre} and \SI{30}{\metre}---avoidance is not
 finely tuned to the assumption from below. But at \SI{90}{\metre} the share reaching zero
-falls from \SI{81.6}{\percent} to \SI{52.4}{\percent}, a drop of \num{29.2} points
-(\SI{95}{\percent} CI $[-29.9, -28.6]$), and residual exposure quadruples from
-\SI{5.6}{\percent} to \SI{21.0}{\percent} of baseline. If real fields of view are half again
+falls from \SI{83.7}{\percent} to \SI{55.1}{\percent}, a drop of \num{28.7} points
+(\SI{95}{\percent} CI $[-29.3, -28.1]$), and residual exposure quadruples from
+\SI{5.3}{\percent} to \SI{21.7}{\percent} of baseline. If real fields of view are half again
 as long as we assume, more than a third of the routes this paper counts as clean are not.
 
 That figure is nonetheless a \emph{lower} bound rather than an estimate, for a reason worth
 being precise about. These routes were \emph{planned} against \SI{60}{\metre} cones and only
 \emph{re-scored} at \SI{90}{\metre}; a router given \SI{90}{\metre} cones would find
 different clean routes, and the denser the network the more of them there are. Measuring
-the true value requires a fresh graph import and a complete re-route at each radius---about
-nine hours apiece---which we have not done. What the sweep establishes is that the
+the true value requires a complete re-route at each radius---most of a day apiece at this
+sample's size---which we have not done. What the sweep establishes is that the
 avoidance claim is conditional on the radius in a way the exposure claim is not, and that
 the conditionality bites only above the assumed value.
 
@@ -1020,22 +1288,34 @@ dimension of this paper.
 
 \subsection{Sample scope}
 
-Fifteen states, not fifty. Within-state commutes only (\texttt{od\_main}), so cross-border
-metropolitan areas---New York/New Jersey, Philadelphia, Washington DC, Kansas City, St
-Louis, Portland---are systematically truncated at the state line. Several are exactly the
-dense multi-jurisdiction areas where the question is most pointed.
+All fifty states and the District of Columbia, but within-state commutes only
+(\texttt{od\_main}), so cross-border metropolitan areas---New York/New Jersey,
+Philadelphia, Washington, Kansas City, St Louis, Portland---are systematically truncated at
+the state line. Several are exactly the dense multi-jurisdiction areas where the question
+is most pointed. The District is the extreme case: most people who work there live in
+Maryland or Virginia, so its sample describes only commutes with both ends inside the
+District. Alaska's flows are from 2016 and Michigan's from 2021, the latest LODES
+publishes; the other 49 jurisdictions' are from 2022.
 
-\subsection{Two snapshots, two months apart}
+\subsection{Past maps record mapping, not deployment}
 
-The network is expanding quickly---\SI{18}{\percent} more mapped nodes between 2026-07-24
-and 2026-09-22---and absolute figures date accordingly; \Cref{sec:results:refresh} shows
-measured exposure rising in proportion to the map. The relative claims held across the two
-snapshots: the cheapness of refusal (a marginal \SI{0.78}{\minute} per camera in both), the
-metro/rural asymmetry, and the within-county collapse of the pooled gradient. Two months is
-a short baseline. The one conclusion that changed between them---the within-county
-transport-agency gradient becoming distinguishable---changed in the direction that growing
-coverage should move a real but small effect, and also in the direction it would move a
-mapping artefact concentrated in a few counties; a third snapshot would separate those.
+The trend of \Cref{sec:results:trend} is a trend in what had been mapped. OpenStreetMap's
+installation dates are too sparse to separate the two---47 of \num{142991} nodes carry
+one---so a camera first mapped in 2026 may have stood since 2021, and the 128-fold growth of
+the map cannot be read as a rate of deployment. Absolute figures date accordingly. The
+relative claims are the ones to carry forward, and across seven maps they held: the
+cheapness of refusal---under a minute per camera evaded on every map, though rising---the
+within-county collapse of the national gradients on every map dense enough to test it, and
+the instability of the national gradients themselves. What the maps cannot establish is that
+the current one is complete. The convergence of the within-county ratios toward parity is
+what a true effect of zero would produce, and also what a real effect would produce if it
+were concentrated in counties still being mapped. The transport-agency gradient of
+\Cref{sec:results:vendor}---narrowly distinguishable across the fifteen states of the
+September round, narrowly not across all fifty-one---is where that distinction matters most,
+and a vendor-resolved trend would test it.
+
+\subsection{Free-flow travel times}
+
 Routing uses free-flow speeds with no traffic, time-of-day, or turn-restriction penalties,
 so both travel times are optimistic. The \emph{difference} between them---the quantity
 actually reported---is more robust than either absolute, since both share the bias.
@@ -1061,24 +1341,51 @@ Component & Path \\
 Data acquisition            & \texttt{research/data/fetch.sh} \\
 Camera fetch (continental)  & \texttt{server/alpr/fetch-na-cones.sh} \\
 Cone construction           & \texttt{server/alpr/build\_cones.py} \\
+Past camera maps (Overpass)  & \texttt{server/alpr/fetch-history.sh} \\
+Past camera maps (history dump) & \texttt{server/alpr/history\_from\_planet.py} \\
+Monthly mapping history     & \texttt{research/scripts/fetch\_mapping\_history.py} \\
 Cone-set variants           & \texttt{server/alpr/build-variants.sh} \\
 Snapshot statistics         & \texttt{research/scripts/snapshot\_stats.py} \\
 Routing configuration       & \texttt{server/graphhopper/config/trames.yml} \\
 Graph build                 & \texttt{server/graphhopper/rebuild-with-cones.sh} \\
 Commute sampling            & \texttt{research/scripts/build\_sample.py} \\
 Experiment                  & \texttt{research/scripts/run\_experiment.py} \\
+Routing on past maps        & \texttt{research/scripts/run-history.sh} \\
+Commuter weights, bootstrap & \texttt{research/scripts/wstats.py} \\
+Trend                       & \texttt{research/scripts/trend.py} \\
 Geometry backfill           & \texttt{research/scripts/backfill\_geometry.py} \\
 Vendor rescoring            & \texttt{research/scripts/vendor\_exposure.py} \\
 Analysis                    & \texttt{research/scripts/analyze.py} \\
 Post-processing, one command & \texttt{research/scripts/run-analyses.sh} \\
 Snapshot comparison         & \texttt{research/scripts/compare\_snapshots.py} \\
 Figures                     & \texttt{research/paper/make\_figures.py} \\
+Tables                      & \texttt{research/paper/make\_tables.py} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \noindent
-The \SI{18}{\giga\byte} OSM extract and \SI{14}{\giga\byte} graph cache are not
-redistributed; the acquisition and import scripts rebuild both.
+The \SI{18}{\giga\byte} OSM extract, the \SI{14}{\giga\byte} graph caches and the
+\SI{163}{\giga\byte} OSM full-history dump are not redistributed; the acquisition and
+import scripts rebuild all of them. Commuter weights come from
+\texttt{research/out/sampling\_frame.json} and \texttt{sample\_draws.csv}, written by the
+sampler.
+
+\appendix
+\section{Every state}
+\label{app:states}
+
+\begin{table}[p]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\caption{Every state and the District of Columbia. Commuters are in-state commuters in the
+LODES frame; ``routed'' excludes the unroutable commutes of \Cref{sec:method:exec}. Mapped
+\alpr are nodes inside the state on 2026-09-22, per \num{100000} residents from ACS 2022.
+Exposure and avoidance figures are within-state estimates; the national row is
+commuter-weighted as in \Cref{tab:headline}.}
+\label{tab:bystate}
+\input{tables/by_state.tex}
+\end{table}
 
 \end{document}

@@ -31,27 +31,34 @@ server your itinerary in order to dodge cameras trades one movement record for a
 
 ## The finding
 
-We routed **17,580 real home–work commutes** — drawn from Census LEHD LODES with
-probability proportional to the number of workers actually making each trip, across 15
-states — twice each: once normally, once avoiding the fields of view of **142,991 mapped
-ALPR installations** (snapshot of 2026-09-22; the same commutes were first routed against
-a July snapshot of 120,838, and the paper compares the two).
+We routed **56,131 real home–work commutes** — drawn from Census LEHD LODES with
+probability proportional to the number of workers actually making each trip, in all 50
+states and the District of Columbia — twice each: once normally, once avoiding the fields
+of view of **142,991 mapped ALPR installations** (snapshot of 2026-09-22). National
+figures weight each state by its commuters.
 
-- **78.7%** of American commutes pass at least one licence-plate reader.
-- **82.1%** can be routed to *zero* exposure, for a median of **1.98 minutes** — an
-  overhead of 7.90%.
-- Avoidance is **cheapest where cameras are densest**. Metropolitan grids offer a parallel
-  street a block over; rural routes often have one road. The burden of refusal falls
-  hardest on drivers with the fewest cameras to refuse.
+- **75.3%** of American commutes pass at least one licence-plate reader; the median
+  commute passes three.
+- **84.2%** can be routed to *zero* exposure, for a median of **1.62 minutes** — an
+  overhead of 6.71%.
+- Avoidance **tends to be cheapest where cameras are densest**. Metropolitan grids offer a
+  parallel street a block over; rural routes often have one road. The burden of refusal
+  falls, if anything, hardest on drivers with the fewest cameras to refuse.
 - Demographic gradients that look robust nationally **do not survive ranking tracts within
-  their own county**. Mapped camera density varies 3.4× per capita across the states
-  studied, and we cannot separate "more cameras" from "more mappers". The one contrast
-  that survives the control is a small (1.20×) gradient in transport-agency and tolling
-  cameras.
-- **Two months of mapping changed the map, not the road network's answer.** 18% more
-  cameras raised measured exposure by exactly 18%, the price of evading one camera stayed
-  at 0.78 minutes, and the states that grew most were the ones that had looked least
-  surveilled — Pennsylvania's exposure rose 88%.
+  their own county**. Mapped camera density varies 7.1× per capita between the 10th- and
+  90th-percentile states, and we cannot separate "more cameras" from "more mappers". A
+  small (1.16×) within-county gradient in transport-agency and tolling cameras sits
+  exactly on the line: the evidence neither establishes nor excludes it.
+- **The map filled in, and exposure with it.** Rebuilt exactly from OpenStreetMap's edit
+  history, the mapped network grew from 1,112 ALPRs in January 2024 to 142,257 in September
+  2026, and the share of commuters passing one from 2.2% to 75.3%. Refusing them grew dearer
+  as it did — for commuters with a camera to avoid, from a median of 0.8 to 3.1 minutes,
+  and per camera from 0.42 to 0.76 — partly because the detours were being mapped too.
+- **Equity findings date with the map.** Nationally, the richest quarter of tracts looked
+  1.58× as exposed as the poorest on the January 2025 map and 1.05× today; the Hispanic
+  gradient swung between 0.80× and 1.48×. Ranked within their own county, tracts showed no
+  income or Hispanic gradient on any map; a Black-share gradient on the earlier maps (1.60× in
+  January 2024, 1.17× in July 2025) faded to parity as the map filled in.
 
 Paper: [`research/paper/trames.pdf`](research/paper/trames.pdf) — build with
 `tectonic -X compile research/paper/trames.tex`.
@@ -183,12 +190,14 @@ The research pipeline is independent of the app:
 
 ```sh
 cd research
-./data/fetch.sh ga tx ca fl il ny pa oh nc az wa co tn mo va
-../server/.venv/bin/python scripts/build_sample.py --states ga tx ... -o out/commutes.csv
-./scripts/run-full.sh          # 5–11 h, detached, resumable
-./scripts/run-analyses.sh      # analysis, vendor and cone-radius re-scoring, figures
-../server/.venv/bin/python scripts/compare_snapshots.py \
-    --a out/2026-07/results.csv --b out/results.csv     # paired: what a refresh changed
+./data/fetch.sh all            # LODES + tract attributes, 50 states and DC
+../server/.venv/bin/python scripts/build_sample.py --states all --per-state 1200 \
+    --frame out/sampling_frame.json --draws out/sample_draws.csv -o out/commutes.csv
+./scripts/run-full.sh          # hours, detached, resumable
+./scripts/run-history.sh       # the same commutes against earlier camera maps
+                               # (built in server/alpr — see "Past-date maps" there)
+./scripts/run-analyses.sh      # weighted analysis, vendor, cone radius, trend, figures
+../server/.venv/bin/python paper/make_tables.py
 ```
 
 ## What leaves the device
