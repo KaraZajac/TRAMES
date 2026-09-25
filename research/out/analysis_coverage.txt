@@ -1,0 +1,21 @@
+==============================================================================
+COVERAGE CHECK: mapped Flock cameras vs the count each police department reports
+==============================================================================
+1,528 transparency portals; 1,181 municipal police departments report a camera count;
+1,050 matched to exactly one incorporated place (130 unmatched names, 1 ambiguous).
+114,360 mapped Flock cameras in the snapshot.
+
+  cameras reported by the matched departments: 31,210; mapped inside their limits: 28,349 (ratio of totals 0.91)
+  per city, mapped/reported: median 0.98, IQR 0.67-1.26
+    < 0.25 (badly under-mapped)                   64 cities ( 6.1%)
+    0.25-0.5                                      92 cities ( 8.8%)
+    0.5-0.8                                      191 cities (18.2%)
+    0.8-1.25 (about complete)                    424 cities (40.4%)
+    > 1.25 (more mapped than the PD reports)     279 cities (26.6%)
+
+  Does coverage vary with who lives in the city? (Spearman rank correlation with mapped/reported,
+  and median ratio by quartile of the attribute across matched cities)
+    median household income    rho +0.119 [+0.058 to +0.181]   median ratio Q1..Q4: 0.86 1.00 1.00 0.97
+    % non-Hispanic Black       rho +0.060 [-0.003 to +0.124]   median ratio Q1..Q4: 0.88 1.00 1.00 0.95
+    % Hispanic                 rho +0.085 [+0.025 to +0.144]   median ratio Q1..Q4: 0.88 1.00 1.00 0.97
+    population                 rho +0.394 [+0.341 to +0.446]   median ratio Q1..Q4: 0.67 0.92 1.00 1.17

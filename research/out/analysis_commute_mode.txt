@@ -1,0 +1,25 @@
+==============================================================================
+COMMUTE MODE: the headline figures re-weighted to workers who drive
+==============================================================================
+56,131 commutes; home tract's share of workers commuting by car/truck/van/motorcycle (ACS B08301)
+(22 commutes with no B08301 tract take the median). Mean drive share, commuter-weighted: 0.807
+  drive share by national quartile of % non-Hispanic Black: 0.826 0.797 0.802 0.802
+  drive share by national quartile of % Hispanic: 0.842 0.792 0.780 0.813
+  drive share by national quartile of median household income: 0.827 0.843 0.815 0.743
+
+  commutes passing >=1 camera (%)    all workers   75.31   drivers   75.09 [74.61-75.55]
+  mean cameras passed                all workers    5.14   drivers    5.05 [4.95-5.15]
+  reduced to zero when avoiding (%)  all workers   84.21   drivers   85.03 [84.56-85.50]
+  mean extra minutes                 all workers    5.62   drivers    5.72 [5.55-5.90]
+
+--- highest-quartile over lowest-quartile mean cameras passed, quartiles within county ---
+                                        all workers                drivers
+  % non-Hispanic Black        1.06x [0.99-1.13]       1.06x [0.98-1.13]
+  % Hispanic                  1.01x [0.94-1.08]       1.01x [0.94-1.09]
+  median household income     0.94x [0.88-1.01]       0.95x [0.88-1.02]
+
+--- highest-quartile over lowest-quartile mean cameras passed, quartiles national ---
+                                        all workers                drivers
+  % non-Hispanic Black        1.39x [1.32-1.47]       1.40x [1.33-1.48]
+  % Hispanic                  1.46x [1.39-1.54]       1.45x [1.37-1.54]
+  median household income     1.05x [0.99-1.11]       1.06x [1.00-1.13]

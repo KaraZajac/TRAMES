@@ -1,0 +1,126 @@
+==============================================================================
+WHERE ALONG THE COMMUTE: cameras passed by location relative to home and work
+==============================================================================
+56,131 commutes, commuter-weighted. Categories are exclusive, in this order: home tract
+interior, home tract edge (<= 50 m of its boundary, either side), within 2 km of home along
+the route, work tract interior and edge, within 2 km of work, in between.
+
+                               mean  share
+  home tract interior         0.134   2.6%
+  home tract edge             0.198   3.9%
+  within 2 km of home         0.124   2.4%
+  in between                  4.105  79.9%
+  within 2 km of work         0.154   3.0%
+  work tract edge             0.212   4.1%
+  work tract interior         0.214   4.2%
+  all                         5.140
+
+--- % non-Hispanic Black, quartiles within county (Q4 = highest) ---
+  ranked: 38,010 commutes, 63% of commuters
+  cameras passed                  Q1      Q2      Q3      Q4   Q4/Q1 [95% CI]
+  home tract edge              0.206   0.207   0.193   0.221    1.07x [0.94-1.22]
+  home edge + 2 km ring        0.339   0.340   0.364   0.435    1.28x [1.15-1.43]  *
+  home tract interior          0.114   0.134   0.113   0.124    1.09x [0.91-1.27]
+  everything else              4.607   4.630   4.697   4.810    1.04x [0.97-1.12]
+  all cameras                  5.060   5.103   5.173   5.369    1.06x [0.99-1.13]
+
+--- % non-Hispanic Black, quartiles within county x density tercile (Q4 = highest) ---
+  ranked: 27,111 commutes, 43% of commuters
+  cameras passed                  Q1      Q2      Q3      Q4   Q4/Q1 [95% CI]
+  home tract edge              0.210   0.198   0.205   0.210    1.00x [0.86-1.17]
+  home edge + 2 km ring        0.383   0.378   0.410   0.448    1.17x [1.03-1.33]  *
+  home tract interior          0.094   0.123   0.110   0.105    1.11x [0.92-1.35]
+  everything else              4.296   4.520   4.415   4.860    1.13x [1.04-1.23]  *
+  all cameras                  4.774   5.022   4.935   5.413    1.13x [1.05-1.22]  *
+
+--- % non-Hispanic Black, quartiles within county, same commutes as the density ranking (Q4 = highest) ---
+  ranked: 27,111 commutes, 43% of commuters
+  cameras passed                  Q1      Q2      Q3      Q4   Q4/Q1 [95% CI]
+  home tract edge              0.203   0.206   0.194   0.220    1.08x [0.93-1.26]
+  home edge + 2 km ring        0.379   0.368   0.403   0.466    1.23x [1.08-1.39]  *
+  home tract interior          0.098   0.117   0.111   0.105    1.08x [0.89-1.31]
+  everything else              4.411   4.380   4.456   4.814    1.09x [1.01-1.19]  *
+  all cameras                  4.888   4.865   4.970   5.385    1.10x [1.02-1.19]  *
+
+--- % non-Hispanic Black, quartiles national (Q4 = highest) ---
+  ranked: 56,123 commutes, 100% of commuters
+  cameras passed                  Q1      Q2      Q3      Q4   Q4/Q1 [95% CI]
+  home tract edge              0.159   0.197   0.209   0.227    1.43x [1.27-1.61]  *
+  home edge + 2 km ring        0.228   0.317   0.338   0.404    1.78x [1.61-1.97]  *
+  home tract interior          0.109   0.143   0.130   0.155    1.42x [1.25-1.61]  *
+  everything else              3.999   4.335   4.939   5.463    1.37x [1.29-1.45]  *
+  all cameras                  4.336   4.795   5.406   6.022    1.39x [1.32-1.47]  *
+
+--- % Hispanic, quartiles within county (Q4 = highest) ---
+  ranked: 38,010 commutes, 63% of commuters
+  cameras passed                  Q1      Q2      Q3      Q4   Q4/Q1 [95% CI]
+  home tract edge              0.202   0.197   0.211   0.217    1.07x [0.94-1.23]
+  home edge + 2 km ring        0.334   0.344   0.364   0.436    1.31x [1.17-1.46]  *
+  home tract interior          0.128   0.133   0.116   0.107    0.84x [0.70-0.99]  *
+  everything else              4.747   4.771   4.528   4.689    0.99x [0.92-1.06]
+  all cameras                  5.208   5.247   5.007   5.232    1.00x [0.93-1.08]
+
+--- % Hispanic, quartiles within county x density tercile (Q4 = highest) ---
+  ranked: 27,111 commutes, 43% of commuters
+  cameras passed                  Q1      Q2      Q3      Q4   Q4/Q1 [95% CI]
+  home tract edge              0.191   0.213   0.204   0.216    1.13x [0.97-1.31]
+  home edge + 2 km ring        0.376   0.403   0.391   0.450    1.20x [1.05-1.36]  *
+  home tract interior          0.117   0.101   0.108   0.104    0.89x [0.71-1.10]
+  everything else              4.536   4.529   4.484   4.512    0.99x [0.91-1.08]
+  all cameras                  5.029   5.034   4.984   5.066    1.01x [0.93-1.09]
+
+--- % Hispanic, quartiles within county, same commutes as the density ranking (Q4 = highest) ---
+  ranked: 27,111 commutes, 43% of commuters
+  cameras passed                  Q1      Q2      Q3      Q4   Q4/Q1 [95% CI]
+  home tract edge              0.185   0.209   0.213   0.215    1.16x [0.99-1.37]
+  home edge + 2 km ring        0.363   0.397   0.396   0.459    1.27x [1.11-1.44]  *
+  home tract interior          0.113   0.115   0.111   0.092    0.81x [0.66-1.00]  *
+  everything else              4.581   4.507   4.574   4.402    0.96x [0.88-1.05]
+  all cameras                  5.057   5.019   5.081   4.953    0.98x [0.90-1.06]
+
+--- % Hispanic, quartiles national (Q4 = highest) ---
+  ranked: 56,123 commutes, 100% of commuters
+  cameras passed                  Q1      Q2      Q3      Q4   Q4/Q1 [95% CI]
+  home tract edge              0.148   0.189   0.201   0.254    1.71x [1.55-1.89]  *
+  home edge + 2 km ring        0.204   0.276   0.338   0.469    2.30x [2.12-2.52]  *
+  home tract interior          0.134   0.135   0.138   0.129    0.96x [0.84-1.10]
+  everything else              3.864   4.308   5.021   5.543    1.43x [1.35-1.52]  *
+  all cameras                  4.202   4.719   5.497   6.141    1.46x [1.38-1.54]  *
+
+--- median household income, quartiles within county (Q4 = highest) ---
+  ranked: 38,015 commutes, 63% of commuters
+  cameras passed                  Q1      Q2      Q3      Q4   Q4/Q1 [95% CI]
+  home tract edge              0.211   0.205   0.208   0.202    0.95x [0.83-1.10]
+  home edge + 2 km ring        0.448   0.365   0.357   0.300    0.67x [0.60-0.75]  *
+  home tract interior          0.113   0.127   0.117   0.127    1.12x [0.96-1.33]
+  everything else              4.615   4.819   4.860   4.439    0.96x [0.89-1.04]
+  all cameras                  5.177   5.311   5.334   4.866    0.94x [0.88-1.01]
+
+--- median household income, quartiles within county x density tercile (Q4 = highest) ---
+  ranked: 27,111 commutes, 43% of commuters
+  cameras passed                  Q1      Q2      Q3      Q4   Q4/Q1 [95% CI]
+  home tract edge              0.213   0.219   0.191   0.199    0.93x [0.79-1.09]
+  home edge + 2 km ring        0.466   0.407   0.396   0.342    0.73x [0.64-0.83]  *
+  home tract interior          0.118   0.106   0.100   0.107    0.91x [0.75-1.12]
+  everything else              4.440   4.537   4.821   4.257    0.96x [0.88-1.04]
+  all cameras                  5.024   5.050   5.317   4.706    0.94x [0.87-1.01]
+
+--- median household income, quartiles within county, same commutes as the density ranking (Q4 = highest) ---
+  ranked: 27,111 commutes, 43% of commuters
+  cameras passed                  Q1      Q2      Q3      Q4   Q4/Q1 [95% CI]
+  home tract edge              0.221   0.207   0.210   0.181    0.82x [0.69-0.96]  *
+  home edge + 2 km ring        0.489   0.397   0.406   0.311    0.63x [0.56-0.73]  *
+  home tract interior          0.112   0.099   0.109   0.112    1.00x [0.82-1.23]
+  everything else              4.480   4.574   4.750   4.229    0.94x [0.87-1.03]
+  all cameras                  5.081   5.070   5.265   4.651    0.92x [0.85-0.99]  *
+
+--- median household income, quartiles national (Q4 = highest) ---
+  ranked: 56,131 commutes, 100% of commuters
+  cameras passed                  Q1      Q2      Q3      Q4   Q4/Q1 [95% CI]
+  home tract edge              0.183   0.192   0.208   0.209    1.14x [1.02-1.28]  *
+  home edge + 2 km ring        0.347   0.303   0.318   0.319    0.92x [0.84-1.01]
+  home tract interior          0.136   0.123   0.136   0.142    1.04x [0.92-1.19]
+  everything else              4.671   4.368   4.762   4.937    1.06x [0.99-1.13]
+  all cameras                  5.154   4.794   5.216   5.397    1.05x [0.99-1.11]
+
+[616s]

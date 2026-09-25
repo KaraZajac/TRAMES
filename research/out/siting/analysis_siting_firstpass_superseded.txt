@@ -1,0 +1,261 @@
+SUPERSEDED - the first national pass of siting.py (2026-09-24), kept as the record of the error the
+paper discloses: within-county contrasts here are crude rates pooled across counties (overstating
+them 20-40%; siting.py now uses Mantel-Haenszel strata), and 'city limits' wrongly include
+census-designated places. Current results: out/analysis_siting.txt.
+
+==============================================================================
+WHERE THE CAMERAS STAND: SITING BY NEIGHBOURHOOD, EDGE AND SEAM
+==============================================================================
+142,991 mapped cameras; 11,523,099 road points, one per 1.0 km of drivable road
+Case-control on the road network: intensities are cameras per road point of the same class,
+i.e. per road-kilometre; contrasts are stratified by county; 95% CIs resample whole counties
+within states (2,000 replicates). '*' marks a ratio whose interval excludes 1.
+
+In the 50 states + DC: 142,255 cameras (142,169 matched to a road within 100 m), 11,194,684 road points, 3,144 counties  [815s]
+  major    roads:  80.0% of cameras,  21.6% of road length
+  minor    roads:  13.1% of cameras,  50.0% of road length
+  service  roads:   6.8% of cameras,  28.4% of road length
+  operator: untagged 118,858, police 13,911, business 3,268, Flock (customer unknown) 2,159, other named 1,864, transport 958, municipal 820, school 265, HOA 152
+
+==============================================================================
+TRACTS  (84,415 units)  [816s]
+==============================================================================
+
+A. SITING INTENSITY BY NEIGHBOURHOOD (population-weighted quartiles; Q4 = highest)
+
+  cameras per 100 km of road (all drivable roads)
+                           scheme                Q1       Q2       Q3       Q4   Q4/Q1 [95% CI]
+  median household income  national            1.21     0.88     1.27     2.27    1.88x [1.65-2.12]  *
+  median household income  within county       2.30     1.66     1.40     1.49    0.65x [0.59-0.71]  *
+  % non-Hispanic Black     national            0.53     1.29     2.15     2.47    4.65x [4.12-5.23]  *
+  % non-Hispanic Black     within county       1.10     1.70     1.97     2.61    2.38x [2.21-2.55]  *
+  % Hispanic               national            0.70     1.19     1.87     2.15    3.06x [2.52-3.65]  *
+  % Hispanic               within county       1.26     1.64     1.89     2.32    1.84x [1.70-2.00]  *
+
+  cameras per 10,000 residents
+                           scheme                Q1       Q2       Q3       Q4   Q4/Q1 [95% CI]
+  median household income  national            4.63     4.08     4.04     4.20    0.91x [0.81-1.00]  *
+  median household income  within county       4.86     4.24     4.00     4.08    0.84x [0.77-0.92]  *
+  % non-Hispanic Black     national            3.29     3.96     4.58     5.18    1.57x [1.43-1.72]  *
+  % non-Hispanic Black     within county       3.93     4.35     4.33     4.74    1.20x [1.13-1.28]  *
+  % Hispanic               national            3.80     4.28     4.51     4.42    1.16x [1.02-1.33]  *
+  % Hispanic               within county       4.31     4.29     4.30     4.39    1.02x [0.94-1.10]
+
+  arterial cameras per 100 km of arterial road
+                           scheme                Q1       Q2       Q3       Q4   Q4/Q1 [95% CI]
+  median household income  national            4.54     3.29     4.56     9.07    2.00x [1.75-2.27]  *
+  median household income  within county       8.61     6.16     5.20     5.61    0.65x [0.59-0.72]  *
+  % non-Hispanic Black     national            2.03     4.99     8.16     8.54    4.20x [3.66-4.74]  *
+  % non-Hispanic Black     within county       4.19     6.23     7.32     9.69    2.31x [2.15-2.49]  *
+  % Hispanic               national            2.54     4.38     7.10     8.74    3.44x [2.85-4.06]  *
+  % Hispanic               within county       4.75     6.06     7.05     8.70    1.83x [1.68-1.99]  *
+
+  residential-street cameras per 100 km of residential-street road
+                           scheme                Q1       Q2       Q3       Q4   Q4/Q1 [95% CI]
+  median household income  national            0.26     0.20     0.36     0.75    2.85x [2.42-3.32]  *
+  median household income  within county       0.63     0.44     0.39     0.46    0.74x [0.63-0.84]  *
+  % non-Hispanic Black     national            0.11     0.32     0.60     0.77    6.79x [5.80-7.92]  *
+  % non-Hispanic Black     within county       0.30     0.50     0.56     0.76    2.54x [2.25-2.89]  *
+  % Hispanic               national            0.17     0.33     0.51     0.54    3.11x [2.45-3.89]  *
+  % Hispanic               within county       0.36     0.45     0.54     0.68    1.85x [1.64-2.13]  *
+
+  police-operated cameras per 100 km of road  (n=13,911)
+                           scheme                Q1       Q2       Q3       Q4   Q4/Q1 [95% CI]
+  median household income  national            0.13     0.08     0.11     0.23    1.77x [1.23-2.48]  *
+  median household income  within county       0.28     0.16     0.12     0.13    0.47x [0.39-0.58]  *
+  % non-Hispanic Black     national            0.05     0.13     0.21     0.25    5.33x [3.62-7.63]  *
+  % non-Hispanic Black     within county       0.09     0.15     0.21     0.32    3.56x [2.85-4.41]  *
+  % Hispanic               national            0.07     0.12     0.18     0.20    2.95x [1.91-4.76]  *
+  % Hispanic               within county       0.12     0.16     0.18     0.26    2.08x [1.74-2.49]  *
+
+  business-operated cameras per 100 km of road  (n=3,268)
+                           scheme                Q1       Q2       Q3       Q4   Q4/Q1 [95% CI]
+  median household income  national            0.03     0.02     0.03     0.04    1.61x [1.31-1.98]  *
+  median household income  within county       0.05     0.05     0.03     0.03    0.50x [0.42-0.59]  *
+  % non-Hispanic Black     national            0.01     0.03     0.06     0.05    4.26x [3.44-5.29]  *
+  % non-Hispanic Black     within county       0.02     0.04     0.05     0.07    3.58x [2.93-4.45]  *
+  % Hispanic               national            0.01     0.03     0.05     0.05    3.74x [2.70-5.12]  *
+  % Hispanic               within county       0.02     0.04     0.05     0.06    2.43x [2.00-2.96]  *
+
+  transport-operated cameras per 100 km of road  (n=958)
+                           scheme                Q1       Q2       Q3       Q4   Q4/Q1 [95% CI]
+  median household income  national            0.01     0.00     0.01     0.02    3.96x [1.59-10.55]  *
+  median household income  within county       0.01     0.01     0.01     0.01    1.22x [0.75-1.93]
+  % non-Hispanic Black     national            0.00     0.01     0.01     0.02    6.59x [1.82-11.70]  *
+  % non-Hispanic Black     within county       0.01     0.01     0.01     0.02    2.96x [1.12-5.09]  *
+  % Hispanic               national            0.00     0.01     0.02     0.02    5.52x [2.15-11.58]  *
+  % Hispanic               within county       0.01     0.01     0.01     0.01    1.22x [0.70-2.01]
+
+  municipal-operated cameras per 100 km of road  (n=820)
+                           scheme                Q1       Q2       Q3       Q4   Q4/Q1 [95% CI]
+  median household income  national            0.00     0.00     0.01     0.02    3.93x [1.39-9.68]  *
+  median household income  within county       0.01     0.01     0.01     0.01    1.24x [0.55-2.25]
+  % non-Hispanic Black     national            0.01     0.01     0.01     0.01    0.89x [0.40-2.27]
+  % non-Hispanic Black     within county       0.01     0.01     0.01     0.01    1.86x [0.93-3.42]
+  % Hispanic               national            0.01     0.01     0.01     0.01    2.35x [0.80-7.78]
+  % Hispanic               within county       0.01     0.01     0.01     0.01    1.21x [0.49-2.78]
+
+  flock-vendor cameras per 100 km of road
+                           scheme                Q1       Q2       Q3       Q4   Q4/Q1 [95% CI]
+  median household income  national            0.97     0.74     1.04     1.77    1.83x [1.59-2.07]  *
+  median household income  within county       1.83     1.36     1.14     1.18    0.64x [0.59-0.70]  *
+  % non-Hispanic Black     national            0.43     1.02     1.73     2.04    4.77x [4.17-5.42]  *
+  % non-Hispanic Black     within county       0.89     1.37     1.58     2.08    2.33x [2.16-2.52]  *
+  % Hispanic               national            0.57     0.96     1.50     1.74    3.04x [2.50-3.68]  *
+  % Hispanic               within county       1.01     1.31     1.53     1.88    1.87x [1.73-2.02]  *
+
+  other-vendor cameras per 100 km of road
+                           scheme                Q1       Q2       Q3       Q4   Q4/Q1 [95% CI]
+  median household income  national            0.19     0.11     0.17     0.35    1.90x [1.48-2.37]  *
+  median household income  within county       0.36     0.22     0.19     0.23    0.64x [0.51-0.76]  *
+  % non-Hispanic Black     national            0.07     0.19     0.32     0.34    4.57x [3.68-5.73]  *
+  % non-Hispanic Black     within county       0.15     0.23     0.30     0.43    2.81x [2.44-3.25]  *
+  % Hispanic               national            0.09     0.17     0.28     0.32    3.42x [2.35-4.85]  *
+  % Hispanic               within county       0.19     0.25     0.27     0.34    1.83x [1.58-2.11]  *
+
+  untagged-vendor cameras per 100 km of road
+                           scheme                Q1       Q2       Q3       Q4   Q4/Q1 [95% CI]
+  median household income  national            0.05     0.03     0.06     0.15    2.80x [2.20-3.53]  *
+  median household income  within county       0.10     0.08     0.07     0.08    0.82x [0.66-1.00]  *
+  % non-Hispanic Black     national            0.03     0.07     0.10     0.09    3.16x [2.30-4.22]  *
+  % non-Hispanic Black     within county       0.06     0.09     0.09     0.10    1.89x [1.52-2.33]  *
+  % Hispanic               national            0.04     0.06     0.08     0.09    2.47x [1.72-3.45]  *
+  % Hispanic               within county       0.07     0.08     0.09     0.10    1.46x [1.19-1.85]  *
+
+B. EDGE VERSUS INTERIOR: cameras within 50 m of the unit's own boundary, per road point there,
+   over the same inside it; by within-county quartile. A cordon predicts a higher ratio in Q4.
+  % non-Hispanic Black     arterial     edge/interior Q1..Q4:  3.40  2.85  2.59  2.15   Q4 vs Q1  0.63x [0.59-0.68]  *
+  % non-Hispanic Black     residential  edge/interior Q1..Q4:  3.73  2.62  2.79  2.50   Q4 vs Q1  0.67x [0.56-0.81]  *
+  % non-Hispanic Black     all roads    edge/interior Q1..Q4:  7.50  6.12  5.84  5.08   Q4 vs Q1  0.68x [0.64-0.72]  *
+  % Hispanic               arterial     edge/interior Q1..Q4:  3.17  2.85  2.66  2.42   Q4 vs Q1  0.76x [0.72-0.82]  *
+  % Hispanic               residential  edge/interior Q1..Q4:  3.76  2.82  2.64  2.42   Q4 vs Q1  0.64x [0.55-0.74]  *
+  % Hispanic               all roads    edge/interior Q1..Q4:  7.07  6.28  5.91  5.47   Q4 vs Q1  0.77x [0.73-0.82]  *
+  median household income  arterial     edge/interior Q1..Q4:  2.53  2.82  3.12  2.88   Q4 vs Q1  1.14x [1.06-1.23]  *
+  median household income  residential  edge/interior Q1..Q4:  2.27  2.59  2.87  4.02   Q4 vs Q1  1.77x [1.50-2.06]  *
+  median household income  all roads    edge/interior Q1..Q4:  5.47  6.10  6.79  6.83   Q4 vs Q1  1.25x [1.17-1.33]  *
+
+C. BOUNDARIES AND SEAMS (standardized by county x road class against road points)
+  cameras within 50 m of a unit boundary: 61,010 observed vs 43,743 expected from roads ->  1.39x [1.35-1.44]  *
+
+  % non-Hispanic Black: contrast across the boundary (|difference|, points)
+    contrast     0-10    cameras  45,141  expected 46,162.1   0.98x [0.97-0.99]  *
+    contrast    10-20    cameras   8,960  expected  8,442.7   1.06x [1.03-1.10]  *
+    contrast    20-30    cameras   3,502  expected  3,187.2   1.10x [1.03-1.17]  *
+    contrast    30-50    cameras   2,270  expected  2,056.5   1.10x [1.03-1.19]  *
+    contrast    50-101   cameras     623  expected    647.4   0.96x [0.85-1.09]
+    at seams with contrast >= 30 (2,893 cameras): standing on the higher-Black side 1,379 vs 1,441.9 expected  0.96x [0.91-1.00]
+    heads looking 30 m ahead (3,275): 49.8% into the higher-Black side; looking across the seam: 521 from the other side into it, 467 out of it
+
+  % Hispanic: contrast across the boundary (|difference|, points)
+    contrast     0-10    cameras  43,469  expected 43,565.4   1.00x [0.99-1.01]
+    contrast    10-20    cameras  11,046  expected 10,603.2   1.04x [1.01-1.07]  *
+    contrast    20-30    cameras   3,678  expected  3,841.6   0.96x [0.90-1.03]
+    contrast    30-50    cameras   1,948  expected  2,094.1   0.93x [0.85-1.02]
+    contrast    50-101   cameras     355  expected    391.7   0.91x [0.77-1.05]
+    at seams with contrast >= 30 (2,303 cameras): standing on the higher-Hispanic side 1,190 vs 1,152.5 expected  1.03x [0.98-1.08]
+    heads looking 30 m ahead (2,591): 50.3% into the higher-Hispanic side; looking across the seam: 366 from the other side into it, 406 out of it
+
+  median household income: contrast across the boundary (|log2 income ratio|)
+    contrast     0-0.25  cameras  22,920  expected 23,546.2   0.97x [0.96-0.99]  *
+    contrast  0.25-0.5   cameras  16,999  expected 17,071.2   1.00x [0.98-1.02]
+    contrast   0.5-1.0   cameras  15,190  expected 14,878.0   1.02x [1.00-1.04]
+    contrast   1.0-1.5   cameras   3,552  expected  3,327.1   1.07x [1.01-1.12]  *
+    contrast   1.5-99    cameras     985  expected    823.4   1.20x [1.06-1.36]  *
+    at seams with contrast >= 1.0 (4,538 cameras): standing on the richer side 2,294 vs 2,298.0 expected  1.00x [0.96-1.03]
+    heads looking 30 m ahead (5,136): 49.9% into the richer side; looking across the seam: 735 from the other side into it, 770 out of it
+
+==============================================================================
+BLOCK GROUPS  (239,781 units)  [1536s]
+==============================================================================
+
+A. SITING INTENSITY BY NEIGHBOURHOOD (population-weighted quartiles; Q4 = highest)
+
+  cameras per 100 km of road (all drivable roads)
+                           scheme                Q1       Q2       Q3       Q4   Q4/Q1 [95% CI]
+  median household income  national            1.25     0.90     1.16     2.09    1.68x [1.49-1.87]  *
+  median household income  within county       1.89     1.32     1.13     1.18    0.62x [0.57-0.68]  *
+  % non-Hispanic Black     national            0.65     1.02     2.02     2.60    3.97x [3.57-4.40]  *
+  % non-Hispanic Black     within county       0.84     1.75     1.79     2.10    2.51x [2.36-2.66]  *
+  % Hispanic               national            0.74     1.15     1.73     2.24    3.03x [2.56-3.54]  *
+  % Hispanic               within county       1.04     1.38     1.53     1.84    1.78x [1.66-1.91]  *
+
+  cameras per 10,000 residents
+                           scheme                Q1       Q2       Q3       Q4   Q4/Q1 [95% CI]
+  median household income  national            4.69     4.03     3.87     4.04    0.86x [0.78-0.94]  *
+  median household income  within county       4.81     4.10     3.85     3.88    0.81x [0.75-0.87]  *
+  % non-Hispanic Black     national            3.55     3.77     4.48     5.13    1.45x [1.33-1.56]  *
+  % non-Hispanic Black     within county       3.77     4.38     4.42     4.57    1.21x [1.14-1.28]  *
+  % Hispanic               national            3.91     4.20     4.47     4.32    1.10x [0.98-1.25]
+  % Hispanic               within county       4.34     4.21     4.21     4.14    0.95x [0.89-1.02]
+
+  arterial cameras per 100 km of arterial road
+                           scheme                Q1       Q2       Q3       Q4   Q4/Q1 [95% CI]
+  median household income  national            4.66     3.38     4.18     8.35    1.79x [1.59-2.00]  *
+  median household income  within county       6.97     4.91     4.15     4.37    0.63x [0.57-0.68]  *
+  % non-Hispanic Black     national            2.53     3.89     7.58     8.99    3.55x [3.16-3.94]  *
+  % non-Hispanic Black     within county       3.16     6.46     6.50     7.65    2.42x [2.29-2.57]  *
+  % Hispanic               national            2.69     4.23     6.62     8.97    3.33x [2.84-3.86]  *
+  % Hispanic               within county       3.86     5.11     5.57     6.86    1.78x [1.65-1.90]  *
+
+  residential-street cameras per 100 km of residential-street road
+                           scheme                Q1       Q2       Q3       Q4   Q4/Q1 [95% CI]
+  median household income  national            0.28     0.20     0.33     0.69    2.48x [2.13-2.86]  *
+  median household income  within county       0.48     0.33     0.29     0.36    0.74x [0.65-0.84]  *
+  % non-Hispanic Black     national            0.14     0.24     0.57     0.81    5.66x [4.93-6.45]  *
+  % non-Hispanic Black     within county       0.20     0.50     0.50     0.59    2.96x [2.67-3.27]  *
+  % Hispanic               national            0.18     0.31     0.48     0.57    3.14x [2.53-3.85]  *
+  % Hispanic               within county       0.27     0.36     0.42     0.50    1.82x [1.61-2.07]  *
+
+B. EDGE VERSUS INTERIOR: cameras within 50 m of the unit's own boundary, per road point there,
+   over the same inside it; by within-county quartile. A cordon predicts a higher ratio in Q4.
+  % non-Hispanic Black     arterial     edge/interior Q1..Q4:  3.96  2.87  2.84  2.79   Q4 vs Q1  0.71x [0.66-0.76]  *
+  % non-Hispanic Black     residential  edge/interior Q1..Q4:  3.82  3.01  2.89  2.83   Q4 vs Q1  0.74x [0.65-0.86]  *
+  % non-Hispanic Black     all roads    edge/interior Q1..Q4:  8.28  6.33  6.09  6.03   Q4 vs Q1  0.73x [0.69-0.77]  *
+  % Hispanic               arterial     edge/interior Q1..Q4:  3.61  3.38  3.15  2.97   Q4 vs Q1  0.82x [0.77-0.88]  *
+  % Hispanic               residential  edge/interior Q1..Q4:  3.86  3.28  2.90  2.81   Q4 vs Q1  0.73x [0.64-0.83]  *
+  % Hispanic               all roads    edge/interior Q1..Q4:  7.77  7.19  6.44  6.32   Q4 vs Q1  0.81x [0.77-0.86]  *
+  median household income  arterial     edge/interior Q1..Q4:  3.13  3.18  3.63  3.44   Q4 vs Q1  1.10x [1.03-1.18]  *
+  median household income  residential  edge/interior Q1..Q4:  2.83  3.04  3.14  3.79   Q4 vs Q1  1.34x [1.15-1.55]  *
+  median household income  all roads    edge/interior Q1..Q4:  6.42  6.66  7.43  7.60   Q4 vs Q1  1.18x [1.11-1.26]  *
+
+C. BOUNDARIES AND SEAMS (standardized by county x road class against road points)
+  cameras within 50 m of a unit boundary: 83,377 observed vs 64,201 expected from roads ->  1.30x [1.27-1.33]  *
+
+  % non-Hispanic Black: contrast across the boundary (|difference|, points)
+    contrast     0-10    cameras  55,761  expected 58,610.5   0.95x [0.94-0.96]  *
+    contrast    10-20    cameras  13,265  expected 12,041.2   1.10x [1.07-1.13]  *
+    contrast    20-30    cameras   6,370  expected  5,614.5   1.13x [1.09-1.19]  *
+    contrast    30-50    cameras   5,022  expected  4,315.4   1.16x [1.11-1.22]  *
+    contrast    50-101   cameras   1,666  expected  1,502.4   1.11x [1.02-1.21]  *
+    at seams with contrast >= 30 (6,688 cameras): standing on the higher-Black side 3,383 vs 3,355.5 expected  1.01x [0.98-1.04]
+    heads looking 30 m ahead (7,454): 50.7% into the higher-Black side; looking across the seam: 1,237 from the other side into it, 1,230 out of it
+
+  % Hispanic: contrast across the boundary (|difference|, points)
+    contrast     0-10    cameras  51,051  expected 52,573.1   0.97x [0.96-0.98]  *
+    contrast    10-20    cameras  16,889  expected 16,068.4   1.05x [1.03-1.07]  *
+    contrast    20-30    cameras   7,627  expected  7,099.2   1.07x [1.03-1.12]  *
+    contrast    30-50    cameras   5,214  expected  5,015.9   1.04x [0.99-1.10]
+    contrast    50-101   cameras   1,303  expected  1,327.4   0.98x [0.90-1.08]
+    at seams with contrast >= 30 (6,517 cameras): standing on the higher-Hispanic side 3,283 vs 3,256.1 expected  1.01x [0.98-1.04]
+    heads looking 30 m ahead (7,157): 49.7% into the higher-Hispanic side; looking across the seam: 1,136 from the other side into it, 1,195 out of it
+
+  median household income: contrast across the boundary (|log2 income ratio|)
+    contrast     0-0.25  cameras  22,748  expected 23,704.4   0.96x [0.94-0.98]  *
+    contrast  0.25-0.5   cameras  18,759  expected 19,188.5   0.98x [0.96-1.00]  *
+    contrast   0.5-1.0   cameras  20,854  expected 20,711.2   1.01x [0.99-1.02]
+    contrast   1.0-1.5   cameras   7,455  expected  6,766.4   1.10x [1.06-1.15]  *
+    contrast   1.5-99    cameras   3,032  expected  2,477.6   1.22x [1.15-1.31]  *
+    at seams with contrast >= 1.0 (10,487 cameras): standing on the richer side 5,236 vs 5,264.0 expected  0.99x [0.97-1.02]
+    heads looking 30 m ahead (11,747): 49.2% into the richer side; looking across the seam: 1,895 from the other side into it, 1,965 out of it
+
+==============================================================================
+F. CITY LIMITS: cameras within 50 m of a municipal (Census place) boundary
+==============================================================================
+  at a city limit: 22,354 cameras vs 13,855 expected from roads ->  1.61x [1.55-1.68]  *
+  by the municipality's median income relative to its county's:
+    poorer by >25%     cameras   4,566  expected  2,637.5   1.73x [1.61-1.87]  *   heads facing into the town: 63.3%
+    within 25%         cameras  13,015  expected  8,209.1   1.59x [1.51-1.67]  *   heads facing into the town: 66.0%
+    richer by 25-50%   cameras   2,204  expected  1,537.2   1.43x [1.30-1.59]  *   heads facing into the town: 66.4%
+    richer by >50%     cameras   2,361  expected  1,252.8   1.88x [1.69-2.09]  *   heads facing into the town: 70.5%
+
+[2774s]

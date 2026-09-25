@@ -1,0 +1,61 @@
+attribute,scope,segment,q1,q2,q3,q4,q4_over_q1,lo,hi
+black,within county,home tract edge,0.2059,0.2068,0.1928,0.2211,1.074,0.9439,1.2201
+black,within county,home edge + 2 km ring,0.3392,0.3396,0.3635,0.4348,1.2817,1.1456,1.4296
+black,within county,home tract interior,0.1142,0.1335,0.1129,0.124,1.0856,0.9103,1.2728
+black,within county,everything else,4.6071,4.6297,4.697,4.81,1.044,0.9667,1.1196
+black,within county,all cameras,5.0605,5.1028,5.1734,5.3687,1.0609,0.9863,1.132
+black,within county x density tercile,home tract edge,0.2097,0.1977,0.2053,0.2096,0.9996,0.8611,1.1688
+black,within county x density tercile,home edge + 2 km ring,0.3835,0.3784,0.4099,0.4476,1.1673,1.0337,1.3279
+black,within county x density tercile,home tract interior,0.0942,0.1231,0.1099,0.105,1.114,0.917,1.3501
+black,within county x density tercile,everything else,4.2964,4.5203,4.4155,4.8602,1.1312,1.0416,1.2309
+black,within county x density tercile,all cameras,4.7741,5.0218,4.9354,5.4127,1.1338,1.0494,1.2247
+black,"within county, same commutes as the density ranking",home tract edge,0.203,0.2055,0.1944,0.2197,1.082,0.9316,1.2611
+black,"within county, same commutes as the density ranking",home edge + 2 km ring,0.3793,0.3682,0.4029,0.4656,1.2275,1.0842,1.39
+black,"within county, same commutes as the density ranking",home tract interior,0.0978,0.1168,0.1114,0.1053,1.0771,0.8855,1.3106
+black,"within county, same commutes as the density ranking",everything else,4.4107,4.3803,4.4559,4.8139,1.0914,1.0065,1.1864
+black,"within county, same commutes as the density ranking",all cameras,4.8878,4.8654,4.9702,5.3848,1.1017,1.0216,1.1912
+black,national,home tract edge,0.1588,0.1974,0.2085,0.2275,1.4322,1.275,1.6086
+black,national,home edge + 2 km ring,0.2275,0.3174,0.3378,0.4043,1.777,1.6128,1.9712
+black,national,home tract interior,0.1089,0.1433,0.1295,0.1545,1.4191,1.255,1.6101
+black,national,everything else,3.9994,4.3345,4.9388,5.4627,1.3659,1.2908,1.4483
+black,national,all cameras,4.3358,4.7952,5.4061,6.0216,1.3888,1.319,1.4684
+hispanic,within county,home tract edge,0.2019,0.197,0.2108,0.2169,1.0742,0.9431,1.2277
+hispanic,within county,home edge + 2 km ring,0.3336,0.3437,0.3638,0.4361,1.3076,1.1741,1.4589
+hispanic,within county,home tract interior,0.1277,0.1326,0.1156,0.1073,0.8408,0.702,0.9921
+hispanic,within county,everything else,4.7469,4.771,4.5279,4.6887,0.9877,0.9153,1.0622
+hispanic,within county,all cameras,5.2081,5.2473,5.0072,5.2322,1.0046,0.9345,1.0757
+hispanic,within county x density tercile,home tract edge,0.1911,0.2126,0.2044,0.2156,1.1284,0.9691,1.311
+hispanic,within county x density tercile,home edge + 2 km ring,0.3755,0.4035,0.3914,0.4498,1.198,1.0516,1.3606
+hispanic,within county x density tercile,home tract interior,0.1173,0.1011,0.1078,0.1044,0.8902,0.7137,1.1025
+hispanic,within county x density tercile,everything else,4.5362,4.5291,4.4844,4.5122,0.9947,0.9139,1.0834
+hispanic,within county x density tercile,all cameras,5.029,5.0337,4.9836,5.0664,1.0074,0.9281,1.0913
+hispanic,"within county, same commutes as the density ranking",home tract edge,0.1846,0.2091,0.2135,0.2146,1.163,0.9899,1.3659
+hispanic,"within county, same commutes as the density ranking",home edge + 2 km ring,0.3627,0.3973,0.3964,0.4589,1.2652,1.1051,1.4428
+hispanic,"within county, same commutes as the density ranking",home tract interior,0.1134,0.1147,0.1114,0.0921,0.8123,0.6567,0.9977
+hispanic,"within county, same commutes as the density ranking",everything else,4.5813,4.5067,4.5737,4.4024,0.961,0.8799,1.047
+hispanic,"within county, same commutes as the density ranking",all cameras,5.0574,5.0187,5.0814,4.9534,0.9794,0.9019,1.0609
+hispanic,national,home tract edge,0.1483,0.1891,0.2006,0.2542,1.7134,1.5453,1.8906
+hispanic,national,home edge + 2 km ring,0.204,0.2759,0.3378,0.4694,2.3017,2.12,2.5171
+hispanic,national,home tract interior,0.1343,0.1348,0.1382,0.1289,0.9599,0.8371,1.1028
+hispanic,national,everything else,3.8636,4.3081,5.021,5.5427,1.4346,1.3533,1.5184
+hispanic,national,all cameras,4.2019,4.7187,5.497,6.1411,1.4615,1.3843,1.5409
+income,within county,home tract edge,0.2111,0.2047,0.2084,0.2015,0.9544,0.8298,1.0987
+income,within county,home edge + 2 km ring,0.4483,0.365,0.3566,0.2996,0.6683,0.5954,0.7484
+income,within county,home tract interior,0.1133,0.1266,0.1175,0.1268,1.1195,0.9573,1.3252
+income,within county,everything else,4.6152,4.8189,4.8603,4.4391,0.9618,0.891,1.0355
+income,within county,all cameras,5.1768,5.3106,5.3344,4.8655,0.9399,0.8757,1.0066
+income,within county x density tercile,home tract edge,0.2133,0.2191,0.1905,0.1989,0.9325,0.7909,1.095
+income,within county x density tercile,home edge + 2 km ring,0.4661,0.4065,0.3964,0.3421,0.7339,0.642,0.8326
+income,within county x density tercile,home tract interior,0.1177,0.1065,0.0996,0.1071,0.9105,0.7532,1.1163
+income,within county x density tercile,everything else,4.4401,4.5372,4.8211,4.2569,0.9587,0.8801,1.0445
+income,within county x density tercile,all cameras,5.0239,5.0501,5.3171,4.7061,0.9367,0.865,1.0149
+income,"within county, same commutes as the density ranking",home tract edge,0.2207,0.2066,0.2104,0.1814,0.8218,0.6933,0.9584
+income,"within county, same commutes as the density ranking",home edge + 2 km ring,0.4892,0.3965,0.4059,0.3106,0.6349,0.5554,0.7258
+income,"within county, same commutes as the density ranking",home tract interior,0.1121,0.0992,0.1089,0.1115,0.9953,0.8162,1.2316
+income,"within county, same commutes as the density ranking",everything else,4.4798,4.5745,4.7499,4.2285,0.9439,0.8678,1.0299
+income,"within county, same commutes as the density ranking",all cameras,5.081,5.0702,5.2647,4.6507,0.9153,0.8461,0.9918
+income,national,home tract edge,0.1831,0.192,0.2079,0.2091,1.1417,1.0236,1.279
+income,national,home edge + 2 km ring,0.347,0.303,0.3184,0.3193,0.9204,0.8375,1.0137
+income,national,home tract interior,0.136,0.1229,0.1355,0.1416,1.0407,0.9209,1.1916
+income,national,everything else,4.6713,4.3685,4.7618,4.9366,1.0568,0.9941,1.1256
+income,national,all cameras,5.1543,4.7944,5.2158,5.3975,1.0472,0.9897,1.1099

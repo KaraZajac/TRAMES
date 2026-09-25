@@ -41,11 +41,18 @@ server/alpr/history-planet/
 # (the acquisition script itself is tracked — the paper tells readers to run it)
 research/data/*
 !research/data/fetch.sh
+# the transparency-portal snapshot validate_coverage.py reads: a live API, so the dated copy is kept
+!research/data/validation/
+research/data/validation/*
+!research/data/validation/transparency_portals_2026-09-24.json
 # ~82 MB of route polylines. Regenerable, but only by re-running the
 # full 7-hour experiment — kept out of git because it is over GitHub's
 # comfortable file size, not because it is cheap.
 research/out/**/routes.jsonl.gz
 research/out/**/*.log
+# siting analysis: the 11.5M-point road sample and the point-to-unit assignment caches (~2 GB).
+# Rebuild with research/scripts/road_sample.py; siting.py re-creates the caches on its first run.
+research/out/siting/*.npz
 # US state boundary GeoJSON fetched by make_figures.py
 research/paper/figures/us-states.json
 
