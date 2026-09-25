@@ -956,6 +956,157 @@ a considerably stronger and more quotable claim than the data sustain. We record
 because a silent truncation that returns success is the failure mode least likely to be
 caught by inspection, and because the corrected finding is the less convenient one.
 
+\subsection{Where the cameras stand}
+\label{sec:results:siting}
+
+The commute measure asks how many cameras a resident drives past. It cannot say where cameras
+are sited relative to the neighbourhoods around them, and two readings of the equity question
+turn on exactly that. On one, cameras watch who enters and leaves marginalized neighbourhoods
+rather than standing inside them. On the other, they concentrate where residents are
+wealthier, bought by police to protect them or by the residents themselves. Both are claims
+about siting, and the commute contrasts of \Cref{sec:results:demo,sec:results:coverage} are
+silent on both: a camera ringing a neighbourhood may lie on no one's commute, and one inside it
+may be passed only by the people who live there.
+
+\paragraph{Method.} We compare cameras with the road network they stand on. One pass over the
+OSM extract samples a point every kilometre along each of 45~million drivable ways---\num{11.2}~million
+points in the fifty states and DC---and records each point's road class; each camera is classed
+by the road it watches, the highest-class road within \SI{30}{\metre} (\SI{99.9}{\percent} of
+cameras lie within \SI{100}{\metre} of a road). The ratio of cameras to road points of the same
+class in any set of neighbourhoods is then proportional to cameras per kilometre of that class
+of road there, which removes the most obvious confound: cameras stand on arterials, and some
+neighbourhoods have more arterial road than others. Neighbourhoods are census tracts and, as a
+check, block groups, with the ACS attributes used throughout, ranked into population-weighted
+quartiles within their county and---to hold urban form fixed as well---within county and
+population-density tercile. A camera within \SI{50}{\metre} of its unit's boundary is at its
+edge; boundaries between units are seams; municipal limits are the boundaries of the
+\num{19519} incorporated places (census-designated places, which have no government and no
+limits, are excluded). Comparisons within county are Mantel--Haenszel rate ratios stratified by
+county, or by county and density tercile: within-county quartiles balance residents, not
+kilometres of road, so a crude rate pooled across counties would let the long and sparsely
+watched networks of rural counties stand in for other counties' roads and overstate the
+contrast (a first pass of this analysis made that error; the pooled ratios ran \SIrange{20}{40}{\percent}
+higher). Intervals resample whole counties within states.
+
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{Where cameras stand, by neighbourhood: the highest quartile of each attribute over
+the lowest, ranked within county and population-density tercile (Mantel--Haenszel rate ratios
+stratified by county and tercile, \SI{95}{\percent} CIs resampling counties) and within county alone
+(stratified by county). Tracts unless marked; cameras per kilometre are
+per kilometre of the same class of road, from a length-weighted sample of \num{11.2}~million road
+points. Edge concentration is the camera intensity within \SI{50}{\metre} of the unit's
+boundary over that inside it.}
+\label{tab:siting}
+\setlength{\tabcolsep}{4pt}
+\resizebox{\linewidth}{!}{\input{tables/siting.tex}}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_siting.pdf}
+\caption{(a) Arterial cameras per kilometre of arterial road in each quartile relative to the
+lowest, ranked within county and density tercile (Mantel--Haenszel), with the Q4/Q1 ratio. (b) Camera intensity within
+\SI{50}{\metre} of a tract's boundary over its interior, same ranking: minority tracts' cameras
+stand relatively inside them, wealthy tracts' at their edges. (c) Cameras within
+\SI{50}{\metre} of an incorporated municipality's limits over the number expected from roads of
+the same class in the same county, by the town's median income relative to its county's.}
+\label{fig:siting}
+\end{figure}
+
+\paragraph{Cameras stand more densely inside Black and Hispanic neighbourhoods, even within a
+county.} Per kilometre of arterial road, tracts in the highest quartile of Black population carry
+\num{1.74}$\times$ [1.59--1.92] the cameras of the lowest quartile in the same county, and
+\num{1.27}$\times$ [1.19--1.36] compared only with tracts of similar density there
+(\Cref{tab:siting}, \Cref{fig:siting}a); on residential streets \num{1.59}$\times$ [1.41--1.81];
+for cameras whose operator is tagged as a police department \num{1.87}$\times$ [1.52--2.30]. The
+Hispanic gradients are smaller but of the same kind (\numrange{1.16}{1.27}$\times$), block groups
+reproduce every one, and so does the plainest comparison available: majority-Black tracts against
+majority-white tracts of the same county, in the 542 counties that have both, carry
+\num{1.20}$\times$ [1.03--1.41] the cameras per kilometre of road (majority-Hispanic
+\num{1.33}$\times$ [1.12--1.66]). Unlike the commute-exposure contrasts of
+\Cref{sec:results:trend}, these did not move with the map. On the maps of July 2025, January 2026, July 2026 and September
+2026 the within-county Black gradient in cameras per kilometre of road was \num{1.96}, \num{1.89},
+\num{1.83} and \num{1.83} (\num{1.50}, \num{1.45}, \num{1.41} and \num{1.41} within county and density
+band) while the map grew six-fold. A pattern produced by where
+volunteers happened to map first would have shifted as the map filled in; this one held.
+
+\paragraph{The cordon reading is not supported.} If cameras watched the entrances and exits of
+minority neighbourhoods, those neighbourhoods' cameras would concentrate at their edges. They do
+the opposite. Relative to their interiors, the edges of the most-Black tracts carry
+\num{0.80}$\times$ [0.75--0.84] the concentration found at the edges of the least-Black tracts
+in the same county and density band, and the most-Hispanic \num{0.88}$\times$ [0.82--0.94]
+(\Cref{fig:siting}b): a minority neighbourhood's cameras stand inside it. Boundaries in general
+attract cameras---within \SI{50}{\metre} of a tract boundary they are \num{1.39}$\times$
+[1.35--1.44] as frequent as on roads of the same class in the same county---and boundaries
+between racially different neighbourhoods slightly more: at block-group seams where the Black
+share differs by ten points or more, cameras are \SIrange{10}{16}{\percent} over-represented. But
+at those seams they show no preference for either side, in where they stand (\num{1.01}$\times$
+[0.98--1.04] on the higher-Black side) or in which way they face (\SI{50.7}{\percent} into it).
+
+\paragraph{The protection reading is contradicted within counties; the perimeter pattern belongs
+to the wealthy.} Between counties, wealthier tracts do have more cameras---about twice as many
+per kilometre of road nationally, the purchasing pattern of richer jurisdictions. Within a
+county the richest quartile has \num{0.65}$\times$ [0.58--0.71] the arterial cameras per
+kilometre of the poorest, \num{0.86}$\times$ [0.79--0.92] once density is held fixed, and
+\num{0.57}$\times$ [0.47--0.69] the police-operated cameras. What wealth predicts is where a
+neighbourhood's cameras stand: the richest tracts' residential-street cameras are
+\num{2.43}$\times$ [2.05--2.86] as concentrated at the tract's edge as the poorest tracts'. (The
+930 cameras tagged as watching an entrance or gate, or operated by a homeowners' association, are
+too few to say whether they lean rich: \num{1.37}$\times$ [0.95--1.99].) At the scale of municipalities
+the pattern is plainer (\Cref{fig:siting}c). Within \SI{50}{\metre} of an incorporated
+city's limits, cameras are \num{1.81}$\times$ [1.72--1.91] as frequent as on roads of the same class
+in the same county. The concentration is greatest around towns more than half again as rich as
+their county (\num{2.41}$\times$ [2.12--2.80]), where \SI{86}{\percent} of the limit cameras stand
+just inside the town, though towns poorer than their county ring their limits too
+(\num{1.95}$\times$ [1.80--2.11]). Where the cameras point adds little to where they stand: of the
+heads that look across a limit, the share looking in from outside exceeds the share of cameras
+standing outside by about six points in every income group. Atlantic City's evaluated deployment, with fixed readers on all
+entrances and exits to the city,\footnote{J.~A. Shjarback and J.~Sarkos, ``An Evaluation of a
+Major Expansion in Automated License Plate Reader (ALPR) Technology,'' \emph{Justice Evaluation
+Journal}, 2025, \url{https://doi.org/10.1080/24751979.2025.2473363}.} is the policy these
+numbers describe.
+
+\paragraph{Why commute exposure hides it.} These gradients are local, and a commute is not. Of the
+cameras a commute passes, \SI{80}{\percent} are more than \SI{2}{\kilo\metre} from both its ends,
+and the home tract with its edge accounts for \SI{6.5}{\percent}. Within their county, residents
+of the most-Black tracts pass \num{1.28}$\times$ [1.15--1.43] as many cameras in the ring within
+\SI{2}{\kilo\metre} of home as residents of the least-Black tracts (\num{1.17}$\times$ within
+county and density band), residents of the most-Hispanic tracts \num{1.31}$\times$, and residents
+of the richest tracts \num{0.67}$\times$ [0.60--0.75] as many as the poorest's; over a whole
+commute these dilute to \num{1.06}$\times$, \num{1.00}$\times$ and \num{0.94}$\times$. The
+conclusion of \Cref{sec:results:coverage} stands for what it measured: within a county, the
+burden of passing cameras on the way to work is close to equal. Where the cameras are placed is
+not.
+
+\paragraph{What this cannot show.} Kilometres of road are not vehicles: cameras follow traffic,
+and we have no national per-segment traffic counts with which to weight the road points. Nor can
+siting data separate motive from rationale. Police departments cite crime and calls for service
+when asked why cameras stand where they do, and both correlate with neighbourhood poverty and
+race; the gradients are disparities in where surveillance is sited, not findings about intent.
+Business-operated cameras, largely retail parking lots, show the same racial gradient, a
+reminder that land use shapes siting as well as policing does. And within-county gradients could
+still reflect mapping that is uneven inside cities: their stability across four maps argues
+against a transient artefact of mapping progress, not against a persistent one. What can be
+checked is coverage between cities. Against Flock Safety's own transparency portals the map
+holds, at the median, \num{0.98} of the cameras that \num{1050} municipal police departments
+report operating (\num{28349} mapped inside their limits against \num{31210} reported), and how
+completely a city is mapped is unrelated to its Black share (Spearman $\rho=0.06$ [$-0.003$,
+$0.12$]) and only weakly related to its income ($\rho=0.12$ [0.06, 0.18]); the strongest predictor
+is size, small towns being the least completely mapped ($\rho=0.39$).\footnote{Portal counts as
+aggregated at \url{https://eyesonflock.com} from \url{https://transparency.flocksafety.com},
+retrieved 2026-09-24; matching and code in \texttt{research/scripts/validate\_coverage.py}.}
+In the one region with an authoritative list---the locations of 614 Flock cameras in Hampton
+Roads, Virginia, unsealed by a federal court in 2025---a study built on that list found
+majority-Black tracts carrying about four times the cameras of majority-white
+ones;\footnote{S.~Keener, J.~Finn and A.~F. Baird, ``Surveillance Inequality: Race, Poverty, and
+the Geography of Automated License Plate Reader Deployment,'' SocArXiv, 2026,
+\url{https://ideas.repec.org/p/osf/socarx/5ckgv_v1.html}.} on our map the same comparison gives
+\num{1.8} times per tract. Our map holds nearly twice as many cameras there as the police list,
+including other owners', which would dilute a police-driven gradient---as the steeper gradient of
+police-operated cameras nationally suggests it does.
+
 \subsection{Thirty-three months of mapping}
 \label{sec:results:trend}
 
@@ -1353,6 +1504,13 @@ Experiment                  & \texttt{research/scripts/run\_experiment.py} \\
 Routing on past maps        & \texttt{research/scripts/run-history.sh} \\
 Commuter weights, bootstrap & \texttt{research/scripts/wstats.py} \\
 Trend                       & \texttt{research/scripts/trend.py} \\
+Road-point sample           & \texttt{research/scripts/road\_sample.py} \\
+Boundaries, projection      & \texttt{research/scripts/geo.py} \\
+Siting, edges, seams, limits & \texttt{research/scripts/siting.py} \\
+Siting on earlier maps      & \texttt{research/scripts/siting\_trend.py} \\
+Exposure near home          & \texttt{research/scripts/near\_home.py} \\
+Coverage against portals    & \texttt{research/scripts/validate\_coverage.py} \\
+Commute-mode reweighting    & \texttt{research/scripts/commute\_mode.py} \\
 Geometry backfill           & \texttt{research/scripts/backfill\_geometry.py} \\
 Vendor rescoring            & \texttt{research/scripts/vendor\_exposure.py} \\
 Analysis                    & \texttt{research/scripts/analyze.py} \\
@@ -1365,9 +1523,11 @@ Tables                      & \texttt{research/paper/make\_tables.py} \\
 \end{table}
 
 \noindent
-The \SI{18}{\giga\byte} OSM extract, the \SI{14}{\giga\byte} graph caches and the
-\SI{163}{\giga\byte} OSM full-history dump are not redistributed; the acquisition and
-import scripts rebuild all of them. Commuter weights come from
+The \SI{18}{\giga\byte} OSM extract, the \SI{14}{\giga\byte} graph caches, the
+\SI{163}{\giga\byte} OSM full-history dump and the \SI{1.2}{\giga\byte} of TIGER/Line boundaries
+are not redistributed; the acquisition and import scripts rebuild all of them. The
+transparency-portal counts behind the coverage check come from a live service and are kept as
+retrieved, in \texttt{research/data/validation/}. Commuter weights come from
 \texttt{research/out/sampling\_frame.json} and \texttt{sample\_draws.csv}, written by the
 sampler.
 

@@ -811,6 +811,71 @@ def fig_trend_gradients():
     save(fig, "fig_trend_gradients")
 
 
+def fig_siting():
+    """Where cameras stand (siting.py): intensity and edge concentration by within-county
+    quartile, and the concentration at municipal limits by the town's relative income."""
+    path = os.path.join(OUT, "siting", "siting.csv")
+    if not os.path.exists(path):
+        print("  (no siting analysis yet)")
+        return
+    R = list(csv.DictReader(open(path)))
+    pick = lambda an, a, sch: next((r for r in R if r["analysis"] == an and r["attribute"] == a
+                                    and r["scheme"] == sch), None)
+    series = [("black", "% Black", "#0072B2", "o"), ("hispanic", "% Hispanic", "#D55E00", "s"),
+              ("income", "income", "#009E73", "^")]
+    fig, axes = plt.subplots(1, 3, figsize=(11, 3.4))
+    for ax, an, ylab, title in ((axes[0], "tract:arterial:road", "rate ratio vs lowest quartile",
+                                 "(a) Arterial cameras per km, vs Q1"),
+                                (axes[1], "tract:edge:all roads", "edge / interior camera intensity",
+                                 "(b) Concentration at the tract's edge")):
+        ends = []
+        for a, lab, colr, mk in series:
+            r = pick(an, a, "county x density")
+            if r is None:
+                continue
+            v = [float(r[f"q{k}"]) for k in (1, 2, 3, 4)]
+            ax.plot([1, 2, 3, 4], v, marker=mk, ms=6, lw=2, color=colr, label=lab)
+            ends.append((v[3], f"{float(r['q4_over_q1']):.2f}$\\times$"))
+        ax.set_xticks([1, 2, 3, 4], ["Q1\nlowest", "Q2", "Q3", "Q4\nhighest"])
+        ax.set_xlim(0.7, 4.6)
+        if an.endswith(":road"):
+            ax.axhline(1, color=C_NEUT, ls="--", lw=0.8)
+        else:
+            ax.set_ylim(0, ax.get_ylim()[1] * 1.08)
+        # direct labels at the line ends, pushed apart where two ends nearly coincide
+        ends.sort()
+        span = np.ptp([e[0] for e in ends]) if len(ends) > 1 else 1.0
+        lo_y, hi_y = ax.get_ylim()
+        gap = 0.05 * (hi_y - lo_y)
+        placed = []
+        for y, text in ends:
+            if placed and y - placed[-1] < gap:
+                y = placed[-1] + gap
+            placed.append(y)
+        for (y0, text), y in zip(ends, placed):
+            ax.annotate(text, (4, y0), xytext=(6, 0), textcoords="offset points", fontsize=7.5,
+                        va="center", color=C_NEUT) if y == y0 else \
+                ax.annotate(text, (4.08, y), fontsize=7.5, va="center", color=C_NEUT)
+        ax.set_ylabel(ylab)
+        ax.set_title(title)
+        ax.legend(fontsize=7.5, loc="upper left" if an.endswith(":road") else "lower left")
+    ax = axes[2]
+    lim = [r for r in R if r["analysis"] == "place:limit"]
+    if lim:
+        x = np.arange(len(lim))
+        v = np.array([float(r["q4_over_q1"]) for r in lim])
+        lo = np.array([float(r["lo"]) for r in lim]); hi = np.array([float(r["hi"]) for r in lim])
+        ax.bar(x, v, width=0.6, color="#999999", yerr=[v - lo, hi - v], capsize=3,
+               error_kw={"lw": 0.9, "ecolor": C_NEUT})
+        ax.axhline(1, color=C_NEUT, ls="--", lw=0.8)
+        ax.set_xticks(x, [r["scheme"].replace("richer by ", "richer\n").replace("poorer by ", "poorer\n")
+                          .replace("within ", "within\n") for r in lim], fontsize=7.5)
+        ax.set_ylabel("cameras / expected from roads")
+        ax.set_title("(c) At municipal limits, by town income\nrelative to its county", fontsize=9.5)
+    fig.tight_layout()
+    save(fig, "fig_siting")
+
+
 def fig_trend_states():
     """Share of each state's commuters passing a mapped reader, date by date."""
     path = os.path.join(OUT, "trend_by_state.csv")
@@ -870,6 +935,7 @@ def main():
     fig_trend()
     fig_trend_gradients()
     fig_trend_states()
+    fig_siting()
 
 
 if __name__ == "__main__":
