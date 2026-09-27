@@ -1,0 +1,56 @@
+==============================================================================
+COVERAGE AGAINST FLOCK'S OWN INVENTORY (Michael 2026; records as of December 2025)
+==============================================================================
+335,701 device records; 127,060 read licence plates; in the 50 states + DC, 126,612 plate readers, of which in service 125,622, planned 18, decommissioned 972.
+
+A. RECALL: in-service inventory plate readers with a mapped ALPR node within d metres
+
+  map of 2026-01-01: 63,522 mapped ALPR nodes in the states, 51,743 tagged Flock
+    within   25 m: any mapped ALPR  35.5%   a Flock-tagged node  33.8%
+    within   50 m: any mapped ALPR  39.5%   a Flock-tagged node  37.7%
+    within  100 m: any mapped ALPR  43.7%   a Flock-tagged node  41.6%
+
+  map of 2026-09-22: 142,255 mapped ALPR nodes in the states, 114,352 tagged Flock
+    within   25 m: any mapped ALPR  61.2%   a Flock-tagged node  59.4%
+    within   50 m: any mapped ALPR  68.3%   a Flock-tagged node  66.4%
+    within  100 m: any mapped ALPR  74.0%   a Flock-tagged node  72.0%
+
+B. PRECISION: mapped Flock nodes with an inventory record within 50 m
+  2026-01-01: 51,743 Flock nodes; near an in-service plate reader 86.9%, any plate-reader record 87.2%, any Flock device record 89.7%
+  2026-09-22: 114,352 Flock nodes; near an in-service plate reader 70.9%, any plate-reader record 71.0%, any Flock device record 79.4%
+
+   recall at 50 m by state (in-service plate readers; current map), lowest first
+    GA 48% (14,985)   AZ 50% (3,460)   TN 59% (3,488)   AL 62% (2,792)   MS 62% (902)   SC 64% (2,170)   FL 67% (7,834)   AR 67% (687)
+    LA 67% (1,822)   DC 68% (102)   TX 68% (16,928)   MA 68% (1,094)   ME 69% (35)   NE 69% (344)   NJ 70% (1,269)   CO 71% (2,572)
+    HI 71% (14)   KY 72% (1,903)   IN 72% (3,363)   NC 72% (3,248)   OR 73% (317)   NV 73% (755)   MD 73% (766)   OH 74% (6,821)
+    CA 74% (19,400)   IL 74% (6,012)   MO 75% (2,492)   MN 75% (1,029)   WI 75% (1,911)   SD 75% (113)   NY 75% (1,931)   OK 76% (1,206)
+    NM 76% (573)   WA 76% (1,864)   PA 77% (1,005)   KS 78% (1,232)   VA 78% (3,117)   DE 78% (399)   CT 79% (735)   WV 81% (118)
+    UT 81% (397)   RI 83% (278)   MI 84% (2,976)   IA 85% (700)   ID 90% (239)   MT 90% (50)   ND 95% (97)   WY 95% (63)
+    NH 100% (4)   VT 100% (10)
+
+C. COVERAGE BIAS: recall at 50 m in the highest quartile of each tract attribute over the lowest
+   (national: crude ratio; within county / county x density: Mantel-Haenszel; 95% CI resampling counties)
+
+  map of 2026-01-01
+    % non-Hispanic Black     national Q1 41% Q4 33% ratio  0.80x [0.70-0.90]  *   within county  0.96x [0.90-1.02]   county x density  0.94x [0.88-1.00]  *
+    % Hispanic               national Q1 38% Q4 38% ratio  0.99x [0.88-1.10]   within county  1.00x [0.95-1.06]   county x density  1.00x [0.94-1.05]
+    median household income  national Q1 35% Q4 41% ratio  1.16x [1.06-1.27]  *   within county  1.06x [1.00-1.13]   county x density  1.08x [1.02-1.15]  *
+
+  map of 2026-09-22
+    % non-Hispanic Black     national Q1 70% Q4 62% ratio  0.88x [0.81-0.95]  *   within county  0.94x [0.90-0.98]  *   county x density  0.93x [0.89-0.97]  *
+    % Hispanic               national Q1 66% Q4 68% ratio  1.03x [0.95-1.10]   within county  1.01x [0.98-1.05]   county x density  1.01x [0.97-1.04]
+    median household income  national Q1 64% Q4 70% ratio  1.10x [1.04-1.16]  *   within county  1.06x [1.01-1.11]  *   county x density  1.08x [1.03-1.13]  *
+
+D. SITING FROM THE INVENTORY: in-service plate readers per kilometre of road (all classes), Q4/Q1
+
+  inventory plate readers per 100 km of road (compare siting.py's all-roads row)
+                           scheme                 Q1       Q2       Q3       Q4   Q4/Q1 [95% CI]
+  median household income  national             1.10     0.76     1.13     2.05    1.87x [1.60-2.14]  *   (rates)
+  median household income  within county        1.00     0.74     0.64     0.63    0.63x [0.56-0.69]  *   (vs Q1, MH)
+  median household income  county x density     1.00     0.82     0.77     0.76    0.76x [0.69-0.83]  *   (vs Q1, MH)
+  % non-Hispanic Black     national             0.42     1.05     1.84     2.56    6.08x [5.03-7.28]  *   (rates)
+  % non-Hispanic Black     within county        1.00     1.31     1.51     1.84    1.84x [1.66-2.06]  *   (vs Q1, MH)
+  % non-Hispanic Black     county x density     1.00     1.15     1.27     1.46    1.46x [1.34-1.59]  *   (vs Q1, MH)
+  % Hispanic               national             0.62     1.06     1.63     1.95    3.14x [2.44-3.98]  *   (rates)
+  % Hispanic               within county        1.00     1.11     1.24     1.42    1.42x [1.29-1.56]  *   (vs Q1, MH)
+  % Hispanic               county x density     1.00     1.03     1.12     1.19    1.19x [1.09-1.30]  *   (vs Q1, MH)

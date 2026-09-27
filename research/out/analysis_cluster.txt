@@ -1,0 +1,86 @@
+==============================================================================
+COUNTY-CLUSTER BOOTSTRAP: are the commute-exposure intervals too narrow?
+==============================================================================
+56,131 commutes from 2,608 origin counties. 'commute' = wstats.py's bootstrap (commutes
+resampled within state); 'county' = origin counties resampled within state. 2,000 replicates each.
+
+  statistic                                       point     commute 95% CI      county 95% CI  width x
+
+--- headline figures ---
+  share passing >= 1 camera                       0.753  [0.748, 0.758]     [0.740, 0.764]      2.63
+  mean cameras passed                             5.143  [5.046, 5.240]     [4.937, 5.396]      2.36
+  share reduced to zero                           0.842  [0.837, 0.847]     [0.828, 0.853]      2.60
+  median extra minutes                             1.62  [1.57, 1.68]       [1.48, 1.84]        3.19
+  median minutes per camera evaded                 0.76  [0.75, 0.78]       [0.74, 0.83]        3.01
+  median avoidance overhead (%)                    6.71  [6.50, 6.93]       [6.13, 7.49]        3.19
+
+--- quartile contrasts, ranked nationally (income: richest over poorest) ---
+  income: mean cameras Q4/Q1                       1.05  [0.99, 1.11]       [0.95, 1.19]        2.04
+  income: cameras per km Q4/Q1                     1.39  [1.31, 1.48]       [1.27, 1.63]        2.02
+  % Black: mean cameras Q4/Q1                      1.39  [1.32, 1.47]       [1.27, 1.53]        1.75
+  % Black: cameras per km Q4/Q1                    1.69  [1.59, 1.78]       [1.55, 1.91]        1.93
+  % Hispanic: mean cameras Q4/Q1                   1.46  [1.39, 1.54]       [1.34, 1.63]        1.86
+  % Hispanic: cameras per km Q4/Q1                 1.40  [1.32, 1.48]       [1.26, 1.58]        1.92
+
+--- quartile contrasts, ranked within county (n >= 40) ---
+  income: mean cameras Q4/Q1                       0.94  [0.88, 1.01]       [0.86, 1.04]        1.39
+  income: cameras per km Q4/Q1                     0.95  [0.87, 1.03]       [0.89, 1.04]        0.92
+  % Black: mean cameras Q4/Q1                      1.06  [0.99, 1.13]       [0.97, 1.14]        1.16
+  % Black: cameras per km Q4/Q1                    1.09  [0.99, 1.19]       [1.00, 1.19]        1.01
+  % Hispanic: mean cameras Q4/Q1                   1.01  [0.94, 1.08]       [0.93, 1.09]        1.14
+  % Hispanic: cameras per km Q4/Q1                 1.00  [0.91, 1.09]       [0.93, 1.09]        0.87
+
+--- cost of refusal by quartile: median extra minutes of the avoiding route, and median
+    minutes per camera evaded (commuters who evade any), lowest vs highest quartile ---
+  income national extra min: Q4 - Q1 (Q1 1.51, Q4 1.81)    +0.30  [+0.12, +0.47]  [-0.00, +0.75]      2.19
+  income national min/camera: Q4 - Q1 (Q1 0.80, Q4 0.73)    -0.07  [-0.12, -0.02]  [-0.17, -0.00]      1.70
+  % Black national extra min: Q4 - Q1 (Q1 1.28, Q4 1.94)    +0.66  [+0.50, +0.84]  [+0.37, +1.05]      1.95
+  % Black national min/camera: Q4 - Q1 (Q1 0.84, Q4 0.72)    -0.12  [-0.18, -0.08]  [-0.20, -0.07]      1.25
+  % Hispanic national extra min: Q4 - Q1 (Q1 1.33, Q4 1.89)    +0.56  [+0.40, +0.73]  [+0.26, +1.12]      2.60
+  % Hispanic national min/camera: Q4 - Q1 (Q1 0.93, Q4 0.66)    -0.27  [-0.32, -0.23]  [-0.35, -0.19]      1.84
+  income within county extra min: Q4 - Q1 (Q1 1.40, Q4 1.53)    +0.13  [-0.07, +0.34]  [-0.06, +0.37]      1.02
+  income within county min/camera: Q4 - Q1 (Q1 0.62, Q4 0.68)    +0.06  [+0.02, +0.10]  [+0.02, +0.12]      1.25
+  % Black within county extra min: Q4 - Q1 (Q1 1.61, Q4 1.44)    -0.18  [-0.41, -0.01]  [-0.40, +0.01]      1.02
+  % Black within county min/camera: Q4 - Q1 (Q1 0.69, Q4 0.59)    -0.10  [-0.13, -0.06]  [-0.14, -0.05]      1.28
+  % Hispanic within county extra min: Q4 - Q1 (Q1 1.57, Q4 1.58)    +0.01  [-0.17, +0.20]  [-0.22, +0.25]      1.28
+  % Hispanic within county min/camera: Q4 - Q1 (Q1 0.67, Q4 0.65)    -0.02  [-0.06, +0.03]  [-0.07, +0.03]      1.12
+
+--- % Black contrast by vendor (mean cameras of that vendor passed, Q4/Q1) ---
+  flock national                                   1.34  [1.26, 1.42]       [1.21, 1.49]        1.75
+  flock within county                              1.02  [0.94, 1.11]       [0.94, 1.12]        1.10
+  other national                                   1.57  [1.42, 1.75]       [1.25, 2.04]        2.43
+  other within county                              1.16  [1.04, 1.29]       [0.98, 1.29]        1.27
+  untagged national                                1.18  [1.01, 1.37]       [0.86, 1.50]        1.79
+  untagged within county                           1.02  [0.85, 1.22]       [0.77, 1.23]        1.27
+
+--- the trend's contrasts on the earlier maps (mean cameras passed, Q4/Q1; income: richest over poorest) ---
+  2024-01-01 income national                       1.10  [0.83, 1.48]       [0.79, 2.24]        2.21
+  2024-01-01 income within county                  0.74  [0.51, 1.06]       [0.60, 1.17]        1.04
+  2024-01-01 % Black national                      1.89  [1.41, 2.53]       [0.72, 3.00]        2.04
+  2024-01-01 % Black within county                 1.60  [1.12, 2.24]       [0.69, 2.09]        1.24
+  2024-01-01 % Hispanic national                   0.80  [0.59, 1.08]       [0.26, 1.21]        1.95
+  2024-01-01 % Hispanic within county              1.00  [0.72, 1.41]       [0.63, 1.20]        0.84
+  2024-07-01 income national                       1.05  [0.82, 1.34]       [0.82, 1.70]        1.67
+  2024-07-01 income within county                  0.83  [0.60, 1.15]       [0.67, 1.36]        1.27
+  2024-07-01 % Black national                      1.64  [1.28, 2.09]       [0.87, 2.34]        1.79
+  2024-07-01 % Black within county                 1.34  [0.96, 1.81]       [0.75, 1.81]        1.27
+  2024-07-01 % Hispanic national                   1.31  [1.01, 1.67]       [0.73, 2.01]        1.96
+  2024-07-01 % Hispanic within county              1.03  [0.76, 1.41]       [0.62, 1.30]        1.04
+  2025-01-01 income national                       1.58  [1.30, 1.93]       [1.24, 2.14]        1.40
+  2025-01-01 income within county                  0.92  [0.69, 1.23]       [0.67, 1.30]        1.20
+  2025-01-01 % Black national                      1.28  [1.04, 1.54]       [0.90, 1.90]        1.99
+  2025-01-01 % Black within county                 1.26  [0.97, 1.64]       [0.93, 1.73]        1.19
+  2025-01-01 % Hispanic national                   1.48  [1.22, 1.77]       [1.05, 2.19]        2.10
+  2025-01-01 % Hispanic within county              0.95  [0.72, 1.27]       [0.70, 1.27]        1.02
+  2025-07-01 income national                       1.25  [1.13, 1.38]       [1.03, 1.63]        2.32
+  2025-07-01 income within county                  0.89  [0.78, 1.02]       [0.76, 1.06]        1.25
+  2025-07-01 % Black national                      1.25  [1.13, 1.38]       [1.00, 1.55]        2.25
+  2025-07-01 % Black within county                 1.17  [1.03, 1.32]       [0.99, 1.37]        1.28
+  2025-07-01 % Hispanic national                   1.10  [0.99, 1.21]       [0.89, 1.47]        2.60
+  2025-07-01 % Hispanic within county              1.02  [0.89, 1.16]       [0.88, 1.21]        1.20
+  2026-01-01 income national                       1.16  [1.09, 1.24]       [1.02, 1.41]        2.53
+  2026-01-01 income within county                  0.92  [0.85, 1.00]       [0.84, 1.04]        1.34
+  2026-01-01 % Black national                      1.27  [1.20, 1.36]       [1.10, 1.45]        2.21
+  2026-01-01 % Black within county                 1.09  [1.00, 1.17]       [0.95, 1.20]        1.40
+  2026-01-01 % Hispanic national                   1.46  [1.37, 1.55]       [1.30, 1.69]        2.17
+  2026-01-01 % Hispanic within county              1.02  [0.94, 1.10]       [0.94, 1.13]        1.16

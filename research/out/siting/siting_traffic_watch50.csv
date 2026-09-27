@@ -1,0 +1,91 @@
+analysis,attribute,scheme,per,q1,q2,q3,q4,q4_over_q1,lo,hi
+tract:hpms-all:road,income,national,road-km,6.2092,4.5324,6.7525,13.4293,2.1628,1.8943,2.4512
+tract:hpms-all:road,income,within county,road-km,1.0,0.7606,0.6744,0.6763,0.6763,0.6071,0.743
+tract:hpms-all:road,income,county x density,road-km,1.0,0.8861,0.855,0.8835,0.8835,0.8135,0.9527
+tract:hpms-all:road,black,national,road-km,2.8484,7.037,11.7719,11.9443,4.1933,3.6652,4.737
+tract:hpms-all:road,black,within county,road-km,1.0,1.2656,1.4245,1.7088,1.7088,1.5605,1.888
+tract:hpms-all:road,black,county x density,road-km,1.0,1.0735,1.1306,1.2787,1.2787,1.1963,1.369
+tract:hpms-all:road,hispanic,national,road-km,3.5824,6.0634,10.2419,12.5361,3.4994,2.904,4.1491
+tract:hpms-all:road,hispanic,within county,road-km,1.0,1.1403,1.2459,1.4367,1.4367,1.3105,1.5779
+tract:hpms-all:road,hispanic,county x density,road-km,1.0,1.029,1.0657,1.1353,1.1353,1.0546,1.2242
+tract:hpms-all:traffic,income,national,vehicle-km,10.106,8.076,7.9347,9.4366,0.9338,0.8339,1.0257
+tract:hpms-all:traffic,income,within county,vehicle-km,1.0,0.806,0.7266,0.7525,0.7525,0.6859,0.8174
+tract:hpms-all:traffic,income,county x density,vehicle-km,1.0,0.8901,0.8777,0.9431,0.9431,0.867,1.0209
+tract:hpms-all:traffic,black,national,vehicle-km,6.3126,8.6394,9.9582,10.9539,1.7352,1.5778,1.9002
+tract:hpms-all:traffic,black,within county,vehicle-km,1.0,1.099,1.1519,1.3528,1.3528,1.2519,1.4651
+tract:hpms-all:traffic,black,county x density,vehicle-km,1.0,0.9906,0.9876,1.096,1.096,1.0298,1.1679
+tract:hpms-all:traffic,hispanic,national,vehicle-km,7.1862,8.5595,9.7843,10.3221,1.4364,1.2773,1.6248
+tract:hpms-all:traffic,hispanic,within county,vehicle-km,1.0,1.0408,1.0768,1.1838,1.1838,1.094,1.2841
+tract:hpms-all:traffic,hispanic,county x density,vehicle-km,1.0,0.9645,0.9598,0.9885,0.9885,0.921,1.0677
+tract:hpms-all-byclass:road,income,within county,road-km,1.0,0.7972,0.7208,0.7302,0.7302,0.6581,0.8022
+tract:hpms-all-byclass:traffic,income,within county,vehicle-km,1.0,0.7961,0.7211,0.7155,0.7155,0.6553,0.7743
+tract:hpms-all-byclass:road,income,county x density,road-km,1.0,0.8919,0.8767,0.9136,0.9136,0.8395,0.993
+tract:hpms-all-byclass:traffic,income,county x density,vehicle-km,1.0,0.8553,0.8247,0.8486,0.8486,0.7836,0.9169
+tract:hpms-all-byclass:road,black,within county,road-km,1.0,1.2174,1.3213,1.5635,1.5635,1.4331,1.7153
+tract:hpms-all-byclass:traffic,black,within county,vehicle-km,1.0,1.1076,1.1729,1.3887,1.3887,1.2923,1.4951
+tract:hpms-all-byclass:road,black,county x density,road-km,1.0,1.0683,1.0996,1.2299,1.2299,1.1477,1.3175
+tract:hpms-all-byclass:traffic,black,county x density,vehicle-km,1.0,1.031,1.0485,1.1963,1.1963,1.1238,1.2732
+tract:hpms-all-byclass:road,hispanic,within county,road-km,1.0,1.1144,1.1941,1.3388,1.3388,1.2237,1.4687
+tract:hpms-all-byclass:traffic,hispanic,within county,vehicle-km,1.0,1.0399,1.0965,1.2215,1.2215,1.1391,1.3142
+tract:hpms-all-byclass:road,hispanic,county x density,road-km,1.0,1.0168,1.046,1.1039,1.1039,1.0236,1.1946
+tract:hpms-all-byclass:traffic,hispanic,county x density,vehicle-km,1.0,0.982,1.0088,1.0768,1.0768,1.0083,1.1541
+tract:hpms-all:aadt-per-km,income,within county,vehicle-km per road-km,1.0,0.9793,0.9916,0.9999,0.9999,0.9745,1.027
+tract:hpms-all:aadt-per-km,income,county x density,vehicle-km per road-km,1.0,1.024,1.0409,1.0772,1.0772,1.055,1.0996
+tract:hpms-all:aadt-per-km,black,within county,vehicle-km per road-km,1.0,1.0823,1.1142,1.1176,1.1176,1.0928,1.1444
+tract:hpms-all:aadt-per-km,black,county x density,vehicle-km per road-km,1.0,1.0266,1.047,1.0366,1.0366,1.0195,1.0541
+tract:hpms-all:aadt-per-km,hispanic,within county,vehicle-km per road-km,1.0,1.0586,1.0818,1.1068,1.1068,1.079,1.1384
+tract:hpms-all:aadt-per-km,hispanic,county x density,vehicle-km per road-km,1.0,1.0278,1.0397,1.0534,1.0534,1.0314,1.0779
+tract:hpms-all:op=police:traffic,income,national,vehicle-km,1.2261,0.8222,0.8536,1.1785,0.9612,0.6785,1.3472
+tract:hpms-all:op=police:traffic,income,within county,vehicle-km,1.0,0.6903,0.535,0.5243,0.5243,0.4199,0.6413
+tract:hpms-all:op=police:traffic,income,county x density,vehicle-km,1.0,0.7319,0.6662,0.6991,0.6991,0.5752,0.8481
+tract:hpms-all:op=police:traffic,black,national,vehicle-km,0.631,1.0387,1.1562,1.3048,2.0677,1.3808,3.0227
+tract:hpms-all:op=police:traffic,black,within county,vehicle-km,1.0,1.1838,1.511,1.9468,1.9468,1.5835,2.446
+tract:hpms-all:op=police:traffic,black,county x density,vehicle-km,1.0,1.0515,1.2222,1.4901,1.4901,1.2083,1.8491
+tract:hpms-all:op=police:traffic,hispanic,national,vehicle-km,0.8136,1.0361,1.1272,1.1323,1.3917,0.8815,2.2834
+tract:hpms-all:op=police:traffic,hispanic,within county,vehicle-km,1.0,1.0046,1.0547,1.333,1.333,1.0847,1.6553
+tract:hpms-all:op=police:traffic,hispanic,county x density,vehicle-km,1.0,0.9397,0.919,1.0662,1.0662,0.8993,1.2786
+tract:hpms-surface:road,income,national,road-km,6.5365,4.7716,7.2599,14.8017,2.2645,1.9796,2.5754
+tract:hpms-surface:road,income,within county,road-km,1.0,0.7533,0.6617,0.6519,0.6519,0.5834,0.7194
+tract:hpms-surface:road,income,county x density,road-km,1.0,0.8754,0.8356,0.8445,0.8445,0.7757,0.9117
+tract:hpms-surface:road,black,national,road-km,2.9423,7.5447,12.9116,12.993,4.4159,3.8381,5.0148
+tract:hpms-surface:road,black,within county,road-km,1.0,1.292,1.4669,1.7834,1.7834,1.6237,1.9738
+tract:hpms-surface:road,black,county x density,road-km,1.0,1.0965,1.1685,1.3409,1.3409,1.2512,1.4392
+tract:hpms-surface:road,hispanic,national,road-km,3.7132,6.4193,11.1106,13.826,3.7235,3.0713,4.448
+tract:hpms-surface:road,hispanic,within county,road-km,1.0,1.1603,1.2792,1.4912,1.4912,1.3614,1.6415
+tract:hpms-surface:road,hispanic,county x density,road-km,1.0,1.0443,1.0932,1.1804,1.1804,1.0958,1.2721
+tract:hpms-surface:traffic,income,national,vehicle-km,16.4114,13.0553,13.6263,16.7651,1.0216,0.914,1.1258
+tract:hpms-surface:traffic,income,within county,vehicle-km,1.0,0.7857,0.7109,0.7017,0.7017,0.6429,0.7606
+tract:hpms-surface:traffic,income,county x density,vehicle-km,1.0,0.8535,0.8163,0.8341,0.8341,0.7698,0.9006
+tract:hpms-surface:traffic,black,national,vehicle-km,9.8024,14.4673,17.3722,19.5289,1.9923,1.8029,2.1913
+tract:hpms-surface:traffic,black,within county,vehicle-km,1.0,1.11,1.197,1.4308,1.4308,1.3282,1.5433
+tract:hpms-surface:traffic,black,county x density,vehicle-km,1.0,1.035,1.0622,1.2255,1.2255,1.1495,1.3067
+tract:hpms-surface:traffic,hispanic,national,vehicle-km,11.3013,14.0844,16.5061,19.2627,1.7045,1.4849,1.9567
+tract:hpms-surface:traffic,hispanic,within county,vehicle-km,1.0,1.0517,1.113,1.2552,1.2552,1.1729,1.3492
+tract:hpms-surface:traffic,hispanic,county x density,vehicle-km,1.0,0.9863,1.0207,1.0888,1.0888,1.0232,1.1649
+tract:hpms-surface-byclass:road,income,within county,road-km,1.0,0.7929,0.7161,0.7307,0.7307,0.6551,0.8055
+tract:hpms-surface-byclass:traffic,income,within county,vehicle-km,1.0,0.7898,0.7157,0.7136,0.7136,0.6519,0.7771
+tract:hpms-surface-byclass:road,income,county x density,road-km,1.0,0.8974,0.877,0.9156,0.9156,0.8381,0.9981
+tract:hpms-surface-byclass:traffic,income,county x density,vehicle-km,1.0,0.8601,0.8219,0.8476,0.8476,0.7777,0.9199
+tract:hpms-surface-byclass:road,black,within county,road-km,1.0,1.2278,1.3248,1.5848,1.5848,1.4488,1.7455
+tract:hpms-surface-byclass:traffic,black,within county,vehicle-km,1.0,1.1087,1.1687,1.4003,1.4003,1.2987,1.5104
+tract:hpms-surface-byclass:road,black,county x density,road-km,1.0,1.0718,1.1045,1.2407,1.2407,1.1554,1.3319
+tract:hpms-surface-byclass:traffic,black,county x density,vehicle-km,1.0,1.0314,1.0507,1.2039,1.2039,1.1285,1.2842
+tract:hpms-surface-byclass:road,hispanic,within county,road-km,1.0,1.1213,1.205,1.3615,1.3615,1.2391,1.4971
+tract:hpms-surface-byclass:traffic,hispanic,within county,vehicle-km,1.0,1.0421,1.1,1.2366,1.2366,1.1523,1.3308
+tract:hpms-surface-byclass:road,hispanic,county x density,road-km,1.0,1.0211,1.0548,1.1167,1.1167,1.0329,1.21
+tract:hpms-surface-byclass:traffic,hispanic,county x density,vehicle-km,1.0,0.9823,1.0144,1.0858,1.0858,1.0169,1.1657
+tract:hpms-surface:aadt-per-km,income,within county,vehicle-km per road-km,1.0,0.9817,0.9776,0.9955,0.9955,0.971,1.0192
+tract:hpms-surface:aadt-per-km,income,county x density,vehicle-km per road-km,1.0,1.029,1.0475,1.0831,1.0831,1.0628,1.1038
+tract:hpms-surface:aadt-per-km,black,within county,vehicle-km per road-km,1.0,1.1206,1.158,1.1673,1.1673,1.1409,1.1956
+tract:hpms-surface:aadt-per-km,black,county x density,vehicle-km per road-km,1.0,1.0467,1.0733,1.0678,1.0678,1.0502,1.0868
+tract:hpms-surface:aadt-per-km,hispanic,within county,vehicle-km per road-km,1.0,1.0907,1.1218,1.1475,1.1475,1.1183,1.1785
+tract:hpms-surface:aadt-per-km,hispanic,county x density,vehicle-km per road-km,1.0,1.0473,1.0632,1.0727,1.0727,1.0509,1.0952
+tract:hpms-surface:op=police:traffic,income,national,vehicle-km,2.0174,1.3351,1.4964,2.1201,1.0509,0.7362,1.4705
+tract:hpms-surface:op=police:traffic,income,within county,vehicle-km,1.0,0.6531,0.5022,0.4757,0.4757,0.3835,0.5898
+tract:hpms-surface:op=police:traffic,income,county x density,vehicle-km,1.0,0.7077,0.6048,0.6201,0.6201,0.5056,0.765
+tract:hpms-surface:op=police:traffic,black,national,vehicle-km,0.9977,1.7656,2.0385,2.349,2.3543,1.5812,3.4238
+tract:hpms-surface:op=police:traffic,black,within county,vehicle-km,1.0,1.2095,1.6021,2.153,2.153,1.7107,2.6888
+tract:hpms-surface:op=police:traffic,black,county x density,vehicle-km,1.0,1.1123,1.3285,1.7053,1.7053,1.3687,2.1001
+tract:hpms-surface:op=police:traffic,hispanic,national,vehicle-km,1.302,1.7416,1.9214,2.12,1.6283,1.0251,2.6777
+tract:hpms-surface:op=police:traffic,hispanic,within county,vehicle-km,1.0,1.0325,1.0625,1.4664,1.4664,1.1997,1.8074
+tract:hpms-surface:op=police:traffic,hispanic,county x density,vehicle-km,1.0,0.9619,0.9726,1.1781,1.1781,0.9924,1.4085

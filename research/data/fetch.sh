@@ -3,12 +3,12 @@
 set -uo pipefail
 cd "$(dirname "$0")"
 
-echo "[1/4] tract centroids (Census Gazetteer 2024)"
+echo "[1/5] tract centroids (Census Gazetteer 2024)"
 [ -f tracts.zip ] || curl -sL -o tracts.zip \
   "https://www2.census.gov/geo/docs/maps-data/data/gazetteer/2024_Gazetteer/2024_Gaz_tracts_national.zip"
 [ -f 2024_Gaz_tracts_national.txt ] || unzip -o -q tracts.zip
 
-echo "[2/4] ACS 5-year tract demographics"
+echo "[2/5] ACS 5-year tract demographics"
 # B19013 median household income; B03002 race/ethnicity (Hispanic-aware, unlike B02001);
 # B08301 means of transportation to work (who drives, for the commute-mode check)
 for t in b19013 b03002 b08301; do
@@ -16,7 +16,7 @@ for t in b19013 b03002 b08301; do
     "https://www2.census.gov/programs-surveys/acs/summary_file/2022/table-based-SF/data/5YRData/acsdt5y2022-$t.dat"
 done
 
-echo "[3/4] LODES8 origin-destination commute flows"
+echo "[3/5] LODES8 origin-destination commute flows"
 # JT00 = all jobs, main = within-state. Real worker flows, so sampled O/D pairs
 # reflect actual commuting rather than uniform random points on a map.
 #
@@ -45,7 +45,7 @@ for st in "$@"; do
   else echo "   $st $got $(du -h "lodes/${st}_od_main_JT00_${got}.csv.gz" | cut -f1)$([ "$got" != 2022 ] && echo '  (2022 not published; using latest)')"; fi
 done
 
-echo "[4/4] TIGER/Line 2022 tract, block-group and place boundaries (siting analysis)"
+echo "[4/5] TIGER/Line 2022 tract, block-group and place boundaries (siting analysis)"
 # 2022 geography matches the ACS 2022 5-year tables above, Connecticut's planning-region
 # codes included. Full-resolution TIGER/Line rather than the generalized cartographic
 # files: siting.py measures distances to boundaries in tens of metres.
@@ -64,4 +64,14 @@ for st in "$@"; do
     else rm -f "$f.part"; echo "   $st ${layer##*:} FAILED"; fi
   done
 done
+echo "[5/5] HPMS 2024 traffic counts on the federal-aid road system (siting_traffic.py)"
+# FHWA's Highway Performance Monitoring System, the USDOT/BTS National Transportation Atlas
+# Database edition: one file geodatabase with a layer per state, 2.6 GB zipped and 5.3 GB
+# unpacked. hpms_sample.py reads it with pyogrio (pip install pyogrio), which bundles GDAL.
+mkdir -p hpms
+if [ ! -d hpms/HPMS2024.gdb ]; then
+  curl -sfL -C - -o hpms/HPMS2024.zip \
+    "https://www.arcgis.com/sharing/rest/content/items/5e6a977c2d7c4ec1bdc82e684d3384f2/data" \
+    && unzip -q -o hpms/HPMS2024.zip -d hpms || echo "   HPMS FAILED"
+fi
 echo "done"

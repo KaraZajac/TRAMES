@@ -53,6 +53,18 @@ def albers(lon, lat, reg):
     return rho * np.sin(th), rho0 - rho * np.cos(th)
 
 
+def albers_inv(x, y, reg):
+    p1, p2, p0, l0 = (np.radians(v) for v in CONES[reg])
+    n = (np.sin(p1) + np.sin(p2)) / 2
+    C = np.cos(p1) ** 2 + 2 * n * np.sin(p1)
+    rho0 = R * np.sqrt(C - 2 * n * np.sin(p0)) / n
+    x, y = np.asarray(x, float), np.asarray(y, float)
+    rho = np.hypot(x, rho0 - y)
+    th = np.arctan2(x, rho0 - y)
+    lat = np.arcsin(np.clip((C - (rho * n / R) ** 2) / (2 * n), -1, 1))
+    return np.degrees(l0 + th / n), np.degrees(lat)
+
+
 def destination(lon, lat, bearing_deg, dist_m):
     """Point dist_m along a great circle from (lon, lat) at bearing (degrees from north)."""
     la, lo, b = np.radians(lat), np.radians(lon), np.radians(bearing_deg)

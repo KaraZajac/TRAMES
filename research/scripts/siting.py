@@ -309,25 +309,30 @@ def mh(C, N, s2c, bt):
     return np.array(pts), np.stack(reps, axis=1)
 
 
-def rates_by_quartile(P, bt, ucix, strata, Q, pop, cam_u, cam_mask, null_u, null_mask, per, title, csv_rows, key):
+def rates_by_quartile(P, bt, ucix, strata, Q, pop, cam_u, cam_mask, null_u, null_mask, per, title, csv_rows, key,
+                      null_w=None, scale=None, per_label=None):
     """Nationally: crude rates by quartile (cameras per 100 km of road, or per 10,000 residents)
     and their ratio. Within county, and within county x density tercile: Mantel-Haenszel rate
     ratios of each quartile over the lowest, stratified by county (or county x tercile). A crude
     pooled rate is not a within-county comparison: within-county quartiles balance residents, not
     kilometres, so rural counties' long and camera-sparse networks would pile into whichever
-    quartile their tracts fall in and stand in for other counties' roads."""
+    quartile their tracts fall in and stand in for other counties' roads.
+    null_w weights the road points (default: each is per_km of road; siting_traffic.py passes
+    vehicle-kilometres), and scale then sets the unit of the national rates."""
     P(f"\n  {title}")
     P(f"  {'':24s} {'scheme':16s} {'Q1':>8s} {'Q2':>8s} {'Q3':>8s} {'Q4':>8s}   Q4/Q1 [95% CI]")
     cu = cam_u[cam_mask]
     nu = null_u[null_mask] if per == "road" else None
+    nw = null_w[null_mask] if (per == "road" and null_w is not None) else None
     for a in ("income", "black", "hispanic"):
         for scheme in ("national", "within county", "county x density"):
             q = Q[(a, scheme)].astype(int)
             if scheme == "national":
                 num = bt.table(ucix[cu], q[cu], ncols=5)
-                den = (bt.table(ucix[nu], q[nu], ncols=5) if per == "road" else
+                den = (bt.table(ucix[nu], q[nu], values=nw, ncols=5) if per == "road" else
                        bt.table(ucix[q > 0], q[q > 0], values=pop[q > 0], ncols=5))
-                vals = div(num.sum(0)[1:], den.sum(0)[1:]) * (100.0 / per_km if per == "road" else 1e4)
+                vals = div(num.sum(0)[1:], den.sum(0)[1:]) * (
+                    scale if scale is not None else (100.0 / per_km if per == "road" else 1e4))
                 rn, rd = bt.reps(num), bt.reps(den)
                 ratio = float(div(vals[3], vals[0]))
                 lo, hi = ci(div(div(rn[:, 4], rd[:, 4]), div(rn[:, 1], rd[:, 1])))
@@ -337,7 +342,7 @@ def rates_by_quartile(P, bt, ucix, strata, Q, pop, cam_u, cam_mask, null_u, null
                 C = np.zeros((len(s2c), 5)); N = np.zeros((len(s2c), 5))
                 np.add.at(C, (u2s[cu], q[cu]), 1)
                 if per == "road":
-                    np.add.at(N, (u2s[nu], q[nu]), 1)
+                    np.add.at(N, (u2s[nu], q[nu]), 1 if nw is None else nw)
                 else:
                     r_ = q > 0
                     np.add.at(N, (u2s[r_], q[r_]), pop[r_])
@@ -348,7 +353,7 @@ def rates_by_quartile(P, bt, ucix, strata, Q, pop, cam_u, cam_mask, null_u, null
                 note = "   (vs Q1, MH)"
             P(f"  {LABEL[a]:24s} {scheme:16s} " + " ".join(f"{v:8.2f}" for v in vals)
               + f"   {fmt_ratio(ratio, lo, hi)}{note}")
-            csv_rows.append({"analysis": key, "attribute": a, "scheme": scheme, "per": per,
+            csv_rows.append({"analysis": key, "attribute": a, "scheme": scheme, "per": per_label or per,
                              **{f"q{i + 1}": round(float(v), 4) for i, v in enumerate(vals)},
                              "q4_over_q1": round(float(ratio), 4), "lo": round(float(lo), 4), "hi": round(float(hi), 4)})
 
