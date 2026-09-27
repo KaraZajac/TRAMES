@@ -118,6 +118,11 @@ def _parse_single(v, default_span):
     if m:
         a, b = float(m.group(1)), float(m.group(2))
         span = (b - a) % 360.0
+        if span == 0 and a != b:
+            # "0-360": an arc that closes on itself is a camera that sees all round. Until
+            # 2026-09-27 this fell through to the default span, a 45-degree wedge at 22.5
+            # degrees, on 33 of the 142,991 nodes of the September 2026 snapshot.
+            return a % 360.0, 360.0
         if span == 0:
             span = default_span
         center = (a + span / 2.0) % 360.0
@@ -174,15 +179,26 @@ def cone_polygon(lat, lon, bearing, span, radius_m, segments=8):
     Equirectangular offset — at a 60 m radius the error against a proper geodesic is
     millimetres, and it avoids a pyproj dependency.
     """
-    coords = [(lon, lat)]
-    start = bearing - span / 2.0
-    step = span / segments
     lat_rad = math.radians(lat)
     m_per_deg_lat = 111320.0
     m_per_deg_lon = 111320.0 * math.cos(lat_rad)
     if abs(m_per_deg_lon) < 1.0:      # guard near the poles
         m_per_deg_lon = 1.0
 
+    if span >= 360.0:
+        # All round: a disc, with no apex vertex (a 360-degree wedge would close on itself
+        # through the centre and be invalid), at the same radius as a wedge.
+        n = max(segments * 3, 24)
+        ring = []
+        for i in range(n):
+            th = 2.0 * math.pi * i / n
+            ring.append((lon + radius_m * math.sin(th) / m_per_deg_lon,
+                         lat + radius_m * math.cos(th) / m_per_deg_lat))
+        return Polygon(ring)
+
+    coords = [(lon, lat)]
+    start = bearing - span / 2.0
+    step = span / segments
     for i in range(segments + 1):
         th = math.radians(start + i * step)
         dlat = radius_m * math.cos(th) / m_per_deg_lat
