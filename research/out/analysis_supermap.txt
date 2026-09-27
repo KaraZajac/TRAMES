@@ -1,0 +1,148 @@
+==============================================================================
+ALPR SUPER-MAP: every device the project has data for, deduplicated
+==============================================================================
+
+osm          142,991 ALPR nodes, Overpass base 2026-09-22T01:19:20Z
+osm-history  6 dated snapshots: 2024-01-01 (1,112), 2024-07-01 (1,420), 2025-01-01 (7,583), 2025-07-01 (22,690), 2026-01-01 (63,526), 2026-07-24 (120,838)
+flock        335,701 device records (flocksurveillance.org, December 2025)
+portals      1,528 agency portals, 39,499 cameras published between them
+node-dates   exact dates for 169,565 ever-ALPR nodes from the OSM history dump of 2026-09-14
+roads        the ways each device's cone or circle touches, for 381,686 devices (north-america.osm.pbf)
+
+geography    477,191 of 478,692 records fall in the United States (476,780 in a tract of the 50 states + DC, 411 in a territory by bounding box)
+             excluded as outside the US: 736 OSM nodes (Canada and Mexico, which the Overpass boxes cover on purpose), 765 registry records
+
+------------------------------------------------------------------------------
+PAIRING (one-to-one, within 50 m, Flock-or-unrecorded vendor to a plate reader)
+------------------------------------------------------------------------------
+  eligible: 121,300 OSM nodes (128,578 heads), 187,170 registry plate readers
+  paired:   88,754 pairs covering 87,883 OSM nodes (72.5% of eligible nodes) and 47.4% of eligible registry readers
+  separation between the two sources' coordinates: median 5.6 m, mean 9.6 m, 90th percentile 25.1 m
+  share of eligible registry plate readers that a mapped node stands on, by status —
+  a planned camera is one nobody can photograph yet, and a decommissioned one is a pole the map may not
+  have caught up with:
+    in_service        126,389 eligible    63.8% paired
+    planned            41,311 eligible    16.7% paired
+    decommissioned     19,470 eligible     6.2% paired
+                                        of which a node stands on more than one: 845 nodes
+  The in-service figure runs a few points under validate_inventory.py's recall at the same
+  50 m, and should: that measure asks whether any node is near, and lets one node answer
+  for every camera on the pole, where this pairing makes each node answer for as many cameras
+  as it has bearings and no more.
+  unpaired OSM nodes in the US: 54,372 — another vendor, or a camera the December 2025 registry does not carry
+
+  rotationAngle against OSM's surveyed bearing, on 73,226 pairs whose node carries one bearing:
+    median |difference| 90.0 deg (independent angles would give 90.0); within 20 deg 7.8%. Best axial fit
+    (rotationAngle + 49 deg, modulo 180) leaves 50.3% of pairs 30 deg or more out. Carried verbatim; no bearing is derived from it.
+
+  389,308 devices in 246,744 sites (25 m single linkage); largest site 1,208 devices
+  241,033 devices within 100 m of a counted road
+
+------------------------------------------------------------------------------
+THE MERGED MAP
+------------------------------------------------------------------------------
+  389,308 devices in the United States, of which
+    88,754 carry both sources (a registry device with a mapped node on it)
+    246,182 only the registry
+    54,372 only OpenStreetMap
+  180,761 read plates and are either in service or carry no status, OSM recording none — the
+  population TRAMES routes around
+  140,261 carry a surveyed bearing, the only direction evidence any source gives
+
+  by class
+    alpr                    238,561
+    video                    68,633
+    unknown                  51,139
+    audio_detection          27,264
+    infrastructure            1,178
+    mobile_platform             915
+    speaker                     742
+    drone_infrastructure        399
+    external_integration        300
+    drone                       177
+
+  by status
+    in_service              213,368
+    planned                  83,396
+    unrecorded (OSM only)    54,372
+    decommissioned           38,161
+    unknown                      11
+
+  by vendor (top 25 of 100 distinct)
+    Flock Safety                        363,910
+    Motorola Solutions                    7,522
+    (unrecorded)                          4,443
+    Genetec                               3,472
+    Axis Communications                   3,272
+    Leonardo                              1,236
+    Rekor                                   789
+    PlateSmart                              735
+    Axon Enterprise                         671
+    Ubicquia                                596
+    Ekin                                    595
+    Neology                                 559
+    Verkada                                 222
+    Avigilon                                176
+    NDI Recognition Systems                 115
+    Redspeed                                115
+    Mav                                     106
+    LiveView Technologies                    80
+    Insight LPR                              74
+    Kapsch                                   59
+    Uniview                                  49
+    Packetalk                                46
+    CoStar                                   43
+    Bosch                                    43
+    Mobotix                                  35
+
+  vendor strings passed through unrecognised: 50 distinct, 101 devices — ICamera (24), PLATELOGIQ (4), Cyber Secure (4), soundvue noise camera (4), Avast (4), Ubiquiti (3), Eyehawk technologies (3), MPH Industries (2)
+
+  data-quality flags
+    flock_tagged_but_not_in_registry     28,974
+    shared_coordinate                    23,036
+    sources_far_apart                     8,909
+    no_road_within_reach                  7,622
+    shared_osm_node                       1,716
+    name_says_retired                     1,329
+    name_says_temporary                   1,229
+    possible_duplicate_mapping              950
+    flock_internal                          749
+    labelled_test                           598
+    osm_position_uncertain                  204
+    possible_duplicate                      121
+
+  operator recorded (OSM): 23,424 devices; inferred from a same-site device: 7,281
+  agency linked from an operator name: 5,744 devices; the place's police portal known for 106,013
+  nearest counted road (HPMS) within 100 m: 241,033 devices
+
+  earliest record of the device in any source, by basis (see fields.earliest_record)
+    registry: record created              127,955
+    registry: in the bulk import          122,991
+    osm: first mapped as an ALPR           59,263
+    osm: checked                              144
+    osm: start_date                            21
+    osm: surveyed                               4
+
+  roads watched: with a cone 138,218 touch a road, 2,043 none; with a circle 243,468 touch a road, 5,579 none
+
+  by state (all devices / plate readers live or undated)
+    CA 51,969/26,671     TX 50,288/21,508     GA 43,100/17,963     FL 26,047/12,193     IL 18,896/9,984      OH 14,530/8,559   
+    IN 13,228/4,615      TN 12,290/4,908      AZ 11,090/4,480      VA 10,733/4,160      NC 10,647/4,602      CO 9,741/3,509    
+    NY 9,487/5,073       MI 8,167/4,051       MO 7,369/3,984       PA 7,342/3,972       WA 6,432/2,581       AL 6,406/3,744    
+    SC 6,180/2,922       OK 4,898/1,761       LA 4,866/2,734       NJ 4,656/2,683       WI 4,419/2,528       KY 4,099/2,336    
+    KS 3,811/2,318       AR 3,625/1,155       MN 3,443/1,650       MS 3,372/1,494       CT 3,308/1,223       NM 3,071/1,155    
+    NV 3,056/1,231       MA 2,907/1,530       MD 2,629/1,277       UT 1,986/1,048       IA 1,894/946         OR 1,486/632      
+    NE 1,198/649         ND 1,167/390         DE 1,105/578         ID 896/474           DC 832/134           RI 777/356        
+    WV 467/251           SD 386/191           PR 299/61            ME 154/71            VI 112/56            MT 111/102        
+    HI 109/92            WY 101/75            NH 95/70             VT 26/26             AK 5/5            
+
+  first appearance on the OSM map, for devices carrying an OSM node
+    2024-01-01                1,005
+    2024-07-01                  291
+    2025-01-01                5,770
+    2025-07-01               14,076
+    2026-01-01               39,019
+    2026-07-24               56,241
+    after 2026-07-24         26,724
+
+wrote out/supermap/alpr_supermap.json (523.2 MB, 53.8 MB gzipped) in 74 s

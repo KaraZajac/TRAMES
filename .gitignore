@@ -32,6 +32,11 @@ tile_cache/
 server/alpr/variants/
 # historical camera sets (fetch-history.sh) — regenerable from Overpass attic data
 server/alpr/history/
+# the map on the first of every month (~1 GB), and the quarterly dates routed in the second
+# history graph (symlinks into it) — rebuilt in seconds by snapshot_from_versions.py from
+# osm-history/node_versions.jsonl, then build_cones.py
+server/alpr/history_monthly/
+server/alpr/history2/
 # OSM full-history dump (163 GB) and the validation extracts built from it
 server/alpr/osm-history/
 server/alpr/history-planet/
@@ -53,6 +58,12 @@ research/out/**/*.log
 # siting analysis: the 11.5M-point road sample and the point-to-unit assignment caches (~2 GB).
 # Rebuild with research/scripts/road_sample.py; siting.py re-creates the caches on its first run.
 research/out/siting/*.npz
+# the merged device map: ~520 MB of JSON holding every source record, rebuilt from the sources
+# above by research/scripts/build_supermap.py (~4 min cold, ~80 s once its assignment caches
+# exist), plus those caches. The report beside it (out/analysis_supermap.txt) IS committed.
+research/out/supermap/*.json
+research/out/supermap/*.json.gz
+research/out/supermap/assign/
 # US state boundary GeoJSON fetched by make_figures.py
 research/paper/figures/us-states.json
 
