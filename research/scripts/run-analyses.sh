@@ -42,9 +42,12 @@ echo "== cone-radius sensitivity"
 "$PY" scripts/analyze_radius.py --sweep out/radius_sweep.csv --results out/results.csv "${DESIGN[@]}" \
     -o out/analysis_radius.txt > /dev/null
 
-echo "== trend across camera-map dates"
+echo "== trend across camera-map dates: every monthly map, plus the two 2026 Overpass snapshots"
+# server/alpr/history_monthly/<date>/ is built by server/alpr/snapshot_from_versions.py from the
+# edit history (node_dates.py); avoidance comes from out/history/<date>/results.csv where
+# run-history.sh has routed that date (the first of every quarter).
 SNAPS=()
-for d in "$H"/*/; do
+for d in ../server/alpr/history_monthly/*/; do
   [ -s "$d/alpr.geojson" ] && SNAPS+=(--snapshot "$(basename "$d")=${d%/}")
 done
 SNAPS+=(--snapshot 2026-07-24=../server/alpr/region_cache.2026-07-24:../server/graphhopper/custom_areas.2026-07-24/alpr.geojson)

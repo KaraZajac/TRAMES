@@ -8,67 +8,198 @@ A date's map is what was MAPPED by then, not what was installed.
 --- 2024-01-01: 1,112 mapped cameras in the 50 states + DC ---
   commutes passing >=1 camera     2.2% [2.0–2.4]
   mean cameras passed            0.05 [0.05–0.06]   median 0   >=5: 0.3%   per km 0.0010
-  income    Q4/Q1 national  1.10x [0.83–1.48]   within-county  0.74x [0.51–1.06]
-  black     Q4/Q1 national  1.89x [1.41–2.53]   within-county  1.60x [1.12–2.24]
-  hispanic  Q4/Q1 national  0.80x [0.59–1.08]   within-county  1.00x [0.72–1.41]
   reduced to ZERO cameras         99.9% [99.8–99.9]   (of exposed commutes: 95.0% [92.7–96.9])
   median extra time               0.00 min [0.00–0.00]   (of exposed: 0.77 [0.68–0.94])   overhead 0.00%
   minutes per camera evaded       0.42 [0.38–0.47]   residual 2.9% of baseline
 
+--- 2024-02-01: 1,157 mapped cameras in the 50 states + DC ---
+  commutes passing >=1 camera     2.7% [2.5–2.9]
+  mean cameras passed            0.07 [0.06–0.08]   median 0   >=5: 0.3%   per km 0.0013
+  (no avoidance run for this date)
+
+--- 2024-03-01: 1,206 mapped cameras in the 50 states + DC ---
+  commutes passing >=1 camera     2.8% [2.6–3.0]
+  mean cameras passed            0.07 [0.07–0.08]   median 0   >=5: 0.4%   per km 0.0014
+  (no avoidance run for this date)
+
+--- 2024-04-01: 1,267 mapped cameras in the 50 states + DC ---
+  commutes passing >=1 camera     2.9% [2.7–3.1]
+  mean cameras passed            0.08 [0.07–0.08]   median 0   >=5: 0.4%   per km 0.0015
+  reduced to ZERO cameras         99.9% [99.8–99.9]   (of exposed commutes: 95.7% [93.8–97.2])
+  median extra time               0.00 min [0.00–0.00]   (of exposed: 1.04 [0.89–1.18])   overhead 0.00%
+  minutes per camera evaded       0.51 [0.45–0.57]   residual 2.2% of baseline
+
+--- 2024-05-01: 1,312 mapped cameras in the 50 states + DC ---
+  commutes passing >=1 camera     3.0% [2.7–3.2]
+  mean cameras passed            0.08 [0.07–0.09]   median 0   >=5: 0.4%   per km 0.0015
+  (no avoidance run for this date)
+
+--- 2024-06-01: 1,374 mapped cameras in the 50 states + DC ---
+  commutes passing >=1 camera     3.2% [2.9–3.4]
+  mean cameras passed            0.08 [0.07–0.09]   median 0   >=5: 0.4%   per km 0.0015
+  (no avoidance run for this date)
+
 --- 2024-07-01: 1,420 mapped cameras in the 50 states + DC ---
   commutes passing >=1 camera     3.3% [3.0–3.5]
   mean cameras passed            0.08 [0.08–0.09]   median 0   >=5: 0.4%   per km 0.0016
-  income    Q4/Q1 national  1.05x [0.82–1.34]   within-county  0.83x [0.60–1.15]
-  black     Q4/Q1 national  1.64x [1.28–2.09]   within-county  1.34x [0.96–1.81]
-  hispanic  Q4/Q1 national  1.31x [1.01–1.67]   within-county  1.03x [0.76–1.41]
   reduced to ZERO cameras         99.9% [99.8–99.9]   (of exposed commutes: 96.0% [94.4–97.4])
   median extra time               0.00 min [0.00–0.00]   (of exposed: 1.00 [0.85–1.10])   overhead 0.00%
   minutes per camera evaded       0.49 [0.44–0.55]   residual 2.1% of baseline
 
+--- 2024-08-01: 1,463 mapped cameras in the 50 states + DC ---
+  commutes passing >=1 camera     3.3% [3.1–3.6]
+  mean cameras passed            0.09 [0.08–0.09]   median 0   >=5: 0.4%   per km 0.0016
+  (no avoidance run for this date)
+
+--- 2024-09-01: 1,509 mapped cameras in the 50 states + DC ---
+  commutes passing >=1 camera     3.3% [3.1–3.6]
+  mean cameras passed            0.09 [0.08–0.09]   median 0   >=5: 0.4%   per km 0.0016
+  (no avoidance run for this date)
+
+--- 2024-10-01: 1,581 mapped cameras in the 50 states + DC ---
+  commutes passing >=1 camera     3.5% [3.2–3.7]
+  mean cameras passed            0.09 [0.08–0.10]   median 0   >=5: 0.5%   per km 0.0017
+  reduced to ZERO cameras         99.9% [99.8–99.9]   (of exposed commutes: 96.0% [94.3–97.4])
+  median extra time               0.00 min [0.00–0.00]   (of exposed: 1.02 [0.86–1.17])   overhead 0.00%
+  minutes per camera evaded       0.52 [0.47–0.60]   residual 2.1% of baseline
+
+--- 2024-11-01: 1,724 mapped cameras in the 50 states + DC ---
+  commutes passing >=1 camera     3.7% [3.4–3.9]
+  mean cameras passed            0.09 [0.09–0.10]   median 0   >=5: 0.5%   per km 0.0018
+  (no avoidance run for this date)
+
+--- 2024-12-01: 4,894 mapped cameras in the 50 states + DC ---
+  commutes passing >=1 camera     8.4% [8.1–8.8]
+  mean cameras passed            0.25 [0.23–0.28]   median 0   >=5: 1.3%   per km 0.0047
+  (no avoidance run for this date)
+
 --- 2025-01-01: 7,583 mapped cameras in the 50 states + DC ---
   commutes passing >=1 camera    12.3% [11.9–12.7]
   mean cameras passed            0.35 [0.32–0.38]   median 0   >=5: 1.8%   per km 0.0065
-  income    Q4/Q1 national  1.58x [1.30–1.93]   within-county  0.92x [0.69–1.23]
-  black     Q4/Q1 national  1.28x [1.04–1.54]   within-county  1.26x [0.97–1.64]
-  hispanic  Q4/Q1 national  1.48x [1.22–1.77]   within-county  0.95x [0.72–1.27]
   reduced to ZERO cameras         99.1% [98.9–99.2]   (of exposed commutes: 92.5% [91.3–93.7])
   median extra time               0.00 min [0.00–0.00]   (of exposed: 1.20 [1.13–1.27])   overhead 0.00%
   minutes per camera evaded       0.61 [0.58–0.65]   residual 3.4% of baseline
 
+--- 2025-02-01: 9,980 mapped cameras in the 50 states + DC ---
+  commutes passing >=1 camera    15.2% [14.7–15.6]
+  mean cameras passed            0.43 [0.40–0.46]   median 0   >=5: 2.3%   per km 0.0081
+  (no avoidance run for this date)
+
+--- 2025-03-01: 11,818 mapped cameras in the 50 states + DC ---
+  commutes passing >=1 camera    17.2% [16.8–17.7]
+  mean cameras passed            0.51 [0.48–0.54]   median 0   >=5: 2.8%   per km 0.0095
+  (no avoidance run for this date)
+
+--- 2025-04-01: 14,238 mapped cameras in the 50 states + DC ---
+  commutes passing >=1 camera    20.4% [19.9–20.9]
+  mean cameras passed            0.59 [0.56–0.62]   median 0   >=5: 3.3%   per km 0.0111
+  reduced to ZERO cameras         98.5% [98.3–98.7]   (of exposed commutes: 92.7% [91.8–93.6])
+  median extra time               0.00 min [0.00–0.00]   (of exposed: 1.24 [1.18–1.31])   overhead 0.00%
+  minutes per camera evaded       0.63 [0.60–0.66]   residual 3.1% of baseline
+
+--- 2025-05-01: 17,511 mapped cameras in the 50 states + DC ---
+  commutes passing >=1 camera    24.2% [23.7–24.7]
+  mean cameras passed            0.74 [0.71–0.77]   median 0   >=5: 4.3%   per km 0.0138
+  (no avoidance run for this date)
+
+--- 2025-06-01: 20,044 mapped cameras in the 50 states + DC ---
+  commutes passing >=1 camera    26.3% [25.8–26.9]
+  mean cameras passed            0.83 [0.80–0.86]   median 0   >=5: 5.0%   per km 0.0155
+  (no avoidance run for this date)
+
 --- 2025-07-01: 22,690 mapped cameras in the 50 states + DC ---
   commutes passing >=1 camera    29.4% [28.8–30.0]
   mean cameras passed            0.94 [0.91–0.98]   median 0   >=5: 5.7%   per km 0.0176
-  income    Q4/Q1 national  1.25x [1.13–1.38]   within-county  0.89x [0.78–1.02]
-  black     Q4/Q1 national  1.25x [1.13–1.38]   within-county  1.17x [1.03–1.32]
-  hispanic  Q4/Q1 national  1.10x [0.99–1.21]   within-county  1.02x [0.89–1.16]
   reduced to ZERO cameras         97.8% [97.6–98.0]   (of exposed commutes: 92.4% [91.8–93.1])
   median extra time               0.00 min [0.00–0.00]   (of exposed: 1.36 [1.30–1.43])   overhead 0.00%
   minutes per camera evaded       0.65 [0.63–0.68]   residual 2.9% of baseline
 
+--- 2025-08-01: 25,011 mapped cameras in the 50 states + DC ---
+  commutes passing >=1 camera    31.3% [30.8–31.9]
+  mean cameras passed            1.02 [0.98–1.05]   median 0   >=5: 6.3%   per km 0.0190
+  (no avoidance run for this date)
+
+--- 2025-09-01: 28,896 mapped cameras in the 50 states + DC ---
+  commutes passing >=1 camera    34.6% [34.0–35.2]
+  mean cameras passed            1.13 [1.09–1.17]   median 0   >=5: 7.1%   per km 0.0212
+  (no avoidance run for this date)
+
+--- 2025-10-01: 34,383 mapped cameras in the 50 states + DC ---
+  commutes passing >=1 camera    38.4% [37.8–39.0]
+  mean cameras passed            1.33 [1.29–1.37]   median 0   >=5: 8.5%   per km 0.0248
+  reduced to ZERO cameras         96.8% [96.5–97.0]   (of exposed commutes: 91.6% [91.0–92.2])
+  median extra time               0.00 min [0.00–0.00]   (of exposed: 1.51 [1.45–1.57])   overhead 0.00%
+  minutes per camera evaded       0.66 [0.64–0.68]   residual 3.0% of baseline
+
+--- 2025-11-01: 40,645 mapped cameras in the 50 states + DC ---
+  commutes passing >=1 camera    42.6% [42.0–43.1]
+  mean cameras passed            1.52 [1.47–1.56]   median 0   >=5: 10.0%   per km 0.0284
+  (no avoidance run for this date)
+
+--- 2025-12-01: 52,688 mapped cameras in the 50 states + DC ---
+  commutes passing >=1 camera    50.7% [50.1–51.3]
+  mean cameras passed            2.00 [1.95–2.05]   median 1   >=5: 14.2%   per km 0.0374
+  (no avoidance run for this date)
+
 --- 2026-01-01: 63,522 mapped cameras in the 50 states + DC ---
   commutes passing >=1 camera    55.9% [55.3–56.4]
   mean cameras passed            2.44 [2.39–2.50]   median 1   >=5: 17.8%   per km 0.0457
-  income    Q4/Q1 national  1.16x [1.09–1.24]   within-county  0.92x [0.85–1.00]
-  black     Q4/Q1 national  1.27x [1.20–1.36]   within-county  1.09x [1.00–1.17]
-  hispanic  Q4/Q1 national  1.46x [1.37–1.55]   within-county  1.02x [0.94–1.10]
   reduced to ZERO cameras         92.7% [92.3–93.0]   (of exposed commutes: 86.9% [86.3–87.4])
   median extra time               0.01 min [0.00–0.08]   (of exposed: 1.98 [1.92–2.04])   overhead 0.04%
   minutes per camera evaded       0.70 [0.69–0.72]   residual 4.3% of baseline
 
+--- 2026-02-01: 72,281 mapped cameras in the 50 states + DC ---
+  commutes passing >=1 camera    59.1% [58.5–59.6]
+  mean cameras passed            2.71 [2.65–2.76]   median 1   >=5: 20.1%   per km 0.0507
+  (no avoidance run for this date)
+
+--- 2026-03-01: 78,819 mapped cameras in the 50 states + DC ---
+  commutes passing >=1 camera    61.1% [60.6–61.7]
+  mean cameras passed            2.92 [2.86–2.98]   median 1   >=5: 21.9%   per km 0.0547
+  (no avoidance run for this date)
+
+--- 2026-04-01: 85,845 mapped cameras in the 50 states + DC ---
+  commutes passing >=1 camera    63.4% [62.8–63.9]
+  mean cameras passed            3.14 [3.08–3.21]   median 1   >=5: 23.7%   per km 0.0589
+  reduced to ZERO cameras         90.3% [89.9–90.7]   (of exposed commutes: 84.7% [84.1–85.3])
+  median extra time               0.56 min [0.52–0.60]   (of exposed: 2.32 [2.24–2.38])   overhead 2.13%
+  minutes per camera evaded       0.73 [0.71–0.75]   residual 4.7% of baseline
+
+--- 2026-05-01: 92,846 mapped cameras in the 50 states + DC ---
+  commutes passing >=1 camera    65.2% [64.7–65.8]
+  mean cameras passed            3.39 [3.33–3.46]   median 2   >=5: 25.5%   per km 0.0635
+  (no avoidance run for this date)
+
+--- 2026-06-01: 100,390 mapped cameras in the 50 states + DC ---
+  commutes passing >=1 camera    67.4% [66.8–67.8]
+  mean cameras passed            3.74 [3.66–3.82]   median 2   >=5: 27.6%   per km 0.0701
+  (no avoidance run for this date)
+
+--- 2026-07-01: 109,853 mapped cameras in the 50 states + DC ---
+  commutes passing >=1 camera    69.6% [69.1–70.1]
+  mean cameras passed            4.08 [3.99–4.16]   median 2   >=5: 29.8%   per km 0.0763
+  reduced to ZERO cameras         87.9% [87.4–88.3]   (of exposed commutes: 82.6% [82.0–83.2])
+  median extra time               1.03 min [0.98–1.07]   (of exposed: 2.67 [2.60–2.75])   overhead 4.24%
+  minutes per camera evaded       0.75 [0.74–0.77]   residual 5.0% of baseline
+
 --- 2026-07-24: 120,272 mapped cameras in the 50 states + DC ---
   commutes passing >=1 camera    71.7% [71.2–72.2]
   mean cameras passed            4.40 [4.31–4.49]   median 2   >=5: 31.9%   per km 0.0823
-  income    Q4/Q1 national  1.10x [1.03–1.16]   within-county  0.94x [0.87–1.02]
-  black     Q4/Q1 national  1.33x [1.26–1.41]   within-county  1.05x [0.97–1.12]
-  hispanic  Q4/Q1 national  1.46x [1.38–1.54]   within-county  1.01x [0.93–1.08]
+  (no avoidance run for this date)
+
+--- 2026-08-01: 123,455 mapped cameras in the 50 states + DC ---
+  commutes passing >=1 camera    72.3% [71.8–72.8]
+  mean cameras passed            4.52 [4.43–4.62]   median 2   >=5: 32.7%   per km 0.0847
+  (no avoidance run for this date)
+
+--- 2026-09-01: 137,188 mapped cameras in the 50 states + DC ---
+  commutes passing >=1 camera    74.6% [74.1–75.1]
+  mean cameras passed            4.97 [4.88–5.07]   median 3   >=5: 35.7%   per km 0.0931
   (no avoidance run for this date)
 
 --- 2026-09-22: 142,257 mapped cameras in the 50 states + DC ---
   commutes passing >=1 camera    75.3% [74.8–75.7]
   mean cameras passed            5.14 [5.04–5.24]   median 3   >=5: 36.5%   per km 0.0962
-  income    Q4/Q1 national  1.05x [0.99–1.11]   within-county  0.94x [0.88–1.01]
-  black     Q4/Q1 national  1.39x [1.32–1.47]   within-county  1.06x [0.99–1.13]
-  hispanic  Q4/Q1 national  1.46x [1.38–1.54]   within-county  1.00x [0.93–1.08]
   reduced to ZERO cameras         84.2% [83.7–84.7]   (of exposed commutes: 79.0% [78.4–79.7])
   median extra time               1.62 min [1.57–1.68]   (of exposed: 3.14 [3.05–3.22])   overhead 6.71%
   minutes per camera evaded       0.76 [0.75–0.78]   residual 5.1% of baseline
@@ -80,35 +211,110 @@ COHORTS: the commutes exposed on one date, followed to later maps
   exposed on 2024-01-01: 780 commutes, 2.2% of commuters
   map date     mean cams         reach zero  med +min       min per camera
   2024-01-01        2.46  95.0% [92.8–96.8]      0.77     0.42 [0.38–0.47]
+  2024-04-01        2.59  94.5% [92.2–96.5]      0.84     0.41 [0.38–0.46]
   2024-07-01        2.63  94.5% [92.2–96.4]      0.84     0.41 [0.38–0.45]
+  2024-10-01        2.73  94.5% [92.2–96.4]      0.86     0.41 [0.38–0.46]
   2025-01-01        3.34  94.2% [91.9–96.2]      1.23     0.49 [0.43–0.54]
+  2025-04-01        3.86  93.9% [91.6–95.9]      1.40     0.49 [0.45–0.54]
   2025-07-01        5.52  93.2% [90.8–95.3]      1.80     0.49 [0.46–0.53]
+  2025-10-01        7.20  91.7% [89.2–94.1]      2.18     0.46 [0.42–0.51]
   2026-01-01        9.23  85.2% [81.8–88.5]      2.97     0.47 [0.43–0.51]
+  2026-04-01       10.62  83.4% [80.1–86.6]      3.47     0.50 [0.46–0.55]
+  2026-07-01       12.32  81.3% [78.0–84.5]      4.40     0.52 [0.47–0.57]
   2026-09-22       14.37  78.7% [75.2–82.1]      5.90     0.53 [0.48–0.57]
+
+  exposed on 2024-04-01: 946 commutes, 2.9% of commuters
+  map date     mean cams         reach zero  med +min       min per camera
+  2024-04-01        2.69  95.7% [93.9–97.2]      1.04     0.51 [0.45–0.57]
+  2024-07-01        2.72  95.6% [93.9–97.1]      1.05     0.49 [0.45–0.57]
+  2024-10-01        2.81  95.3% [93.3–96.9]      1.07     0.51 [0.45–0.58]
+  2025-01-01        3.39  94.7% [92.6–96.5]      1.34     0.57 [0.52–0.65]
+  2025-04-01        3.73  94.5% [92.3–96.3]      1.61     0.59 [0.52–0.70]
+  2025-07-01        5.30  93.5% [91.2–95.5]      2.25     0.57 [0.52–0.63]
+  2025-10-01        6.82  91.5% [88.9–93.9]      2.58     0.54 [0.50–0.59]
+  2026-01-01        8.96  86.1% [82.8–89.0]      3.54     0.53 [0.50–0.58]
+  2026-04-01       10.51  84.4% [81.1–87.3]      4.37     0.58 [0.53–0.63]
+  2026-07-01       12.59  81.9% [78.7–85.0]      5.48     0.61 [0.55–0.66]
+  2026-09-22       16.54  71.2% [67.6–74.9]      7.41     0.62 [0.57–0.66]
 
   exposed on 2024-07-01: 1076 commutes, 3.3% of commuters
   map date     mean cams         reach zero  med +min       min per camera
   2024-07-01        2.57  96.0% [94.4–97.4]      1.00     0.49 [0.44–0.56]
+  2024-10-01        2.67  95.7% [93.9–97.2]      1.01     0.51 [0.44–0.58]
   2025-01-01        3.33  94.1% [91.9–96.1]      1.38     0.60 [0.54–0.68]
+  2025-04-01        3.78  93.9% [91.7–95.9]      1.65     0.62 [0.54–0.72]
   2025-07-01        5.25  93.0% [90.7–95.1]      2.31     0.58 [0.53–0.64]
+  2025-10-01        6.62  91.3% [88.7–93.5]      2.60     0.55 [0.51–0.61]
   2026-01-01        8.63  85.3% [82.1–88.3]      3.55     0.55 [0.51–0.60]
+  2026-04-01       10.09  83.8% [80.6–86.8]      4.35     0.60 [0.55–0.65]
+  2026-07-01       12.20  81.2% [77.9–84.4]      5.43     0.64 [0.58–0.69]
   2026-09-22       15.78  69.6% [66.2–73.4]      7.19     0.64 [0.59–0.67]
+
+  exposed on 2024-10-01: 1136 commutes, 3.5% of commuters
+  map date     mean cams         reach zero  med +min       min per camera
+  2024-10-01        2.59  96.0% [94.3–97.3]      1.02     0.52 [0.47–0.59]
+  2025-01-01        3.29  94.1% [91.9–96.0]      1.38     0.58 [0.55–0.66]
+  2025-04-01        3.78  93.9% [91.7–95.9]      1.66     0.61 [0.54–0.70]
+  2025-07-01        5.23  93.3% [91.1–95.3]      2.37     0.58 [0.54–0.64]
+  2025-10-01        6.53  90.4% [87.7–92.8]      2.68     0.57 [0.52–0.62]
+  2026-01-01        8.51  84.7% [81.5–87.7]      3.56     0.57 [0.52–0.61]
+  2026-04-01        9.92  83.4% [80.2–86.4]      4.46     0.62 [0.56–0.67]
+  2026-07-01       12.04  80.7% [77.5–84.0]      5.54     0.66 [0.61–0.72]
+  2026-09-22       15.40  69.3% [65.9–73.1]      7.40     0.65 [0.61–0.72]
 
   exposed on 2025-01-01: 4875 commutes, 12.3% of commuters
   map date     mean cams         reach zero  med +min       min per camera
   2025-01-01        2.85  92.5% [91.2–93.6]      1.20     0.61 [0.58–0.65]
+  2025-04-01        3.48  91.3% [90.0–92.5]      1.46     0.64 [0.60–0.67]
   2025-07-01        4.33  89.8% [88.5–91.0]      1.84     0.65 [0.61–0.68]
+  2025-10-01        5.33  87.5% [86.1–88.9]      2.28     0.63 [0.60–0.67]
   2026-01-01        7.09  84.1% [82.5–85.6]      3.25     0.68 [0.65–0.72]
+  2026-04-01        8.37  80.1% [78.4–81.7]      4.17     0.74 [0.71–0.78]
+  2026-07-01       10.41  77.1% [75.5–78.8]      4.98     0.78 [0.74–0.81]
   2026-09-22       12.30  69.8% [67.9–71.6]      6.56     0.83 [0.79–0.87]
+
+  exposed on 2025-04-01: 8566 commutes, 20.4% of commuters
+  map date     mean cams         reach zero  med +min       min per camera
+  2025-04-01        2.91  92.7% [91.8–93.6]      1.24     0.63 [0.61–0.66]
+  2025-07-01        3.69  91.2% [90.3–92.1]      1.55     0.65 [0.62–0.68]
+  2025-10-01        4.51  89.4% [88.4–90.4]      1.98     0.65 [0.63–0.68]
+  2026-01-01        6.20  85.1% [84.0–86.2]      2.92     0.70 [0.68–0.74]
+  2026-04-01        7.43  81.2% [79.9–82.4]      3.71     0.76 [0.73–0.79]
+  2026-07-01        9.20  77.2% [76.0–78.5]      4.53     0.80 [0.76–0.82]
+  2026-09-22       10.93  71.0% [69.5–72.4]      5.66     0.83 [0.80–0.87]
 
   exposed on 2025-07-01: 12647 commutes, 29.4% of commuters
   map date     mean cams         reach zero  med +min       min per camera
   2025-07-01        3.20  92.4% [91.7–93.1]      1.36     0.65 [0.63–0.68]
+  2025-10-01        3.91  90.8% [90.0–91.5]      1.71     0.66 [0.64–0.69]
   2026-01-01        5.67  84.8% [83.9–85.7]      2.70     0.71 [0.68–0.74]
+  2026-04-01        6.81  81.4% [80.4–82.3]      3.34     0.75 [0.73–0.77]
+  2026-07-01        8.36  78.2% [77.2–79.2]      4.06     0.78 [0.75–0.80]
   2026-09-22        9.90  72.6% [71.5–73.7]      5.00     0.81 [0.79–0.84]
+
+  exposed on 2025-10-01: 17086 commutes, 38.4% of commuters
+  map date     mean cams         reach zero  med +min       min per camera
+  2025-10-01        3.46  91.6% [91.0–92.2]      1.51     0.66 [0.65–0.68]
+  2026-01-01        5.13  86.0% [85.3–86.8]      2.41     0.71 [0.69–0.73]
+  2026-04-01        6.20  82.5% [81.6–83.3]      3.06     0.74 [0.72–0.76]
+  2026-07-01        7.65  79.6% [78.7–80.5]      3.71     0.77 [0.75–0.80]
+  2026-09-22        9.13  74.4% [73.4–75.3]      4.54     0.80 [0.77–0.82]
 
   exposed on 2026-01-01: 25001 commutes, 55.9% of commuters
   map date     mean cams         reach zero  med +min       min per camera
   2026-01-01        4.37  86.9% [86.3–87.5]      1.98     0.70 [0.69–0.72]
+  2026-04-01        5.38  83.6% [82.9–84.2]      2.61     0.73 [0.71–0.75]
+  2026-07-01        6.67  80.6% [79.9–81.3]      3.17     0.76 [0.74–0.78]
   2026-09-22        8.04  75.6% [74.9–76.4]      3.95     0.78 [0.76–0.80]
+
+  exposed on 2026-04-01: 29095 commutes, 63.4% of commuters
+  map date     mean cams         reach zero  med +min       min per camera
+  2026-04-01        4.96  84.7% [84.1–85.2]      2.32     0.73 [0.71–0.75]
+  2026-07-01        6.21  81.6% [81.0–82.3]      2.89     0.76 [0.74–0.78]
+  2026-09-22        7.55  76.8% [76.1–77.5]      3.63     0.78 [0.76–0.80]
+
+  exposed on 2026-07-01: 32517 commutes, 69.6% of commuters
+  map date     mean cams         reach zero  med +min       min per camera
+  2026-07-01        5.86  82.6% [82.0–83.1]      2.67     0.75 [0.74–0.77]
+  2026-09-22        7.17  77.9% [77.3–78.6]      3.38     0.77 [0.76–0.79]
 

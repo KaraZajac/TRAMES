@@ -15,7 +15,14 @@ cd "$(dirname "$0")/.."
 
 PY=/home/kara/Projects/TRAMES/server/.venv/bin/python
 GH=../server/graphhopper
-H=../server/alpr/history
+# A second set of dates lives in its own graph (TRAMES_HISTORY_SET=2: server/alpr/history2,
+# config/trames-history2.yml, custom_areas_history2, data/graph-cache-history2), so that
+# neither import has to hold every camera map at once.
+SET="${TRAMES_HISTORY_SET:-}"
+H=../server/alpr/history$SET
+CFG=config/trames-history$SET.yml
+AREAS=custom_areas_history$SET
+GRAPH=data/graph-cache-history$SET
 
 DATES=()
 for d in "$H"/*/; do [ -s "$d/alpr.geojson" ] && DATES+=("$(basename "$d")"); done
@@ -24,26 +31,26 @@ if curl -s -o /dev/null http://localhost:8989/info; then
   echo "a routing server is already answering on :8989 — stop it first" >&2; exit 1
 fi
 
-mkdir -p "$GH/custom_areas_history"
+mkdir -p "$GH/$AREAS"
 changed=0
 for d in "${DATES[@]}"; do
-  dst="$GH/custom_areas_history/alpr_${d//-/_}.geojson"
+  dst="$GH/$AREAS/alpr_${d//-/_}.geojson"
   cmp -s "$H/$d/alpr.geojson" "$dst" 2>/dev/null || { cp "$H/$d/alpr.geojson" "$dst"; changed=1; }
 done
-if [ "$changed" = 1 ] || [ ! -s "$GH/data/graph-cache-history/properties" ]; then
+if [ "$changed" = 1 ] || [ ! -s "$GH/$GRAPH/properties" ]; then
   echo "== importing the history graph with ${#DATES[@]} dated areas (~2 h)  $(date -u +%H:%M:%SZ)"
-  rm -rf "$GH/data/graph-cache-history"
+  rm -rf "$GH/$GRAPH"
   (cd "$GH" && java -Xmx32g "-Ddw.graphhopper.datareader.file=data/north-america.osm.pbf" \
-        -jar graphhopper-web-11.0.jar import config/trames-history.yml > logs/history-import.log 2>&1) || true
-  grep -q "flushed graph" "$GH/logs/history-import.log" \
-    || { echo "import FAILED — see $GH/logs/history-import.log" >&2; tail -5 "$GH/logs/history-import.log" >&2; exit 1; }
-  grep -h "areas available" "$GH/logs/history-import.log" | tail -1
+        -jar graphhopper-web-11.0.jar import "$CFG" > "logs/history${SET}-import.log" 2>&1) || true
+  grep -q "flushed graph" "$GH/logs/history${SET}-import.log" \
+    || { echo "import FAILED — see $GH/logs/history${SET}-import.log" >&2; tail -5 "$GH/logs/history${SET}-import.log" >&2; exit 1; }
+  grep -h "areas available" "$GH/logs/history${SET}-import.log" | tail -1
 fi
 
 echo "== serving  $(date -u +%H:%M:%SZ)"
-(cd "$GH" && setsid nohup java -Xmx40g -jar graphhopper-web-11.0.jar server config/trames-history.yml \
-      > logs/history-server.log 2>&1 < /dev/null &)
-trap 'pkill -f "graphhopper-web-11.0.jar server config/trames-history.yml" || true' EXIT
+(cd "$GH" && setsid nohup java -Xmx40g -jar graphhopper-web-11.0.jar server "$CFG" \
+      > "logs/history${SET}-server.log" 2>&1 < /dev/null &)
+trap 'pkill -f "graphhopper-web-11.0.jar server $CFG" || true' EXIT
 (cd "$GH" && ./healthcheck.sh 900)
 
 for d in "${DATES[@]}"; do
