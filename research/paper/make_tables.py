@@ -59,6 +59,8 @@ def by_state():
 
 
 def trend():
+    """The routed dates only: every monthly map is in trend.csv and fig_trend, but a table of
+    thirty-five rows says less than the figure does."""
     T = list(csv.DictReader(open(os.path.join(OUT, "trend.csv"))))
     has = lambda r, k: r.get(k) not in ("", None)
     L = [r"\begin{tabular}{lrrrrrrr}", r"\toprule",
@@ -66,46 +68,63 @@ def trend():
          r"& ALPR & & [95\% CI] & passed & reach zero (\%) & exposed & camera \\",
          r"\midrule"]
     for r in T:
+        if not has(r, "pct_zero_after"):
+            continue
         av = (f"{num(float(r['pct_zero_after_given_exposed']), 1)} & {num(float(r['median_extra_min_given_exposed']), 2)} & "
-              f"{num(float(r['median_min_per_camera']), 2)}") if has(r, "pct_zero_after") else "--- & --- & ---"
+              f"{num(float(r['median_min_per_camera']), 2)}")
         L.append(f"{r['date']} & {num(float(r['cameras_us']))} & {num(float(r['pct_ge1']), 1)} & "
                  f"[{float(r['pct_ge1_lo']):.1f}--{float(r['pct_ge1_hi']):.1f}] & {num(float(r['mean_cameras']), 2)} & {av} \\\\")
     L += [r"\bottomrule", r"\end{tabular}"]
     return "\n".join(L) + "\n"
 
 
-SITING_ROWS = [
-    ("tract:all:road", "Cameras per km of road (any class)"),
-    ("tract:arterial:road", "Arterial cameras per km of arterial"),
-    ("tract:residential-street:road", "Residential cameras per km of residential street"),
-    ("tract:all:people", "Cameras per resident"),
-    ("tract:op=police:road", "Police-operated cameras per km of road"),
-    ("tract:edge:all roads", "Edge concentration (edge/interior), all roads"),
-    ("tract:edge:residential", "Edge concentration, residential streets"),
-    ("bg:arterial:road", "Block groups: arterial cameras per km"),
-    ("bg:edge:all roads", "Block groups: edge concentration, all roads"),
+SITING_ROWS = [      # (csv, analysis, label); None rules off a group
+    ("siting", "tract:all:road", "Cameras per km of road (any class)"),
+    ("siting", "tract:arterial:road", "Arterial cameras per km of arterial"),
+    ("siting", "tract:residential-street:road", "Residential cameras per km of residential street"),
+    ("siting", "tract:all:people", "Cameras per resident"),
+    ("siting", "tract:op=police:road", "Police-operated cameras per km of road"),
+    None,
+    ("siting_traffic", "tract:hpms-all-byclass:road", "Counted roads: cameras per km, by class"),
+    ("siting_traffic", "tract:hpms-all-byclass:traffic", "Counted roads: cameras per vehicle-km, by class"),
+    ("siting_traffic", "tract:hpms-surface:op=police:traffic", "Police-operated per vehicle-km of surface road"),
+    None,
+    ("siting", "tract:edge:all roads", "Edge concentration (edge/interior), all roads"),
+    ("siting", "tract:edge:residential", "Edge concentration, residential streets"),
+    None,
+    ("siting", "bg:arterial:road", "Block groups: arterial cameras per km"),
+    ("siting_traffic", "bg:hpms-all-byclass:traffic", "Block groups: cameras per vehicle-km, by class"),
+    ("siting", "bg:edge:all roads", "Block groups: edge concentration, all roads"),
 ]
 
 
 def siting():
-    """Q4/Q1 siting contrasts from siting.py: within county x density tercile (with intervals)
-    and within county alone (point estimates)."""
-    path = os.path.join(OUT, "siting", "siting.csv")
-    R = list(csv.DictReader(open(path)))
-    get = lambda an, a, sch: next((r for r in R if r["analysis"] == an and r["attribute"] == a
-                                   and r["scheme"] == sch), None)
+    """Q4/Q1 siting contrasts from siting.py and siting_traffic.py: within county x density
+    tercile (with intervals) and within county alone (point estimates)."""
+    R = {}
+    for name in ("siting", "siting_traffic"):
+        path = os.path.join(OUT, "siting", f"{name}.csv")
+        R[name] = list(csv.DictReader(open(path))) if os.path.exists(path) else []
+    get = lambda src, an, a, sch: next((r for r in R[src] if r["analysis"] == an and r["attribute"] == a
+                                        and r["scheme"] == sch), None)
     L = [r"\begin{tabular}{lrrrrrr}", r"\toprule",
          r"& \multicolumn{3}{c}{Within county and density tercile} & \multicolumn{3}{c}{Within county} \\",
          r"\cmidrule(lr){2-4} \cmidrule(lr){5-7}",
          r"Highest over lowest quartile & \% Black & \% Hispanic & Income & \% Black & \% Hispanic & Income \\",
          r"\midrule"]
-    for an, label in SITING_ROWS:
+    for row in SITING_ROWS:
+        if row is None:
+            L.append(r"\midrule")
+            continue
+        src, an, label = row
+        if not any(r["analysis"] == an for r in R[src]):
+            continue
         cells = []
         for a in ("black", "hispanic", "income"):
-            r = get(an, a, "county x density")
+            r = get(src, an, a, "county x density")
             cells.append(f"{float(r['q4_over_q1']):.2f} [{float(r['lo']):.2f}--{float(r['hi']):.2f}]" if r else "---")
         for a in ("black", "hispanic", "income"):
-            r = get(an, a, "within county")
+            r = get(src, an, a, "within county")
             cells.append(f"{float(r['q4_over_q1']):.2f}" if r else "---")
         L.append(f"{label} & " + " & ".join(cells) + r" \\")
     L += [r"\bottomrule", r"\end{tabular}"]

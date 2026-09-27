@@ -27,6 +27,7 @@ ROOT = os.path.dirname(HERE)
 FIG = os.environ.get("TRAMES_FIG_DIR", os.path.join(HERE, "figures"))
 STATES_JSON = os.path.join(HERE, "figures", "us-states.json")
 sys.path.insert(0, os.path.join(ROOT, "scripts"))
+sys.path.insert(0, os.path.join(ROOT, "..", "server", "alpr"))
 
 os.makedirs(FIG, exist_ok=True)
 
@@ -116,9 +117,11 @@ DESIGN = (os.path.join(OUT, "sampling_frame.json"), os.path.join(OUT, "sample_dr
 
 
 def load_cameras():
-    """(lon, lat, vendor_class) for every mapped ALPR node in the 50 states + DC. The Overpass
-    regions overlap Canada and Mexico; the paper is about American commutes, so only
-    installations inside a state are drawn and counted."""
+    """(lon, lat, vendor_class, has_cone) for every mapped ALPR node in the 50 states + DC. The
+    Overpass regions overlap Canada and Mexico; the paper is about American commutes, so only
+    installations inside a state are drawn and counted. has_cone marks a camera with a bearing
+    build_cones.py can parse: only those can contribute exposure."""
+    from build_cones import DIRECTION_KEYS, parse_directions
     keys = ("manufacturer", "surveillance:manufacturer", "brand", "surveillance:brand")
     seen = {}
     for p in glob.glob(os.path.join(ROOT, "..", "server", "alpr", "region_cache", "*.json")):
@@ -130,7 +133,7 @@ def load_cameras():
             if el.get("type") == "node" and el.get("lat") is not None:
                 seen[el["id"]] = el
     locate = state_locator()
-    lon, lat, cls = [], [], []
+    lon, lat, cls, cone = [], [], [], []
     for el in seen.values():
         if locate(el["lat"], el["lon"]) is None:
             continue
@@ -138,7 +141,9 @@ def load_cameras():
         v = next((t[k] for k in keys if t.get(k)), None)
         lon.append(el["lon"]); lat.append(el["lat"])
         cls.append("flock" if v and "flock" in v.lower() else ("other" if v else "untagged"))
-    return np.array(lon), np.array(lat), np.array(cls)
+        raw = next((t[k] for k in DIRECTION_KEYS if t.get(k)), None)
+        cone.append(bool(raw and parse_directions(raw)))
+    return np.array(lon), np.array(lat), np.array(cls), np.array(cone)
 
 
 def load_results(path):
@@ -232,7 +237,7 @@ def fig_camera_map(lon, lat, cls):
     x, y = albers(lon, lat)
     keep = (x > -0.42) & (x < 0.52) & (y > -0.02) & (y < 0.62)
     hb = ax.hexbin(x[keep], y[keep], gridsize=110, bins="log", mincnt=1,
-                   cmap="magma_r", linewidths=0, zorder=2)
+                   cmap="magma_r", linewidths=0, zorder=2, rasterized=True)
     draw_basemap(ax, lw=0.3)
     ax.set_xlim(-0.42, 0.52)
     ax.set_ylim(-0.02, 0.62)
@@ -268,8 +273,8 @@ def fig_exposure(rows, D):
     ax.set_ylabel("cumulative share of commuters")
     ax.set_title("(b) Cumulative exposure")
     ax.axhline(zero, color=C_NEUT, ls=":", lw=0.8)
-    ax.annotate(f"{100*zero:.1f}% reach zero\nwhen avoiding", xy=(0.06, zero),
-                xycoords=("axes fraction", "data"), fontsize=7.5, va="bottom", color=C_NEUT)
+    ax.annotate(f"{100*zero:.1f}% reach zero\nwhen avoiding", xy=(0.05, zero - 0.03),
+                xycoords=("axes fraction", "data"), fontsize=7.5, va="top", color=C_NEUT)
     ax.legend(fontsize=8, loc="lower right")
 
     ax = axes[2]
@@ -524,7 +529,7 @@ def fig_vendor(vrows, D, counts):
 
 def fig_route_example(lon, lat, rows):
     """
-    One commute, routed both ways, with the camera cones the fast route crosses.
+    One commute, routed both ways, with the camera cones the unavoided route crosses.
 
     Two panels because one cannot show both facts at once: at metro scale the detour is
     legible but a 60 m cone is smaller than a line width, and at street scale the cones
@@ -576,7 +581,7 @@ def fig_route_example(lon, lat, rows):
     ax.scatter(lon[sel], lat[sel], s=8, c=C_UNTAG, alpha=.65, linewidths=0, zorder=2,
                label=f"ALPR installations in view ({int(sel.sum()):,})")
     ax.plot(b[:, 0], b[:, 1], color=C_BASE, lw=2.4, zorder=4,
-            label=f"fastest route — {res['base_cameras']} cameras, "
+            label=f"unavoided route — {res['base_cameras']} cameras, "
                   f"{res['base_min']:.0f} min")
     ax.plot(a[:, 0], a[:, 1], color=C_AVOID, lw=2.0, zorder=5,
             label=f"ALPR-avoiding — 0 cameras, {res['avoid_min']:.0f} min")
@@ -639,9 +644,9 @@ def fig_route_example(lon, lat, rows):
     ax.set_title("(b) Street scale: directional fields of view", y=1.0, pad=8)
     handles = [
         Line2D([], [], marker="^", ls="", color="#111111", ms=6, label="camera"),
-        Patch(fc="#8B0000", label="cone crossed by fast route"),
+        Patch(fc="#8B0000", label="cone crossed by unavoided route"),
         Patch(fc="#BBBBBB", ec="#888888", label="cone not crossed"),
-        Line2D([], [], color=C_BASE, lw=3, label="fastest"),
+        Line2D([], [], color=C_BASE, lw=3, label="unavoided"),
     ]
     in_win = ((np.abs(a[:, 0] - zx) < zr) & (np.abs(a[:, 1] - zy) < zr)).any()
     if in_win:
@@ -700,8 +705,9 @@ def fig_radius(path):
 
 
 def fig_trend():
-    """The same commutes on the same roads against the camera map of each date."""
-    tpath, mpath = os.path.join(OUT, "trend.csv"), os.path.join(OUT, "mapped_alpr_monthly_by_state.csv")
+    """The same commutes on the same roads against the camera map of each date: exposure on
+    every monthly map (a line, with its interval as a band), avoidance on the routed quarters."""
+    tpath = os.path.join(OUT, "trend.csv")
     if not os.path.exists(tpath):
         print("  (no trend yet)")
         return
@@ -709,24 +715,21 @@ def fig_trend():
     T = list(csv.DictReader(open(tpath)))
     day = lambda s: dt.date.fromisoformat(s[:10])
     dates = [day(r["date"]) for r in T]
+    has = [r.get("pct_zero_after") not in ("", None) for r in T]
+    dz = [d for d, h in zip(dates, has) if h]
     fig, axes = plt.subplots(1, 3, figsize=(11, 3.3))
 
     ax = axes[0]
-    if os.path.exists(mpath):
-        by = {}
-        for r in csv.DictReader(open(mpath)):
-            by[r["month"]] = by.get(r["month"], 0) + int(r["mapped_alpr"])
-        ms = sorted(by)
-        ax.plot([day(m + "-01") for m in ms], [by[m] for m in ms], color=C_NEUT, lw=1.3,
-                label="mapped, monthly (OSM history)")
-    ax.plot(dates, [float(r["cameras_us"]) for r in T], "o", ms=5, color=C_FLOCK, zorder=3,
-            label="study snapshots")
+    ax.plot(dates, [float(r["cameras_us"]) for r in T], "-", marker=".", ms=3.5, color=C_NEUT, lw=1.3,
+            zorder=2, label="monthly, from the edit history")
+    ax.plot(dz, [float(r["cameras_us"]) for r, h in zip(T, has) if h], "o", ms=5, color=C_FLOCK,
+            zorder=3, label="routed for avoidance")
     ax.set_yscale("log")
     ax.axvline(dt.date(2024, 10, 15), color=C_OTHER, ls=":", lw=1)
     ax.annotate("DeFlock\nfounded\nOct 2024", xy=(dt.date(2024, 10, 15), 0.62),
                 xycoords=("data", "axes fraction"), fontsize=7.5, color=C_OTHER,
                 xytext=(-4, 0), textcoords="offset points", ha="right")
-    ax.set_xlim(dt.date(2023, 1, 1), dt.date(2026, 11, 1))
+    ax.set_xlim(dt.date(2023, 12, 1), dt.date(2026, 11, 1))
     ax.set_ylabel("mapped ALPR, 50 states + DC")
     ax.set_title("(a) The map filled in")
     ax.legend(fontsize=7.5, loc="lower right")
@@ -735,20 +738,16 @@ def fig_trend():
     ax = axes[1]
     p = np.array([float(r["pct_ge1"]) for r in T])
     lo = np.array([float(r["pct_ge1_lo"]) for r in T]); hi = np.array([float(r["pct_ge1_hi"]) for r in T])
-    ax.errorbar(dates, p, yerr=[p - lo, hi - p], marker="o", ms=5, lw=1.6, color=C_BASE, capsize=3,
-                label="pass $\\geq$1 ALPR")
-    has = [r.get("pct_zero_after") not in ("", None) for r in T]
+    ax.fill_between(dates, lo, hi, color=C_BASE, alpha=0.18, lw=0)
+    ax.plot(dates, p, "-", marker=".", ms=3.5, lw=1.6, color=C_BASE, label="pass $\\geq$1 ALPR, monthly")
     if any(has):
-        dz = [d for d, h in zip(dates, has) if h]
         z = np.array([100 - float(r["pct_zero_after"]) for r, h in zip(T, has) if h])
-        ax.plot(dz, z, marker="s", ms=5, lw=1.6, color=C_AVOID, label="still pass one when avoiding")
+        ax.plot(dz, z, marker="s", ms=5, lw=1.4, color=C_AVOID, label="still pass one when avoiding, quarterly")
     ax.set_ylim(0, 100)
-    ax.set_xlim(dt.date(2023, 10, 1), dt.date(2026, 11, 1))
+    ax.set_xlim(dt.date(2023, 12, 1), dt.date(2026, 11, 1))
     ax.set_ylabel("% of commuters")
     ax.set_title("(b) Exposure, and what avoidance leaves")
-    h, l = ax.get_legend_handles_labels()  # errorbar entries list last; exposure reads first
-    order = sorted(range(len(l)), key=lambda i: not l[i].startswith("pass"))
-    ax.legend([h[i] for i in order], [l[i] for i in order], fontsize=7.5, loc="upper left")
+    ax.legend(fontsize=7.5, loc="upper left")
     ax.tick_params(axis="x", labelrotation=30, labelsize=7.5)
 
     ax = axes[2]
@@ -766,9 +765,9 @@ def fig_trend():
                 ax.plot(dz, v, marker=mk, ms=5, lw=1.6, color=colr, label=lab)
                 top = max(top, v.max())
         ax.set_ylim(0, top * 1.3)
-    ax.set_xlim(dt.date(2023, 10, 1), dt.date(2026, 11, 1))
+    ax.set_xlim(dt.date(2023, 12, 1), dt.date(2026, 11, 1))
     ax.set_ylabel("minutes")
-    ax.set_title("(c) The price of refusal")
+    ax.set_title("(c) The price of refusal, routed quarters")
     ax.legend(fontsize=7.5, loc="upper left")
     ax.tick_params(axis="x", labelrotation=30, labelsize=7.5)
     fig.tight_layout()
@@ -877,12 +876,16 @@ def fig_siting():
 
 
 def fig_trend_states():
-    """Share of each state's commuters passing a mapped reader, date by date."""
+    """Share of each state's commuters passing a mapped reader, on each routed date (the monthly
+    maps would make the heatmap thirty-five rows tall and add little)."""
     path = os.path.join(OUT, "trend_by_state.csv")
     if not os.path.exists(path):
         return
     R = list(csv.DictReader(open(path)))
-    dates = sorted({r["date"] for r in R})
+    tpath = os.path.join(OUT, "trend.csv")
+    routed = {r["date"] for r in csv.DictReader(open(tpath))
+              if r.get("pct_zero_after") not in ("", None)} if os.path.exists(tpath) else set()
+    dates = sorted({r["date"] for r in R if not routed or r["date"] in routed})
     states = sorted({r["state"] for r in R})
     V = {(r["state"], r["date"]): float(r["pct_ge1"]) for r in R}
     states.sort(key=lambda s: -V[(s, dates[-1])])
@@ -904,10 +907,16 @@ def fig_trend_states():
 
 
 def main():
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--with-demographics", action="store_true",
+                    help="also draw the siting and equity figures (the companion paper's; not in trames.tex)")
+    args = ap.parse_args()
     print("loading cameras (50 states + DC)...")
-    lon, lat, cls = load_cameras()
-    counts = {v: int((cls == v).sum()) for v in ("flock", "other", "untagged")}
-    print(f"  {len(lon):,} cameras {counts}")
+    lon, lat, cls, cone = load_cameras()
+    # reach per unit deployed is per camera that can be passed: those with a cone
+    counts = {v: int(((cls == v) & cone).sum()) for v in ("flock", "other", "untagged")}
+    print(f"  {len(lon):,} cameras, {int(cone.sum()):,} with a cone {counts}")
 
     rows = load_results(os.path.join(OUT, "results.csv"))
     D = Design(rows, *DESIGN)
@@ -923,8 +932,9 @@ def main():
     fig_exposure(rows, D)
     fig_cost(rows, D)
     fig_states(D, by_state, per100k)
-    fig_demographics(rows, D)
-    fig_within_county(rows, D)
+    if args.with_demographics:
+        fig_demographics(rows, D)
+        fig_within_county(rows, D)
     fig_route_example(lon, lat, rows)
     fig_radius(os.path.join(OUT, "radius_sweep.csv"))
     vpath = os.path.join(OUT, "vendor.csv")
@@ -933,9 +943,10 @@ def main():
         if vrows and "base_flock" in vrows[0]:
             fig_vendor(vrows, Design(vrows, *DESIGN), counts)
     fig_trend()
-    fig_trend_gradients()
     fig_trend_states()
-    fig_siting()
+    if args.with_demographics:
+        fig_trend_gradients()
+        fig_siting()
 
 
 if __name__ == "__main__":

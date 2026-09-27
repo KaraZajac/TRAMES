@@ -34,34 +34,76 @@ server your itinerary in order to dodge cameras trades one movement record for a
 We routed **56,131 real home–work commutes** — drawn from Census LEHD LODES with
 probability proportional to the number of workers actually making each trip, in all 50
 states and the District of Columbia — twice each: once normally, once avoiding the fields
-of view of **142,991 mapped ALPR installations** (snapshot of 2026-09-22). National
-figures weight each state by its commuters.
+of view of the **142,991 ALPR installations mapped in North America** (snapshot of
+2026-09-22), 140,043 of which carry a bearing the parser can read. National figures weight
+each state by its commuters. Then we did it again on the map as it stood on the first of
+every month since January 2024, rebuilt exactly from OpenStreetMap's edit history.
 
 - **75.3%** of American commutes pass at least one licence-plate reader; the median
   commute passes three.
-- **84.2%** can be routed to *zero* exposure, for a median of **1.62 minutes** — an
-  overhead of 6.71%.
+- **84.2%** can be routed to *zero* exposure: the quarter whose route passes none, and four
+  in five of the rest. The avoiding route adds a median of **1.62 minutes** (an overhead of
+  6.71%), or 3.14 minutes for commuters whose usual route passes a camera.
 - Avoidance **tends to be cheapest where cameras are densest**. Metropolitan grids offer a
   parallel street a block over; rural routes often have one road. The burden of refusal
   falls, if anything, hardest on drivers with the fewest cameras to refuse.
-- Demographic gradients that look robust nationally **do not survive ranking tracts within
-  their own county**. Mapped camera density varies 7.1× per capita between the 10th- and
-  90th-percentile states, and we cannot separate "more cameras" from "more mappers". A
-  small (1.16×) within-county gradient in transport-agency and tolling cameras sits
-  exactly on the line: the evidence neither establishes nor excludes it.
-- **The map filled in, and exposure with it.** Rebuilt exactly from OpenStreetMap's edit
-  history, the mapped network grew from 1,112 ALPRs in January 2024 to 142,257 in September
-  2026, and the share of commuters passing one from 2.2% to 75.3%. Refusing them grew dearer
-  as it did — for commuters with a camera to avoid, from a median of 0.8 to 3.1 minutes,
-  and per camera from 0.42 to 0.76 — partly because the detours were being mapped too.
-- **Equity findings date with the map.** Nationally, the richest quarter of tracts looked
-  1.58× as exposed as the poorest on the January 2025 map and 1.05× today; the Hispanic
-  gradient swung between 0.80× and 1.48×. Ranked within their own county, tracts showed no
-  income or Hispanic gradient on any map; a Black-share gradient on the earlier maps (1.60× in
-  January 2024, 1.17× in July 2025) faded to parity as the map filled in.
+- **The map filled in, and exposure with it.** From 1,112 mapped readers in January 2024 to
+  142,257 in September 2026: about fifty a month until DeFlock was founded in October 2024,
+  then 1,724 → 4,894 in a single month, then a median 10.7% a month since. The share of
+  commuters passing one went from 2.2% to 75.3%, crossing a tenth in January 2025, a quarter
+  in June, a half in December; against the number of mapped cameras the elasticity is 0.89
+  across 35 maps, and the curve is still rising by about two points a month.
+- **Refusing them grew dearer, per camera as well as in total.** On the 2024 maps 95% of
+  exposed commuters could reach zero, for a median 0.8 minutes; today 79% can, for 3.1
+  minutes, and the price per camera evaded rose from 0.42 to 0.76 minutes. Routed every
+  quarter, the share able to reach zero held near 96% through 2024 and near 92% through 2025,
+  then fell on every map since October 2025; the extra time and the price per camera rose on
+  every routed map since July 2024. Followed from July
+  2025 to September 2026, the same 12,647 exposed commutes went from passing 3.2 cameras to
+  9.9, and the price per camera on those very trips rose a quarter — partly because the
+  detours were being mapped too.
+- **Every date is a mapping date, not an installation date.** OpenStreetMap records when a
+  camera entered the map (to the second, from the edit history); an installation date exists
+  for 47 of 142,991 nodes. Absolute figures are lower bounds that rise with every map.
 
 Paper: [`research/paper/trames.pdf`](research/paper/trames.pdf) — build with
 `tectonic -X compile research/paper/trames.tex`.
+
+## The merged device map
+
+Every camera source the study uses, resolved to one device list:
+
+```bash
+research/scripts/build_supermap.py -o research/out/supermap/alpr_supermap.json \
+    --report research/out/analysis_supermap.txt --gzip        # ~4 min cold, ~80 s cached; 523 MB (54 MB gzipped)
+```
+
+**389,308 devices in the United States** — 88,754 carried by both OpenStreetMap and Flock's own
+device registry, 246,182 by the registry alone, 54,372 mapped but absent from it. 238,561 of them
+are licence-plate readers, 140,160 with a surveyed bearing; 180,761 devices read plates and are
+either in service or mapped by OpenStreetMap, which records no status. Each device carries where
+it is, which sources say so and how far apart they put it, what it is (plate reader, video, audio
+detector, speaker, drone, infrastructure), its status, its bearings where anyone surveyed them,
+its operator and transparency portal where they are known, its tract and place, and the map
+snapshot in which its node first appears. Around each device: the traffic on the road it
+watches (HPMS AADT and functional class, for the 241,033 devices within 100 m of a counted
+road), the OSM road class a mapped node stands on, the one police portal of the place it stands
+in (106,013 devices; the likely operator of a municipal camera, not a recorded one), an operator
+inferred from other devices on the same pole (7,281), the fleet number an agency gives it, and
+flags for what a registry name says its status is, and for probable duplicates on either side.
+Every device also lists the roads it watches: the drivable ways its cone crosses (the same
+60 m, 45° sector the router uses, one per surveyed head), or, **where no source records which
+way a camera looks, the ways within a 60 m circle of it** — the cone's length, in every
+direction, so a camera of unknown bearing is taken to see as far as one with a bearing. A
+first pass used 40 ft and left 13% of bearing-less plate readers touching no road, because
+cameras stand set back from the carriageways they watch; at 60 m, 435 of 98,401 (0.4%) do.
+Of the 5,579 bearing-less devices of any kind still touching no road, most are indoor and
+campus video cameras that the registry places at one building's coordinate.
+The registry's `rotationAngle` is *not* a bearing — its median
+disagreement with a surveyed one is 90°, which is what unrelated angles would give — so it is
+carried verbatim and never used as one. The report beside it counts everything, by state, class,
+vendor and status; [`build_supermap.py`](research/scripts/build_supermap.py)'s docstring is the
+specification.
 
 ## How it works — offline
 
