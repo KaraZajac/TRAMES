@@ -57,6 +57,6 @@ SNAPS+=(--snapshot 2026-09-22=../server/alpr/region_cache:"$A")
     --report out/analysis_trend.txt > /dev/null
 
 echo "== figures"
-"$PY" paper/make_figures.py
+"$PY" paper/make_figures.py --osm-only     # the headline figures come from run-merged-analyses.sh
 
 echo "done: out/analysis*.txt out/by_state.csv out/trend*.csv paper/figures/"

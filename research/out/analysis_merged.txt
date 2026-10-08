@@ -1,0 +1,151 @@
+==============================================================================
+ALPR COMMUTE EXPOSURE AND AVOIDANCE COST — COMMUTER-WEIGHTED
+==============================================================================
+
+Sample: 56131 commutes in 51 states, standing for 132.8M in-state commuters (LODES). National figures are weighted
+by each state's commuters and each pair's draw count; 95% CIs from a stratified bootstrap
+(each state resampled at its own size, 2,000 replicates).
+Median commute: 23.6 km / 23.4 min
+
+--- RQ1: EXPOSURE ON THE UNAVOIDED COMMUTE ---
+  cameras passed (baseline)          median     3.00 [95% CI 3.00–3.00]  IQR 1.00–8.00  mean     6.24
+  mean cameras passed                 6.24 [6.11–6.36]
+  commutes passing >=1 camera:        78.6% [78.1–79.0]
+  commutes passing >=5 cameras:       42.0% [41.4–42.6]
+  commutes passing >=10 cameras:      20.7% [20.2–21.3]
+  90th / 99th percentile exposure:   16 / 42 cameras
+  exposure rate:                     0.1168 cameras per km driven [0.1144–0.1191]
+
+--- RQ2: COST OF AVOIDANCE ---
+  extra time                         median     2.29 min [95% CI 2.21–2.37]  IQR 0.00–7.56  mean     7.39
+  extra distance                     median     0.87 km [95% CI 0.83–0.91]  IQR 0.00–3.56  mean     3.37
+  cameras passed (avoided), mean      0.36
+  commutes reduced to ZERO cameras:   80.8% [80.3–81.3]
+  residual exposure:                 5.7% of baseline [5.5–5.9]
+  minutes per camera evaded          median     0.83 min [95% CI 0.82–0.85]  IQR 0.40–1.72  mean     1.38
+  avoidance overhead                 median     9.71 % [95% CI 9.48–9.97]  IQR 0.00–24.18  mean    17.22
+
+--- RQ3a: BY STATE (within-state estimates, draw-weighted) ---
+  state      n mean cams   %>=1  %zero  med +min  med +%  cams/km
+  GA      1182     16.56  93.9%  37.5%     13.62   44.4%   0.3142
+  IL      1188     10.32  91.6%  88.3%      4.33   17.6%   0.2429
+  CA      1171      9.34  89.4%  73.4%      3.67   14.2%   0.1379
+  TX      1176      9.04  88.4%  73.7%      4.18   16.4%   0.1200
+  NY      1194      7.68  82.1%  62.5%      2.67   13.3%   0.1945
+  FL      1170      7.34  89.1%  68.1%      3.12   12.1%   0.1124
+  OH      1195      6.31  86.5%  78.8%      3.72   13.9%   0.1381
+  IN      1176      5.83  84.1%  90.2%      4.26   17.3%   0.1337
+  AL      1159      5.70  83.2%  79.4%      3.65   11.9%   0.0944
+  MO      1182      5.69  84.6%  78.8%      3.11   13.6%   0.1022
+  AZ      1150      5.59  87.0%  89.3%      2.47   11.1%   0.1218
+  LA      1116      5.51  80.9%  64.2%      4.25   16.8%   0.0993
+  SC      1159      5.44  80.1%  80.6%      2.77    9.5%   0.0987
+  VA      1171      5.19  78.3%  82.3%      1.81    7.1%   0.1036
+  CO      1117      5.15  85.3%  87.3%      2.42   10.9%   0.1157
+  MI      1190      5.13  74.3%  94.2%      2.07    7.7%   0.1006
+  KS      1166      4.80  78.8%  88.1%      2.13   10.5%   0.0871
+  CT      1183      4.61  75.0%  93.1%      1.72    8.2%   0.1580
+  NM       994      4.49  76.9%  81.5%      1.60    8.0%   0.0774
+  TN      1182      4.43  80.5%  78.9%      2.81    8.3%   0.0805
+  KY      1160      4.19  76.0%  86.0%      2.39    7.5%   0.0753
+  NC      1179      3.93  70.6%  88.6%      1.26    3.9%   0.0668
+  WI      1176      3.77  78.8%  90.3%      2.55   10.5%   0.0773
+  PA      1178      3.66  60.9%  94.9%      0.44    1.6%   0.0810
+  NJ      1184      3.64  70.6%  91.0%      1.05    4.6%   0.1092
+  RI      1142      3.50  83.2%  82.9%      1.79   12.5%   0.1908
+  UT      1091      3.38  81.6%  95.9%      1.80    8.9%   0.0809
+  MS      1125      3.28  67.1%  89.6%      1.35    4.9%   0.0581
+  MA      1187      3.26  72.7%  87.2%      1.06    5.6%   0.1088
+  AR      1146      3.24  69.4%  92.5%      1.47    5.2%   0.0527
+  NV      1132      3.01  72.1%  94.7%      0.65    3.6%   0.0688
+  WA      1145      2.93  67.8%  90.8%      1.00    3.6%   0.0542
+  DE      1104      2.85  72.7%  86.3%      1.18    5.7%   0.0999
+  MN      1163      2.59  66.0%  95.8%      0.63    2.7%   0.0617
+  OK      1168      2.57  72.3%  94.9%      0.57    1.9%   0.0479
+  ND       977      2.42  46.1%  99.5%      0.00    0.0%   0.0345
+  ID      1007      2.35  56.3%  95.0%      0.33    1.7%   0.0422
+  MD      1183      2.09  53.0%  89.9%      0.00    0.0%   0.0615
+  IA      1150      1.79  54.3%  96.6%      0.00    0.0%   0.0319
+  NE      1125      1.46  51.1%  98.7%      0.00    0.0%   0.0390
+  WV      1118      1.24  38.0%  94.7%      0.00    0.0%   0.0198
+  DC      1032      1.12  56.2%  90.4%      0.00    0.0%   0.1852
+  SD       906      0.92  43.5%  99.7%      0.00    0.0%   0.0157
+  OR      1133      0.80  39.3%  98.7%      0.00    0.0%   0.0171
+  HI       835      0.63  35.7%  95.9%      0.00    0.0%   0.0387
+  ME      1066      0.63  27.3%  99.0%      0.00    0.0%   0.0131
+  WY       656      0.51  23.0%  92.7%      0.00    0.0%   0.0065
+  MT       789      0.26  12.0%  99.9%      0.00    0.0%   0.0035
+  NH      1105      0.21  14.8% 100.0%      0.00    0.0%   0.0058
+  VT       940      0.08   5.4% 100.0%      0.00    0.0%   0.0019
+  AK       608      0.00   0.0% 100.0%      0.00    0.0%   0.0000
+  (per-state table written to out/merged/by_state.csv)
+
+--- RQ3b: BY ORIGIN-TRACT MEDIAN HOUSEHOLD INCOME ---
+  quartile cut-points (commuter-weighted): $58,975 / $79,100 / $106,250
+  quartile         n commuters  med cams  mean cams  med +min   cams/km   med km
+  Q1 lowest    14984     25.0%       3.0       6.21      2.19    0.1019     23.7
+  Q2           15076     25.0%       3.0       5.81      2.08    0.1047     23.7
+  Q3           14157     25.0%       3.0       6.35      2.30    0.1239     23.9
+  Q4 highest   11914     25.0%       4.0       6.58      2.57    0.1431     23.4
+  Q1 mean 6.21 [5.97–6.45] vs Q4 mean 6.58 [6.29–6.87]
+  ratio Q1/Q4 = 0.94x [95% CI 0.89–1.00]  (CIs OVERLAP — not distinguishable)
+  CONTROL per-km: Q1 0.1019 [0.0984–0.1055] vs Q4 0.1431 [0.1368–0.1499] cameras/km
+    -> total exposure indistinguishable, but per-km density differs (Q4 higher): Q4 commutes are more densely watched per km, offset by length
+
+--- RQ3c: BY ORIGIN-TRACT RACIAL COMPOSITION (% non-Hispanic Black) ---
+  quartile cut-points (commuter-weighted): 0.9% / 4.2% / 13.9%
+  quartile         n commuters  med cams  mean cams  med +min   cams/km   med km
+  Q1 least     17289     25.0%       2.0       5.17      1.68    0.0874     27.9
+  Q2           13712     25.0%       3.0       5.76      2.16    0.1082     22.8
+  Q3           12208     25.0%       4.0       6.59      2.37    0.1252     22.9
+  Q4 most      12914     25.0%       4.0       7.43      2.90    0.1527     21.8
+  Q1 mean 5.17 [4.95–5.41] vs Q4 mean 7.43 [7.19–7.67]
+  ratio Q4/Q1 = 1.44x [95% CI 1.36–1.52]  (CIs disjoint)
+  CONTROL per-km: Q1 0.0874 [0.0842–0.0910] vs Q4 0.1527 [0.1465–0.1587] cameras/km
+    -> total exposure AND per-km density both differ (Q4 higher on rate)
+
+--- RQ3d: BY ORIGIN-TRACT HISPANIC SHARE ---
+  quartile cut-points (commuter-weighted): 3.7% / 9.9% / 24.7%
+  quartile         n commuters  med cams  mean cams  med +min   cams/km   med km
+  Q1 least     19235     25.0%       2.0       5.00      1.86    0.0914     26.5
+  Q2           16670     25.0%       3.0       5.67      1.96    0.1132     23.2
+  Q3           12325     25.0%       4.0       6.70      2.44    0.1298     22.4
+  Q4 most       7893     25.0%       5.0       7.58      2.74    0.1324     22.6
+  Q1 mean 5.00 [4.85–5.15] vs Q4 mean 7.58 [7.25–7.90]
+  ratio Q4/Q1 = 1.52x [95% CI 1.44–1.59]  (CIs disjoint)
+  CONTROL per-km: Q1 0.0914 [0.0886–0.0943] vs Q4 0.1324 [0.1258–0.1393] cameras/km
+    -> total exposure AND per-km density both differ (Q4 higher on rate)
+
+==============================================================================
+RQ4: COVERAGE-BIAS SENSITIVITY — quartiles computed WITHIN counties, pooled by commuters
+==============================================================================
+
+--- RQ4a: INCOME, within-county quartiles ---
+  321 counties with n>=40 contribute 38015 commutes (68% of sample, 63% of commuters)
+  quartile         n  mean cams   cams/km
+  Q1           10043       6.28    0.1482
+  Q2            9531       6.44    0.1452
+  Q3            9456       6.43    0.1450
+  Q4            8985       5.88    0.1406
+  Q1 mean 6.28 [5.99–6.58] vs Q4 mean 5.88 [5.59–6.20]
+  ratio Q4/Q1 = 0.94x [95% CI 0.87–1.01]  (CIs OVERLAP — not distinguishable)
+
+--- RQ4b: % NON-HISPANIC BLACK, within-county quartiles ---
+  321 counties with n>=40 contribute 38010 commutes (68% of sample, 63% of commuters)
+  quartile         n  mean cams   cams/km
+  Q1           10590       6.11    0.1401
+  Q2            8894       6.23    0.1437
+  Q3            9426       6.23    0.1426
+  Q4            9100       6.50    0.1534
+  Q1 mean 6.11 [5.81–6.41] vs Q4 mean 6.50 [6.18–6.84]
+  ratio Q4/Q1 = 1.06x [95% CI 0.99–1.14]  (CIs OVERLAP — not distinguishable)
+
+--- RQ4c: HISPANIC SHARE, within-county quartiles ---
+  321 counties with n>=40 contribute 38010 commutes (68% of sample, 63% of commuters)
+  quartile         n  mean cams   cams/km
+  Q1           10024       6.31    0.1433
+  Q2            9376       6.36    0.1453
+  Q3            9558       6.02    0.1473
+  Q4            9052       6.35    0.1433
+  Q1 mean 6.31 [5.99–6.67] vs Q4 mean 6.35 [6.05–6.68]
+  ratio Q4/Q1 = 1.01x [95% CI 0.93–1.08]  (CIs OVERLAP — not distinguishable)

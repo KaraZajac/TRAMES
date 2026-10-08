@@ -1,0 +1,18 @@
+==============================================================================
+EXPOSURE ON THE MERGED MAP: the same routes, three camera sets
+==============================================================================
+56,131 commutes, commuter-weighted. 135,202 OSM wedge parts; 44,176 registry discs (26,131 name a cardinal travel direction); 159,286 merged parts. Cameras are counted as cone parts after the union, as the routing counts them.
+check: the merged count matches the routing's own on 56,131 of 56,131 baselines
+
+camera set             >=1 camera           mean cameras  median     >=5   per km
+osm          75.3% [74.8-75.8]     5.14 [5.04-5.24]       3    36.5%   0.0963
+merged       78.6% [78.1-79.0]     6.24 [6.11-6.36]       3    42.0%   0.1168
+directed     77.7% [77.2-78.1]     5.82 [5.70-5.94]       3    40.0%   0.1089
+
+newly exposed by the registry (0 on the map, >=1 merged): 3.2% of commuters; encounters +21.3%
+directed against merged: mean encounters x0.933 [0.931-0.934]; of the registry's additions, 38% are against the named direction
+
+AVOIDING ROUTES planned against the merged map (56,131 scored)
+  osm        reduced to zero  82.3% [81.8-82.8]   of exposed  76.6%   residual 6.1% of baseline
+  merged     reduced to zero  80.3% [79.8-80.9]   of exposed  75.0%   residual 5.8% of baseline
+  directed   reduced to zero  81.1% [80.6-81.6]   of exposed  75.7%   residual 6.0% of baseline

@@ -1,0 +1,46 @@
+==============================================================================
+COUNTY-CLUSTER BOOTSTRAP: are the commute-exposure intervals too narrow?
+==============================================================================
+56,131 commutes from 2,608 origin counties. 'commute' = wstats.py's bootstrap (commutes
+resampled within state); 'county' = origin counties resampled within state. 2,000 replicates each.
+
+  statistic                                       point     commute 95% CI      county 95% CI  width x
+
+--- headline figures ---
+  share passing >= 1 camera                       0.786  [0.781, 0.790]     [0.772, 0.794]      2.49
+  mean cameras passed                             6.237  [6.111, 6.362]     [5.981, 6.572]      2.35
+  share reduced to zero                           0.808  [0.803, 0.813]     [0.792, 0.820]      2.77
+  median extra minutes                             2.29  [2.21, 2.37]       [2.12, 2.56]        2.84
+  median minutes per camera evaded                 0.83  [0.82, 0.85]       [0.81, 0.91]        3.29
+  median avoidance overhead (%)                    9.71  [9.48, 9.97]       [8.91, 10.62]       3.52
+
+--- quartile contrasts, ranked nationally (income: richest over poorest) ---
+  income: mean cameras Q4/Q1                       1.06  [1.00, 1.12]       [0.96, 1.21]        1.94
+  income: cameras per km Q4/Q1                     1.40  [1.33, 1.49]       [1.29, 1.64]        2.20
+  % Black: mean cameras Q4/Q1                      1.44  [1.36, 1.52]       [1.31, 1.58]        1.68
+  % Black: cameras per km Q4/Q1                    1.75  [1.65, 1.84]       [1.60, 1.97]        1.86
+  % Hispanic: mean cameras Q4/Q1                   1.52  [1.44, 1.59]       [1.39, 1.70]        1.98
+  % Hispanic: cameras per km Q4/Q1                 1.45  [1.36, 1.54]       [1.30, 1.64]        1.90
+
+--- quartile contrasts, ranked within county (n >= 40) ---
+  income: mean cameras Q4/Q1                       0.94  [0.87, 1.01]       [0.86, 1.04]        1.37
+  income: cameras per km Q4/Q1                     0.95  [0.88, 1.02]       [0.89, 1.03]        0.93
+  % Black: mean cameras Q4/Q1                      1.06  [0.99, 1.14]       [0.98, 1.15]        1.11
+  % Black: cameras per km Q4/Q1                    1.10  [1.00, 1.20]       [1.01, 1.20]        0.95
+  % Hispanic: mean cameras Q4/Q1                   1.01  [0.93, 1.08]       [0.93, 1.10]        1.09
+  % Hispanic: cameras per km Q4/Q1                 1.00  [0.92, 1.09]       [0.94, 1.09]        0.82
+
+--- cost of refusal by quartile: median extra minutes of the avoiding route, and median
+    minutes per camera evaded (commuters who evade any), lowest vs highest quartile ---
+  income national extra min: Q4 - Q1 (Q1 2.19, Q4 2.57)    +0.37  [+0.16, +0.60]  [+0.02, +0.96]      2.12
+  income national min/camera: Q4 - Q1 (Q1 0.86, Q4 0.82)    -0.04  [-0.10, -0.00]  [-0.15, +0.02]      1.74
+  % Black national extra min: Q4 - Q1 (Q1 1.68, Q4 2.90)    +1.22  [+0.99, +1.48]  [+0.81, +1.68]      1.76
+  % Black national min/camera: Q4 - Q1 (Q1 0.92, Q4 0.80)    -0.13  [-0.19, -0.08]  [-0.24, -0.07]      1.55
+  % Hispanic national extra min: Q4 - Q1 (Q1 1.86, Q4 2.74)    +0.88  [+0.63, +1.12]  [+0.45, +1.62]      2.42
+  % Hispanic national min/camera: Q4 - Q1 (Q1 1.02, Q4 0.74)    -0.28  [-0.33, -0.23]  [-0.37, -0.18]      2.01
+  income within county extra min: Q4 - Q1 (Q1 1.94, Q4 2.20)    +0.26  [-0.01, +0.49]  [-0.03, +0.58]      1.24
+  income within county min/camera: Q4 - Q1 (Q1 0.67, Q4 0.76)    +0.09  [+0.04, +0.13]  [+0.04, +0.14]      1.11
+  % Black within county extra min: Q4 - Q1 (Q1 2.24, Q4 2.09)    -0.15  [-0.41, +0.09]  [-0.40, +0.08]      0.95
+  % Black within county min/camera: Q4 - Q1 (Q1 0.74, Q4 0.66)    -0.08  [-0.12, -0.04]  [-0.14, -0.04]      1.23
+  % Hispanic within county extra min: Q4 - Q1 (Q1 2.18, Q4 2.14)    -0.03  [-0.35, +0.18]  [-0.45, +0.22]      1.26
+  % Hispanic within county min/camera: Q4 - Q1 (Q1 0.73, Q4 0.70)    -0.04  [-0.08, +0.00]  [-0.09, +0.00]      1.03

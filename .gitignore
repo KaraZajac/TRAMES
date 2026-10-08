@@ -64,6 +64,11 @@ research/out/siting/*.npz
 research/out/supermap/*.json
 research/out/supermap/*.json.gz
 research/out/supermap/assign/
+# the merged-map study's inputs, rebuilt by research/scripts/cones_from_supermap.py: the map's
+# wedges (65 MB, as custom_areas*) and the registry readers it adds - a device-level list drawn
+# from the registry, which, like the device map, the repository does not redistribute
+research/out/merged/alpr_osm.geojson
+research/out/merged/registry_discs.json
 # US state boundary GeoJSON fetched by make_figures.py
 research/paper/figures/us-states.json
 
