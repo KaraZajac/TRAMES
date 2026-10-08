@@ -34,19 +34,27 @@ server your itinerary in order to dodge cameras trades one movement record for a
 We routed **56,131 real home–work commutes** — drawn from Census LEHD LODES with
 probability proportional to the number of workers actually making each trip, in all 50
 states and the District of Columbia — twice each: once normally, once avoiding the fields
-of view of the **142,991 ALPR installations mapped in North America** (snapshot of
-2026-09-22), 140,043 of which carry a bearing the parser can read. National figures weight
-each state by its commuters. Then we did it again on the map as it stood on the first of
-every month since January 2024, rebuilt exactly from OpenStreetMap's edit history.
+of view of every licence-plate reader we can place: the **142,257 mapped in OpenStreetMap**
+in the 50 states and DC (snapshot of 2026-09-22), and **44,059 more in service that only
+Flock Safety's own device registry records** (as of December 2025) — **186,316 in all**.
+National figures weight each state by its commuters. Then we did it again on OpenStreetMap's
+camera map as it stood on the first of every month since January 2024, rebuilt exactly from
+its edit history; the registry carries no dates, so the trend is the map's alone.
 
-- **75.3%** of American commutes pass at least one licence-plate reader; the median
+- **78.6%** of American commutes pass at least one licence-plate reader; the median
   commute passes three.
-- **84.2%** can be routed to *zero* exposure: the quarter whose route passes none, and four
-  in five of the rest. The avoiding route adds a median of **1.62 minutes** (an overhead of
-  6.71%), or 3.14 minutes for commuters whose usual route passes a camera.
-- Avoidance **tends to be cheapest where cameras are densest**. Metropolitan grids offer a
-  parallel street a block over; rural routes often have one road. The burden of refusal
-  falls, if anything, hardest on drivers with the fewest cameras to refuse.
+- **80.8%** can be routed to *zero* exposure: the fifth whose route passes none, and three
+  in four of the rest. The avoiding route adds a median of **2.29 minutes** (an overhead of
+  9.71%), or 3.92 minutes for commuters whose usual route passes a camera.
+- **The vendor's own records make refusal two-fifths dearer than the volunteer map shows.**
+  On the same commutes, the readers only the registry records add a fifth more camera
+  encounters, cut the share who can reach zero by 3.5 points and add 0.67 minutes to the
+  median detour (paired intervals in the paper). Scored by the travel direction each reader's
+  label names instead of as a 60 m disc, the share passing a reader moves by under a point.
+- **Where refusal stops being cheap: Georgia.** 93.9% of its commuters pass a reader, only
+  37.5% can reach work past none, and avoiding costs a median 13.6 minutes — against 54.3%
+  and 7.8 minutes on the volunteer map alone. Whether evasion is cheaper per camera where
+  cameras are denser, as the map alone weakly suggested, the merged map does not bear out.
 - **The map filled in, and exposure with it.** From 1,112 mapped readers in January 2024 to
   142,257 in September 2026: about fifty a month until DeFlock was founded in October 2024,
   then 1,724 → 4,894 in a single month, then a median 10.7% a month since. The share of
@@ -54,8 +62,9 @@ every month since January 2024, rebuilt exactly from OpenStreetMap's edit histor
   in June, a half in December; against the number of mapped cameras the elasticity is 0.89
   across 35 maps, and the curve is still rising by about two points a month.
 - **Refusing them grew dearer, per camera as well as in total.** On the 2024 maps 95% of
-  exposed commuters could reach zero, for a median 0.8 minutes; today 79% can, for 3.1
-  minutes, and the price per camera evaded rose from 0.42 to 0.76 minutes. Routed every
+  exposed commuters could reach zero, for a median 0.8 minutes; on today's map 79% can, for
+  3.1 minutes (75%, for 3.9 minutes, once the registry is added), and the price per camera
+  evaded rose from 0.42 to 0.76 minutes. Routed every
   quarter, the share able to reach zero held near 96% through 2024 and near 92% through 2025,
   then fell on every map since October 2025; the extra time and the price per camera rose on
   every routed map since July 2024. Followed from July
@@ -99,6 +108,9 @@ first pass used 40 ft and left 13% of bearing-less plate readers touching no roa
 cameras stand set back from the carriageways they watch; at 60 m, 435 of 98,401 (0.4%) do.
 Of the 5,579 bearing-less devices of any kind still touching no road, most are indoor and
 campus video cameras that the registry places at one building's coordinate.
+The study's merged map is drawn from it: the in-service plate readers it holds from the registry
+alone, 44,059 in the 50 states and DC, each given a 60 m disc
+([`cones_from_supermap.py`](research/scripts/cones_from_supermap.py)).
 The registry's `rotationAngle` is *not* a bearing — its median
 disagreement with a surveyed one is 90°, which is what unrelated angles would give — so it is
 carried verbatim and never used as one. The report beside it counts everything, by state, class,
@@ -238,8 +250,12 @@ cd research
 ./scripts/run-full.sh          # hours, detached, resumable
 ./scripts/run-history.sh       # the same commutes against earlier camera maps
                                # (built in server/alpr — see "Past-date maps" there)
-./scripts/run-analyses.sh      # weighted analysis, vendor, cone radius, trend, figures
-../server/.venv/bin/python paper/make_tables.py
+./scripts/run-analyses.sh      # weighted analysis, vendor, cone radius, trend (the map alone)
+./scripts/run-merged.sh        # the merged map: the map's wedges plus a 60 m disc for each
+                               # registry reader it lacks, in a graph of its own; the
+                               # commutes it exposes routed again (needs the device map above)
+./scripts/run-merged-analyses.sh  # merged headline, paired comparison with the map alone,
+                               # directed scoring, then the paper's figures and tables
 ```
 
 ## What leaves the device
