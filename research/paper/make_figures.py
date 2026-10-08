@@ -51,6 +51,7 @@ plt.rcParams.update({
 
 # Colourblind-safe (Okabe-Ito)
 C_FLOCK = "#D55E00"
+C_REG = "#CC79A7"       # Flock's registry only: distinct from the mapped cameras' vermilion
 C_OTHER = "#0072B2"
 C_UNTAG = "#999999"
 C_BASE = "#CC79A7"
@@ -114,10 +115,35 @@ from trend import state_locator  # noqa: E402
 # Overridable so the figures can be exercised on a scratch copy of the outputs.
 OUT = os.environ.get("TRAMES_OUT_DIR", os.path.join(ROOT, "out"))
 DESIGN = (os.path.join(OUT, "sampling_frame.json"), os.path.join(OUT, "sample_draws.csv"))
+GH = os.path.join(ROOT, "..", "server", "graphhopper")
+
+# The headline figures are drawn from the merged map (OpenStreetMap plus the in-service plate
+# readers of Flock's registry that the map lacks), which is the paper's basis. --osm-only draws
+# them from the map alone, as fig_*_osm, for the comparison. The trend figures are always the
+# map alone: the registry carries no dates.
+MERGED = True
+SFX = ""
+INPUTS = {}
 
 
-def load_cameras():
-    """(lon, lat, vendor_class, has_cone) for every mapped ALPR node in the 50 states + DC. The
+def inputs(osm_only):
+    if osm_only:
+        return dict(results=os.path.join(OUT, "results.csv"), by_state=os.path.join(OUT, "by_state.csv"),
+                    cameras_by_state=os.path.join(OUT, "cameras_by_state.csv"),
+                    routes=os.path.join(OUT, "routes.jsonl.gz"), avoid_routes=None,
+                    cones=os.path.join(GH, "custom_areas", "alpr.geojson"), discs=None)
+    M = os.path.join(OUT, "merged")
+    return dict(results=os.path.join(M, "results.csv"), by_state=os.path.join(M, "by_state.csv"),
+                cameras_by_state=os.path.join(M, "cameras_by_state.csv"),
+                routes=os.path.join(OUT, "routes.jsonl.gz"), avoid_routes=os.path.join(M, "routes.jsonl.gz"),
+                cones=os.path.join(GH, "custom_areas_merged", "alpr_merged.geojson"),
+                discs=os.path.join(M, "registry_discs.json"))
+
+
+def load_cameras(discs=None):
+    """(lon, lat, vendor_class, has_cone, state) for every mapped ALPR node in the 50 states + DC
+    and, given the registry discs of cones_from_supermap.py, every in-service plate reader Flock's
+    registry holds that the map does not (class "registry"; each has a disc, so has_cone). The
     Overpass regions overlap Canada and Mexico; the paper is about American commutes, so only
     installations inside a state are drawn and counted. has_cone marks a camera with a bearing
     build_cones.py can parse: only those can contribute exposure."""
@@ -133,17 +159,40 @@ def load_cameras():
             if el.get("type") == "node" and el.get("lat") is not None:
                 seen[el["id"]] = el
     locate = state_locator()
-    lon, lat, cls, cone = [], [], [], []
+    lon, lat, cls, cone, st = [], [], [], [], []
     for el in seen.values():
-        if locate(el["lat"], el["lon"]) is None:
+        s = locate(el["lat"], el["lon"])
+        if s is None:
             continue
         t = el.get("tags") or {}
         v = next((t[k] for k in keys if t.get(k)), None)
-        lon.append(el["lon"]); lat.append(el["lat"])
+        lon.append(el["lon"]); lat.append(el["lat"]); st.append(s)
         cls.append("flock" if v and "flock" in v.lower() else ("other" if v else "untagged"))
         raw = next((t[k] for k in DIRECTION_KEYS if t.get(k)), None)
         cone.append(bool(raw and parse_directions(raw)))
-    return np.array(lon), np.array(lat), np.array(cls), np.array(cone)
+    if discs:
+        # a registry reader carries the state of the census tract the device map placed it in,
+        # which the simplified outlines can miss (a reader on Islamorada, in the Florida Keys)
+        from trend import FIPS
+        for m in json.load(open(discs))["discs"]:
+            s = (m.get("state") or "").lower()
+            if s not in FIPS:
+                continue
+            lon.append(m["lon"]); lat.append(m["lat"]); st.append(s); cls.append("registry"); cone.append(True)
+    return np.array(lon), np.array(lat), np.array(cls), np.array(cone), np.array(st)
+
+
+def per_100k(state, path):
+    """Installations per 100k residents of each state, for the camera set in hand; written to
+    path in the layout of trend.py's cameras_by_state.csv."""
+    from trend import FIPS, state_populations
+    pops = state_populations()
+    n = {s: int((state == s).sum()) for s in FIPS}
+    with open(path, "w", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=["date", "state", "cameras", "per_100k"]); w.writeheader()
+        for s in sorted(FIPS):
+            w.writerow({"date": "merged", "state": s, "cameras": n[s], "per_100k": round(1e5 * n[s] / pops[FIPS[s]], 2)})
+    return {s: 1e5 * n[s] / pops[FIPS[s]] for s in FIPS}
 
 
 def load_results(path):
@@ -216,22 +265,32 @@ def fig_camera_map(lon, lat, cls):
                              gridspec_kw={"width_ratios": [1, 1], "wspace": 0.02})
     ax = axes[0]
     draw_basemap(ax)
-    order = [("untagged", C_UNTAG, 0.35), ("other", C_OTHER, 0.75), ("flock", C_FLOCK, 0.5)]
+    # the registry's readers on top: none stands within 50 m of a mapped node, so at street
+    # scale they hide nothing, and at this scale they show where the volunteer map falls short
+    order = [("untagged", C_UNTAG, 0.35), ("other", C_OTHER, 0.75), ("flock", C_FLOCK, 0.5),
+             ("registry", C_REG, 0.5)]
     for name, colr, al in order:
         m = cls == name
+        if not m.any():
+            continue
         x, y = albers(lon[m], lat[m])
         ax.scatter(x, y, s=0.45, c=colr, alpha=al, linewidths=0, zorder=3, rasterized=True)
     ax.set_xlim(-0.42, 0.52)
     ax.set_ylim(-0.02, 0.62)
-    ax.set_title(f"(a) {len(lon):,} mapped ALPR installations, by vendor")
-    ax.legend(handles=[
-        Line2D([], [], marker="o", ls="", ms=4, color=C_FLOCK,
-               label=f"Flock Safety ({100*(cls=='flock').mean():.1f}%)"),
-        Line2D([], [], marker="o", ls="", ms=4, color=C_OTHER,
-               label=f"other vendor ({100*(cls=='other').mean():.1f}%)"),
-        Line2D([], [], marker="o", ls="", ms=4, color=C_UNTAG,
-               label=f"unlabelled ({100*(cls=='untagged').mean():.1f}%)"),
-    ], loc="lower left", fontsize=8)
+    merged = bool((cls == "registry").any())
+    ax.set_title(f"(a) {len(lon):,} ALPR installations: mapped, and from Flock's registry" if merged
+                 else f"(a) {len(lon):,} mapped ALPR installations, by vendor")
+    dot = lambda c, lab: Line2D([], [], marker="o", ls="", ms=4, color=c, label=lab)
+    share = lambda v: f"{100*(cls == v).mean():.1f}%"
+    if merged:      # two short columns, so four entries stand no taller than three did
+        handles = [dot(C_FLOCK, f"Flock, mapped ({share('flock')})"),
+                   dot(C_REG, f"Flock, registry only ({share('registry')})"),
+                   dot(C_OTHER, f"other vendor ({share('other')})"), dot(C_UNTAG, f"unlabelled ({share('untagged')})")]
+        ax.legend(handles=handles, loc="lower left", fontsize=8, ncol=2, columnspacing=1.0, handletextpad=0.3)
+    else:
+        handles = [dot(C_FLOCK, f"Flock Safety ({share('flock')})"), dot(C_OTHER, f"other vendor ({share('other')})"),
+                   dot(C_UNTAG, f"unlabelled ({share('untagged')})")]
+        ax.legend(handles=handles, loc="lower left", fontsize=8)
 
     ax = axes[1]
     x, y = albers(lon, lat)
@@ -245,7 +304,7 @@ def fig_camera_map(lon, lat, cls):
     cb = fig.colorbar(hb, ax=ax, fraction=0.03, pad=0.01)
     cb.set_label("cameras per cell", fontsize=8)
     cb.ax.tick_params(labelsize=7)
-    save(fig, "fig_camera_map")
+    save(fig, "fig_camera_map" + SFX)
 
 
 def fig_exposure(rows, D):
@@ -293,7 +352,7 @@ def fig_exposure(rows, D):
     ax.set_title("(c) Commuters exceeding an exposure threshold")
     ax.set_xlim(0, 100)
     ax.legend(fontsize=8, loc="upper right")
-    save(fig, "fig_exposure")
+    save(fig, "fig_exposure" + SFX)
 
 
 def fig_cost(rows, D):
@@ -334,7 +393,7 @@ def fig_cost(rows, D):
     ax.set_xlabel("minutes spent per camera evaded")
     ax.set_ylabel("% of commuters who evade any")
     ax.set_title("(c) Marginal price of evasion")
-    save(fig, "fig_cost")
+    save(fig, "fig_cost" + SFX)
 
 
 # ---- 51-state choropleth. Alaska and Hawaii are drawn as insets in their own simple
@@ -420,10 +479,11 @@ def fig_states(D, by_state, per100k):
                 placed.append(bb)
                 break
             t.remove()
-    ax.set_xlabel("mapped cameras per 100k residents")
+    ax.set_xlabel("ALPR installations per 100k residents" if MERGED else "mapped cameras per 100k residents")
     ax.set_ylabel("mean cameras passed per commute")
-    ax.set_title("(b) Measured exposure tracks mapping intensity")
-    save(fig, "fig_states")
+    ax.set_title("(b) Measured exposure tracks installation density" if MERGED
+                 else "(b) Measured exposure tracks mapping intensity")
+    save(fig, "fig_states" + SFX)
 
 
 def _contrast_bars(ax, D, metric, den, masks, labels, title, ylabel):
@@ -542,14 +602,12 @@ def fig_route_example(lon, lat, rows):
     from shapely.geometry import LineString, shape
     from shapely.strtree import STRtree
 
-    cones = list(shape(json.load(open(os.path.join(
-        ROOT, "..", "server", "graphhopper", "custom_areas",
-        "alpr.geojson")))["features"][0]["geometry"]).geoms)
+    cones = list(shape(json.load(open(INPUTS["cones"]))["features"][0]["geometry"]).geoms)
     tree = STRtree(cones)
     index = {(r["state"], r["h_tract"], r["w_tract"]): r for r in rows}
 
     best = None
-    for rec in read_routes(os.path.join(ROOT, "out", "routes.jsonl.gz")):
+    for rec in read_routes(INPUTS["routes"]):
         res = index.get((rec["state"], rec["h_tract"], rec["w_tract"]))
         if res is None or res["avoid_cameras"] != 0 or res["base_cameras"] < 10:
             continue
@@ -565,13 +623,24 @@ def fig_route_example(lon, lat, rows):
         print("  (no suitable example route found)")
         return
     rec, res = best
+    if INPUTS["avoid_routes"]:
+        # the merged run keeps its avoiding routes in a sidecar of their own
+        key = (rec["state"], rec["h_tract"], rec["w_tract"])
+        for r in read_routes(INPUTS["avoid_routes"]):
+            if (r["state"], r["h_tract"], r["w_tract"]) == key and "avoid" in r:
+                rec = dict(rec, avoid=r["avoid"])
+                break
+        else:
+            print("  (the example's avoiding route is not in the sidecar)")
+            return
     b = np.asarray(rec["base"])
     a = np.asarray(rec["avoid"])
     bl = LineString(rec["base"])
     hit = [cones[i] for i in tree.query(bl) if cones[i].intersects(bl)]
 
-    fig = plt.figure(figsize=(11, 4.6))
-    gs = fig.add_gridspec(1, 2, width_ratios=[1.35, 1], wspace=0.18)
+    fig = plt.figure(figsize=(11, 5.6))
+    # legends go below the panels: a long commute leaves no empty corner to put them in
+    gs = fig.add_gridspec(1, 2, width_ratios=[1.35, 1], wspace=0.18, bottom=0.25, top=0.93)
     ax = fig.add_subplot(gs[0, 0])
 
     x0, x1 = min(b[:, 0].min(), a[:, 0].min()), max(b[:, 0].max(), a[:, 0].max())
@@ -611,7 +680,7 @@ def fig_route_example(lon, lat, rows):
     pct = 100 * res["extra_min"] / res["base_min"] if res["base_min"] else 0
     ax.set_title(f"(a) {rec['state'].upper()} commute: {res['base_cameras']} cameras "
                  f"evaded for +{res['extra_min']:.1f} min ({pct:.1f}%)", y=1.0, pad=8)
-    ax.legend(fontsize=7.5, loc="lower right")
+    ax.legend(fontsize=7.5, loc="upper center", bbox_to_anchor=(0.5, -0.15), frameon=False)
 
     ax = fig.add_subplot(gs[0, 1])
     zsel = (lon > zx - zr) & (lon < zx + zr) & (lat > zy - zr) & (lat < zy + zr)
@@ -641,18 +710,20 @@ def fig_route_example(lon, lat, rows):
     ax.xaxis.set_major_locator(plt.MaxNLocator(4))
     ax.yaxis.set_major_locator(plt.MaxNLocator(5))
     ax.tick_params(axis="x", labelsize=7.5)
-    ax.set_title("(b) Street scale: directional fields of view", y=1.0, pad=8)
+    ax.set_title("(b) Street scale: mapped wedges, registry discs" if MERGED
+                 else "(b) Street scale: directional fields of view", y=1.0, pad=8)
     handles = [
         Line2D([], [], marker="^", ls="", color="#111111", ms=6, label="camera"),
-        Patch(fc="#8B0000", label="cone crossed by unavoided route"),
-        Patch(fc="#BBBBBB", ec="#888888", label="cone not crossed"),
+        Patch(fc="#8B0000", label="field of view crossed by unavoided route"),
+        Patch(fc="#BBBBBB", ec="#888888", label="field of view not crossed"),
         Line2D([], [], color=C_BASE, lw=3, label="unavoided"),
     ]
     in_win = ((np.abs(a[:, 0] - zx) < zr) & (np.abs(a[:, 1] - zy) < zr)).any()
     if in_win:
         handles.append(Line2D([], [], color=C_AVOID, lw=2.6, label="avoiding"))
-    ax.legend(handles=handles, fontsize=7.5, loc="upper left")
-    save(fig, "fig_route_example")
+    ax.legend(handles=handles, fontsize=7.5, loc="upper center", bbox_to_anchor=(0.5, -0.15), ncol=2,
+              frameon=False)
+    save(fig, "fig_route_example" + SFX)
 
 
 def fig_radius(path):
@@ -718,12 +789,23 @@ def fig_trend():
     has = [r.get("pct_zero_after") not in ("", None) for r in T]
     dz = [d for d, h in zip(dates, has) if h]
     fig, axes = plt.subplots(1, 3, figsize=(11, 3.3))
+    # The merged present - the latest map plus the registry's readers, which carry no dates and
+    # so have no past - as one hollow marker per series at the latest date.
+    mpath, cpath = os.path.join(OUT, "merged", "compare.csv"), os.path.join(OUT, "merged", "cameras_by_state.csv")
+    M = ({r["statistic"]: r for r in csv.DictReader(open(mpath))}
+         if os.path.exists(mpath) and os.path.exists(cpath) else None)
+    last = dates[-1]
+    hollow = dict(ls="none", mfc="white", mew=1.4, ms=6.5, zorder=4)
+    hollow_key = lambda: Line2D([], [], marker="o", mec=C_NEUT, label="hollow: with Flock's registry added", **hollow)
 
     ax = axes[0]
     ax.plot(dates, [float(r["cameras_us"]) for r in T], "-", marker=".", ms=3.5, color=C_NEUT, lw=1.3,
             zorder=2, label="monthly, from the edit history")
     ax.plot(dz, [float(r["cameras_us"]) for r, h in zip(T, has) if h], "o", ms=5, color=C_FLOCK,
             zorder=3, label="routed for avoidance")
+    if M:
+        ax.plot([last], [sum(int(r["cameras"]) for r in csv.DictReader(open(cpath)))], marker="o", mec=C_FLOCK,
+                label="with Flock's registry added", **hollow)
     ax.set_yscale("log")
     ax.axvline(dt.date(2024, 10, 15), color=C_OTHER, ls=":", lw=1)
     ax.annotate("DeFlock\nfounded\nOct 2024", xy=(dt.date(2024, 10, 15), 0.62),
@@ -743,11 +825,15 @@ def fig_trend():
     if any(has):
         z = np.array([100 - float(r["pct_zero_after"]) for r, h in zip(T, has) if h])
         ax.plot(dz, z, marker="s", ms=5, lw=1.4, color=C_AVOID, label="still pass one when avoiding, quarterly")
+    if M:
+        ax.plot([last], [float(M["passing >=1 camera (%)"]["merged"])], marker="o", mec=C_BASE, **hollow)
+        ax.plot([last], [100 - float(M["reduced to zero, all (%)"]["merged"])], marker="s", mec=C_AVOID, **hollow)
     ax.set_ylim(0, 100)
     ax.set_xlim(dt.date(2023, 12, 1), dt.date(2026, 11, 1))
     ax.set_ylabel("% of commuters")
     ax.set_title("(b) Exposure, and what avoidance leaves")
-    ax.legend(fontsize=7.5, loc="upper left")
+    h, _ = ax.get_legend_handles_labels()
+    ax.legend(handles=h + ([hollow_key()] if M else []), fontsize=7.5, loc="upper left")
     ax.tick_params(axis="x", labelrotation=30, labelsize=7.5)
 
     ax = axes[2]
@@ -764,11 +850,18 @@ def fig_trend():
             else:
                 ax.plot(dz, v, marker=mk, ms=5, lw=1.6, color=colr, label=lab)
                 top = max(top, v.max())
+        if M:
+            for k, mk, colr in (("median extra min, exposed", "o", C_AVOID), ("median min per camera evaded", "^", C_OTHER)):
+                v, lo, hi = (float(M[k][f]) for f in ("merged", "merged_lo", "merged_hi"))
+                ax.errorbar([last], [v], yerr=[[v - lo], [hi - v]], fmt=mk, mfc="white", mec=colr, mew=1.4, ms=6.5,
+                            ecolor=colr, capsize=3, zorder=4)
+                top = max(top, hi)
         ax.set_ylim(0, top * 1.3)
     ax.set_xlim(dt.date(2023, 12, 1), dt.date(2026, 11, 1))
     ax.set_ylabel("minutes")
     ax.set_title("(c) The price of refusal, routed quarters")
-    ax.legend(fontsize=7.5, loc="upper left")
+    h, _ = ax.get_legend_handles_labels()
+    ax.legend(handles=h + ([hollow_key()] if M else []), fontsize=7.5, loc="upper left")
     ax.tick_params(axis="x", labelrotation=30, labelsize=7.5)
     fig.tight_layout()
     save(fig, "fig_trend")
@@ -911,21 +1004,29 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--with-demographics", action="store_true",
                     help="also draw the siting and equity figures (the companion paper's; not in trames.tex)")
+    ap.add_argument("--osm-only", action="store_true",
+                    help="draw the headline figures from the map alone, as fig_*_osm, instead of the merged map")
     args = ap.parse_args()
-    print("loading cameras (50 states + DC)...")
-    lon, lat, cls, cone = load_cameras()
+    global MERGED, SFX, INPUTS
+    MERGED, SFX, INPUTS = not args.osm_only, "_osm" if args.osm_only else "", inputs(args.osm_only)
+    print("loading cameras (50 states + DC)..." + ("" if MERGED else " map only"))
+    lon, lat, cls, cone, state = load_cameras(INPUTS["discs"])
     # reach per unit deployed is per camera that can be passed: those with a cone
     counts = {v: int(((cls == v) & cone).sum()) for v in ("flock", "other", "untagged")}
-    print(f"  {len(lon):,} cameras, {int(cone.sum()):,} with a cone {counts}")
+    print(f"  {len(lon):,} cameras, {int(cone.sum()):,} with a cone {counts}, "
+          f"{int((cls == 'registry').sum()):,} from the registry alone")
 
-    rows = load_results(os.path.join(OUT, "results.csv"))
+    rows = load_results(INPUTS["results"])
     D = Design(rows, *DESIGN)
     print(f"  {len(rows):,} commutes in {len(D.states)} states (commuter-weighted)")
 
-    by_state = list(csv.DictReader(open(os.path.join(OUT, "by_state.csv"))))
-    cams = [r for r in csv.DictReader(open(os.path.join(OUT, "cameras_by_state.csv")))]
-    latest = max(r["date"] for r in cams)
-    per100k = {r["state"]: float(r["per_100k"]) for r in cams if r["date"] == latest}
+    by_state = list(csv.DictReader(open(INPUTS["by_state"])))
+    if MERGED:
+        per100k = per_100k(state, INPUTS["cameras_by_state"])
+    else:
+        cams = [r for r in csv.DictReader(open(INPUTS["cameras_by_state"]))]
+        latest = max(r["date"] for r in cams)
+        per100k = {r["state"]: float(r["per_100k"]) for r in cams if r["date"] == latest}
 
     print("figures:")
     fig_camera_map(lon, lat, cls)
