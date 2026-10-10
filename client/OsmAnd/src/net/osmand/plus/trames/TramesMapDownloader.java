@@ -112,7 +112,7 @@ public class TramesMapDownloader {
 	/**
 	 * Fetch the offline camera pack if it isn't already here.
 	 *
-	 * <p>Rides along with a map download rather than being its own errand: about 1.1 MB
+	 * <p>Rides along with a map download rather than being its own errand: about 1.4 MB
 	 * against a map measured in gigabytes, and a user who has downloaded a map for offline
 	 * use has already said what they want. Without it the map draws no cameras once the
 	 * network drops, while the router carries on avoiding them — the map and the route

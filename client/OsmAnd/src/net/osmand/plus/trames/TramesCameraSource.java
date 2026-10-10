@@ -26,15 +26,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Fetches ALPR (licence-plate reader) camera positions for display on the map.
  *
- * <p>Primary source is the TRAMES server's own camera endpoint, which serves the exact
- * snapshot the routing graph's cones were built from — so the map shows the cameras the
- * router is actually avoiding, not a fresher OSM state the graph has never seen. It
- * speaks Overpass's protocol, so the public Overpass instances remain as fallbacks and
- * the fetch path below cannot tell them apart. That fallback is what keeps the layer
- * alive for a self-hoster running a router with no camera endpoint — and it is not
- * hypothetical the other way round either: on 2026-07-28 both public instances answered
- * 504 to this exact query for a full day, which on the old Overpass-only path meant a
- * silent, clean-looking map over surveilled streets.
+ * <p>Primary source is the TRAMES server's own camera endpoint, which serves the snapshot
+ * the offline maps' tags were built from (it once matched the hosted routing graph, retired
+ * on 2026-08-29) — so the map shows the cameras the router is actually avoiding, not a
+ * fresher OSM state the maps have never seen. It speaks Overpass's protocol, so the
+ * public Overpass instances remain as fallbacks and the fetch path below cannot tell them
+ * apart. That fallback is what keeps the layer alive for a self-hoster running a router
+ * with no camera endpoint — and it is not hypothetical the other way round either: on
+ * 2026-07-28 both public instances answered 504 to this exact query for a full day, which
+ * on the old Overpass-only path meant a silent, clean-looking map over surveilled streets.
  *
  * <p>Tag handling follows what OSM actually contains rather than what the wiki recommends
  * — see TramesCameraSource#parseDirections. Measured over 3,899 cameras in one metro:

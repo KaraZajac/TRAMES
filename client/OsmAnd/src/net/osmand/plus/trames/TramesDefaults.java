@@ -21,16 +21,16 @@ import java.util.Map;
  *
  * <p><b>Offline by default, for privacy.</b> The car profile routes with OsmAnd's
  * offline engine against ALPR-tagged maps ({@link TramesMapsDialog}), where camera
- * avoidance comes from the {@code avoid_alpr} rule baked into {@code routing.xml}.
- * Online routing is still available and still avoids cameras, but selecting it by
- * default would be incoherent for this app: every route request would hand a server the
- * user's origin, destination and timing — precisely the movement record the app exists
- * to keep people out of. Avoiding cameras while streaming your itinerary to a host is
- * not privacy, so the private path is the default and the network is opt-in.
+ * avoidance comes from the {@code alpr_avoidance} levels baked into {@code routing.xml}.
+ * Online routing is opt-in, and selecting it by default would be incoherent for this app:
+ * every route request would hand a server the user's origin, destination and timing —
+ * precisely the movement record the app exists to keep people out of. Avoiding cameras
+ * while streaming your itinerary to a host is not privacy, so the private path is the
+ * default and the network is opt-in.
  *
- * <p>The online TRAMES engine is still seeded, just not selected. It stays one tap away
- * in the car profile's navigation settings for users who want fresher camera data than
- * their downloaded map, or who have no map for where they are.
+ * <p>The online TRAMES engine is still seeded, just not selected — but its standard URL is
+ * the public endpoint, retired on 2026-08-29, which now answers 503 (the app reports an
+ * empty route). It remains useful only to self-hosters who point it at their own server.
  *
  * <p><b>Trade-off, stated plainly:</b> offline routing needs a downloaded map. With none
  * present the router cannot produce a route at all — so a fresh install must visit
@@ -44,7 +44,7 @@ import java.util.Map;
  * earlier version — never over a choice the user made.
  *
  * <p>Everything else is already default-on: the camera map layer draws whenever the map
- * is past its minimum zoom, {@code avoid_alpr} defaults to true in the routing config,
+ * is past its minimum zoom, {@code alpr_strong} defaults to true in the routing config,
  * and a seeded engine with no stored berth routes at
  * {@link TramesEngine#getDefaultBerthLevel()} (STRONG) — the same strength the offline
  * rule uses, so the two paths agree.

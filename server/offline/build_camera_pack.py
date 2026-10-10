@@ -3,15 +3,17 @@
 
     python3 build_camera_pack.py --cameras ../cameras/cameras.json -o cameras-us.json.gz
 
-The map layer normally fetches cameras from the routing server (or Overpass). Offline
-that leaves the map blank over surveilled streets while the offline router is busy
-avoiding those very cameras — the map and the route disagree, and the quiet direction
-of the disagreement is the dangerous one.
+Before this pack, the map layer could only fetch cameras from the routing server (or
+Overpass). Offline that left the map blank over surveilled streets while the offline
+router was busy avoiding those very cameras — the map and the route disagreed, and the
+quiet direction of the disagreement is the dangerous one. Since v1.2.3 the pack is the
+layer's only source unless a profile routes online.
 
 This ships the same snapshot the routing graph and the .obf tags were built from, so an
 offline map draws exactly what the offline router avoided. Only what the layer needs is
-kept — position and direction — which turns 13.4 MB of Overpass JSON into ~1.1 MB gzipped
-for all 120k US cameras, small enough to fetch alongside any map download.
+kept — position and direction — which turns 16.6 MB of camera JSON into ~1.4 MB gzipped
+for the 142,991 North American cameras of 2026-09-22 (13.4 MB into 1.1 MB for July's
+120,838), small enough to fetch alongside any map download.
 """
 import argparse, gzip, json, os, sys
 

@@ -31,11 +31,12 @@ import java.util.zip.GZIPInputStream;
  *
  * <p>The pack is the same snapshot the routing graph and the ALPR-tagged {@code .obf}
  * files were built from, so what the map draws offline is exactly what the offline router
- * avoided. Stripped to position and direction, all 120k US cameras compress to about
- * 1.1 MB — negligible next to the maps it rides along with.
+ * avoided. Stripped to position and direction, the 142,991 North American cameras of the
+ * 2026-09-22 snapshot compress to about 1.4 MB — negligible next to the maps it rides
+ * along with.
  *
  * <p>Parsed with a streaming {@link JsonReader} into parallel primitive arrays rather than
- * a JSON tree of 120k objects: the tree costs tens of MB transiently and this runs on
+ * a JSON tree of 143k objects: the tree costs tens of MB transiently and this runs on
  * phones already holding a rendered map. Camera objects are materialised only for the
  * handful inside the current view.
  */

@@ -50,8 +50,8 @@ spatial index at import. A request then references it with no geometry attached:
 { "priority": [ { "if": "in_alpr", "multiply_by": "0.05" } ] }
 ```
 
-That keeps the request tiny regardless of camera count (~120k in North America) and
-leaves avoidance strength a continuous per-request knob.
+That keeps the request tiny regardless of camera count (~143k in North America on the
+2026-09-22 map) and leaves avoidance strength a continuous per-request knob.
 
 **Import-time custom areas being referenceable from per-request custom models is not
 documented by GraphHopper.** It was verified experimentally; the whole design depends on
@@ -81,8 +81,9 @@ Hybrid-mode latency: 20–46 ms up to 1,085 km, 161 ms coast-to-coast.
 default since v1.2.0: the continental graph was the whole memory footprint of that box
 — 18.8 GiB of 22.9 GiB, on a host that also serves thirteen websites — to keep an
 opt-in path warm. Caddy now answers `/route`, `/info` and `/health` with a 503 whose
-body says to route offline and where the ALPR-tagged maps are, so a client still
-pointed at the online engine gets a sentence a person can act on rather than a 502.
+body says to route offline and where the ALPR-tagged maps are — a sentence a person can
+act on rather than a 502. The app itself does not show it: it reads the body as a route,
+cannot parse it, and reports "The calculated route is empty."
 `/cameras` (the camera map-layer service, `cameras/`) is unaffected and stays up.
 
 The client keeps the online engine for self-hosters: point it at your own instance.

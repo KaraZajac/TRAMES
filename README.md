@@ -15,8 +15,10 @@ the router detour around roads nobody is being read on.
 
 Since v1.2.0 it does this **offline by default**. Routes are computed on the device
 against ALPR-tagged maps, so a start, a destination and a departure time never leave the
-phone. Online routing still exists and still avoids cameras, but it is opt-in: sending a
-server your itinerary in order to dodge cameras trades one movement record for another.
+phone: sending a server your itinerary in order to dodge cameras trades one movement record
+for another. The hosted online server was **retired on 2026-08-29**. The app's online engine
+remains for anyone who runs their own (`server/`); left pointed at the retired address, as it
+is out of the box, it returns no route.
 
 ---
 
@@ -24,8 +26,8 @@ server your itinerary in order to dodge cameras trades one movement record for a
 
 | Path | What it is |
 |---|---|
-| `client/` | Android app — a fork of [OsmAnd](https://github.com/osmandapp/OsmAnd) (GPLv3): offline ALPR avoidance for car/bike/foot, an ALPR-avoiding online engine, a camera map layer, and an in-app map downloader |
-| `server/alpr`, `server/graphhopper` | Online routing backend — stock GraphHopper 11 plus a preprocessor that turns OSM ALPR data into camera-cone geometry |
+| `client/` | Android app — a fork of [OsmAnd](https://github.com/osmandapp/OsmAnd) (GPLv3): offline ALPR avoidance for car/bike/foot, an ALPR-avoiding online engine for a self-hosted server, a camera map layer, and an in-app map downloader |
+| `server/alpr`, `server/graphhopper` | Online routing backend, to self-host (the public instance was retired) and the engine the study routes against — stock GraphHopper 11 plus a preprocessor that turns OSM ALPR data into camera-cone geometry |
 | `server/offline/` | The offline pipeline — tags camera-watched ways, builds `.obf` maps that carry the tag, and packs camera positions for the map layer |
 | `research/` | The measurement study: pipeline, results, and the paper |
 
@@ -160,9 +162,13 @@ Prebuilt maps for all 50 states + DC are hosted at
 
 ## How it works — online
 
+This is the self-hosted path, and the engine the study routes against; the public instance
+was retired on 2026-08-29 (see [`server/README.md`](server/README.md)).
+
 GraphHopper resolves `custom_areas.directory` into a spatial index **at graph import
-time**. Register 135,210 camera cones as one merged area named `alpr`, and a per-request
-custom model can then reference it with no geometry in the request at all:
+time**. Register the camera cones (157,084 on the 2026-09-22 map, merged into 135,210
+polygons) as one area named `alpr`, and a per-request custom model can then reference it with
+no geometry in the request at all:
 
 ```json
 { "priority": [ { "if": "in_alpr", "multiply_by": 0.01 } ] }
@@ -272,10 +278,12 @@ on-device and the map draws cameras from a downloaded pack.
 
 A camera query carries a bounding box around the current view — which is to say, the
 user's location — so those requests **default to denied** and are permitted only while
-the active profile uses an online routing engine. The gate lives inside the single
-function that builds the request rather than at its call sites, so a later change cannot
-reintroduce the leak by forgetting a check. Until v1.2.3 this was wrong: a fresh install
-queried cameras before the user had opted into anything.
+the active profile uses an online routing engine. They then go to the TRAMES camera service
+(`routing.blackflagintel.com/cameras`) or, if it fails, a public Overpass instance, whichever
+server the routing itself uses. The gate lives inside the single function that builds the
+request rather than at its call sites, so a later change cannot reintroduce the leak by
+forgetting a check. Until v1.2.3 this was wrong: a fresh install queried cameras before the
+user had opted into anything.
 
 The remaining network calls carry no location and are all user-initiated: a static map
 manifest, a map file by name, and the camera pack. Choosing online routing sends start
@@ -314,3 +322,8 @@ git remote add osmand https://github.com/osmandapp/OsmAnd.git
 Camera data comes from OpenStreetMap (ODbL) via the Overpass API, the same corpus
 surfaced by [DeFlock](https://deflock.me). It is contributed by volunteers and is
 **incomplete in ways that are not random** — the central caveat of the study.
+
+The study also reads Flock Safety's device registry as it stood in December 2025, from the
+map an independent researcher published at [flocksurveillance.org](https://flocksurveillance.org).
+That data is not redistributed here: the device list and the registry's discs are built
+locally and gitignored, and the app does not carry them.

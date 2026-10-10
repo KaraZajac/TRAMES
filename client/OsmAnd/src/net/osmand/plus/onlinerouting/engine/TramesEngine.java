@@ -40,8 +40,8 @@ import static net.osmand.util.Algorithms.isEmpty;
  * <pre>{@code {"priority": [{"if": "in_alpr", "multiply_by": "0.05"}]}}</pre>
  *
  * No geometry travels with the request, so the payload stays tiny regardless of how many
- * cameras exist — there are ~120k in North America — and the strength stays a per-request
- * knob instead of being frozen into the graph.
+ * cameras exist — ~143k in North America on the 2026-09-22 map — and the strength stays a
+ * per-request knob instead of being frozen into the graph.
  *
  * <p><b>Why ch.disable.</b> Contraction Hierarchies bake the weighting into the prepared
  * graph, so a per-request custom model requires dropping out of speed mode. The server
@@ -128,13 +128,13 @@ public class TramesEngine extends GraphhopperEngine {
 	}
 
 	/**
-	 * Public TRAMES routing endpoint. Open — no key required.
+	 * The public TRAMES routing endpoint — RETIRED on 2026-08-29. It now answers 503 with a
+	 * one-line notice, which this engine cannot parse, so a route through it comes back
+	 * empty. Self-hosters override it with a custom URL; see server/README.md.
 	 *
-	 * It is not token-gated because a token shipped in a public APK is extractable in
-	 * seconds and was never real security. The server is protected instead by a systemd
-	 * cgroup cap so routing load cannot starve the other services on that host.
-	 * Self-hosters override this with a custom URL; see
-	 * https://github.com/KaraZajac/TRAMES-server.
+	 * It was open, with no key: a token shipped in a public APK is extractable in seconds
+	 * and was never real security, so the server was protected instead by a systemd cgroup
+	 * cap that kept routing load from starving the other services on that host.
 	 */
 	@NonNull
 	@Override

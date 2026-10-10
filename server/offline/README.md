@@ -100,7 +100,8 @@ the server venv, which carries only `shapely`).
   `manifest.json` from the map host and installs a `.obf` straight into the maps
   directory with an immediate re-index — no restart, no file picker.
 - **The camera pack.** `build_camera_pack.py` slims the served snapshot to position +
-  direction (~1.1 MB gzipped for all 120k US cameras); it rides along with a map download
+  direction (~1.4 MB gzipped for the 142,991 North American cameras of the 2026-09-22
+  snapshot; 1.1 MB for July's 120,838); it rides along with a map download
   so the offline map draws exactly the cameras the offline router is avoiding.
 - **The default.** `TramesDefaults` points the car profile at OsmAnd's offline engine;
   the online TRAMES engine is seeded but not selected. Offline is the default because
