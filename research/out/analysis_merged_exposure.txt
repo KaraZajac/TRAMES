@@ -9,10 +9,17 @@ osm          75.3% [74.8-75.8]     5.14 [5.04-5.24]       3    36.5%   0.0963
 merged       78.6% [78.1-79.0]     6.24 [6.11-6.36]       3    42.0%   0.1168
 directed     77.7% [77.2-78.1]     5.82 [5.70-5.94]       3    40.0%   0.1089
 
-newly exposed by the registry (0 on the map, >=1 merged): 3.2% of commuters; encounters +21.3%
+newly exposed by the registry (no mapped camera, >=1 on the merged map): 3.26% of commuters against the routed map-alone run, as compare_merged.py and the paper count it; 3.25% against the wedges rebuilt here, which draw the 31 full-circle cameras as discs and are scored on stored rather than live geometry. Encounters +21.3%
 directed against merged: mean encounters x0.933 [0.931-0.934]; of the registry's additions, 38% are against the named direction
 
 AVOIDING ROUTES planned against the merged map (56,131 scored)
   osm        reduced to zero  82.3% [81.8-82.8]   of exposed  76.6%   residual 6.1% of baseline
   merged     reduced to zero  80.3% [79.8-80.9]   of exposed  75.0%   residual 5.8% of baseline
   directed   reduced to zero  81.1% [80.6-81.6]   of exposed  75.7%   residual 6.0% of baseline
+
+THE APP'S CASE: the map-alone run's avoiding routes - planned, as the app's are, around the map
+alone - scored against the registry's readers
+  clean of every mapped camera: 84.2% of commuters
+  of those, still passing >=1 registry reader       35.0% [34.4-35.7]
+  of those the map exposes and the route clears     44.1% [43.3-44.9]
+  clean of both, of all commuters                   54.7% [54.2-55.3]

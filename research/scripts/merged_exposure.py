@@ -29,8 +29,13 @@ of travel at a disc is the route's bearing where it passes nearest the reader.
 
 With --merged-results and --merged-routes (run_history.py's output against alpr_merged), the
 merged count is checked against the one the routing recorded, and the avoiding routes are
-scored the same three ways. Commuter-weighted summaries as in analyze.py, with the stratified
-bootstrap of wstats.py.
+scored the same three ways.
+
+The app's case: the app routes around the map alone. The map-alone run's avoiding routes (the
+"avoid" geometry in --routes) are scored against the registry's discs, to say how often a route
+clean of every mapped camera still passes a reader only the registry records.
+
+Commuter-weighted summaries as in analyze.py, with the stratified bootstrap of wstats.py.
 """
 import argparse
 import csv
@@ -92,6 +97,12 @@ class Scorer:
         for j, p in enumerate(b):
             self.disc_of[p].append(j)
         self.unassigned = m1 + m2
+        self.dtree = STRtree(self.discs)
+
+    def registry_hits(self, coords):
+        """Registry discs a route crosses: readers that a route planned around the map alone can still pass."""
+        line = LineString(coords)
+        return sum(1 for j in self.dtree.query(line) if self.discs[j].intersects(line))
 
     def direction_ok(self, line, j):
         want = HEADING.get(self.meta[j]["watches"] or "")
@@ -135,11 +146,13 @@ def main():
           f"({S.unassigned} pieces placed by nearest part)", flush=True)
 
     rows = {tuple(r[k] for k in KEY): r for r in csv.DictReader(open(args.results, newline=""))}
-    base = {}
+    base, app = {}, {}
     for n, rec in enumerate(read_routes(args.routes), 1):
         k = tuple(rec[x] for x in KEY)
         if k in rows:
             base[k] = S.score(rec["base"])
+            if "avoid" in rec:
+                app[k] = S.registry_hits(rec["avoid"])
         if n % 10000 == 0:
             print(f"  {n:,} baselines scored", flush=True)
     print(f"{len(base):,} baselines scored", flush=True)
@@ -165,6 +178,7 @@ def main():
         r.update(base_osm=b[0], base_merged=b[1], base_directed=b[2])
         if k in avoid:
             a = avoid[k]; r.update(avoid_osm=a[0], avoid_merged=a[1], avoid_directed=a[2])
+        r.update(app_route_registry=app.get(k, ""))      # registry discs on the map-alone avoiding route
         out_rows.append(r)
     with open(args.out, "w", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=list(out_rows[0].keys())); w.writeheader(); w.writerows(out_rows)
@@ -186,8 +200,12 @@ def main():
         lo, hi = ci(Dz.boot_ratio((x >= 1).astype(float), ones)[:, 0]); mlo, mhi = ci(Dz.boot_ratio(x, ones)[:, 0])
         P(f"{name:10s} {100*Dz.share(x >= 1):6.1f}% [{100*lo:.1f}-{100*hi:.1f}]   {Dz.mean(x):6.2f} [{mlo:.2f}-{mhi:.2f}]   "
           f"{Dz.quantile(x, .5):5.0f}   {100*Dz.share(x >= 5):5.1f}%   {Dz.ratio(x, km):.4f}")
-    P(f"\nnewly exposed by the registry (0 on the map, >=1 merged): {100*Dz.share((X['osm'] == 0) & (X['merged'] >= 1)):.1f}% "
-      f"of commuters; encounters +{100*(Dz.mean(X['merged'])/Dz.mean(X['osm'])-1):.1f}%")
+    routed = np.array([float(r["base_cameras"]) for r in out_rows])      # the routed map-alone run's own count
+    P(f"\nnewly exposed by the registry (no mapped camera, >=1 on the merged map): "
+      f"{100*Dz.share((routed == 0) & (X['merged'] >= 1)):.2f}% of commuters against the routed map-alone run, as "
+      f"compare_merged.py and the paper count it; {100*Dz.share((X['osm'] == 0) & (X['merged'] >= 1)):.2f}% against "
+      f"the wedges rebuilt here, which draw the 31 full-circle cameras as discs and are scored on stored rather than "
+      f"live geometry. Encounters +{100*(Dz.mean(X['merged'])/Dz.mean(X['osm'])-1):.1f}%")
     rd = Dz.boot_ratio(X["directed"], ones)[:, 0] / Dz.boot_ratio(X["merged"], ones)[:, 0]
     lo, hi = ci(rd)
     P(f"directed against merged: mean encounters x{Dz.mean(X['directed'])/Dz.mean(X['merged']):.3f} [{lo:.3f}-{hi:.3f}]; "
@@ -202,6 +220,18 @@ def main():
             lo, hi = ci(Dd.boot_ratio((xa == 0).astype(float), np.ones(Dd.n))[:, 0])
             P(f"  {name:10s} reduced to zero {100*Dd.share(xa == 0):5.1f}% [{100*lo:.1f}-{100*hi:.1f}]   "
               f"of exposed {100*Dd.share(xa == 0, xb >= 1):5.1f}%   residual {100*Dd.ratio(xa, xb):.1f}% of baseline")
+    if app:
+        clean = np.array([float(r["avoid_cameras"]) == 0 for r in out_rows])       # the map-alone run's own count
+        expo = np.array([float(r["base_cameras"]) >= 1 for r in out_rows])
+        hit = np.array([r["app_route_registry"] != "" and float(r["app_route_registry"]) >= 1 for r in out_rows])
+        P("\nTHE APP'S CASE: the map-alone run's avoiding routes - planned, as the app's are, around the map")
+        P("alone - scored against the registry's readers")
+        P(f"  clean of every mapped camera: {100*Dz.share(clean):.1f}% of commuters")
+        for lab, num, den in (("of those, still passing >=1 registry reader", hit & clean, clean),
+                              ("of those the map exposes and the route clears", hit & clean & expo, clean & expo),
+                              ("clean of both, of all commuters", clean & ~hit, np.ones(Dz.n, bool))):
+            lo, hi = ci(Dz.boot_ratio(num, den)[:, 0])
+            P(f"  {lab:48s} {100*Dz.share(num, den):5.1f}% [{100*lo:.1f}-{100*hi:.1f}]")
     txt = "\n".join(L); print(txt); open(args.report, "w").write(txt + "\n")
 
 

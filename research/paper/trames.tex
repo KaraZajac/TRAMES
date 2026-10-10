@@ -238,9 +238,11 @@ weights into the prepared graph and a per-request avoidance strength needs them 
 landmarks, the ALT algorithm of \citet{goldberg2005}, serve instead. And the avoiding profile
 shares the plain profile's landmark preparation, which is valid only because avoidance
 multiplies priority strictly downward, so the landmark distances remain the lower bounds ALT
-requires. The same engine and cone geometry serve TRAMES, a fork of the OsmAnd navigation
-client \citep{osmand} that routes around the cameras on a phone; the routing server binds to
-localhost and is not internet-facing.
+requires. The same engine and the map's cone geometry serve TRAMES, a fork of the OsmAnd
+navigation client \citep{osmand} that routes around the cameras on a phone; the routing server
+binds to localhost and is not internet-facing. The app avoids the volunteer map alone: the
+registry's readers that this paper's current figures count (\Cref{sec:data:registry}) are not
+in it, and \Cref{sec:discussion} measures what that leaves on a route the app calls clean.
 
 \section{Data}
 \label{sec:data}
@@ -695,8 +697,8 @@ stored routes scored with discs.
 By vendor, on the map alone, where every cone comes from a surveyed bearing, Flock Safety
 holds \SI{81.5}{\percent} of the installations that contribute cones in the fifty states and
 the District but supplies \SI{67.8}{\percent} of commuter exposure; per unit deployed, other
-makers' cameras generate \num{2.26} times as many encounters, being multi-headed six times as
-often (\SI{22.8}{\percent} against \SI{3.6}{\percent}) and standing more often beside principal
+makers' cameras generate \num{2.26} times as many encounters, being multi-headed more than six
+times as often (\SI{23.3}{\percent} against \SI{3.6}{\percent}) and standing more often beside principal
 arterials and freeways (\SI{42}{\percent} within \SI{30}{\metre} of one in the federal traffic
 inventory \citep{hpms2024}, against \SI{26}{\percent} of Flock's). Where the operator is
 tagged, police departments run about two-thirds of both. The registry adds only Flock's
@@ -964,6 +966,13 @@ but it is becoming less so: as the map filled in, the share of exposed commuters
 zero fell from \SI{95}{\percent} to \SI{79}{\percent}, and to \SI{75}{\percent} once the
 vendor's registry is added, while the median cost for those with a camera to avoid quadrupled
 on the map alone and rises by a further quarter with the registry (\Cref{sec:results:trend}).
+
+Cheap refusal also presumes a router that knows where the cameras are. The app this study's
+engine serves avoids the volunteer map alone (\Cref{sec:system}). Routes planned that way are
+clean of the map for \SI{84.2}{\percent} of commuters, but for \SI{35.0}{\percent}
+[34.4--35.7] of them the route still passes a reader that only the vendor's registry records,
+and for \SI{44.1}{\percent} of those whose usual route passes a mapped camera; \SI{54.7}{\percent}
+of commuters get a route clean of both. Avoidance is only as complete as the record it avoids.
 
 The corollary cuts the other way. If avoidance is this cheap, it is also cheap for people
 with reason to evade legitimate investigation, which bounds how much investigative value a

@@ -56,6 +56,11 @@ its edit history; the registry carries no dates, so the trend is the map's alone
   37.5% can reach work past none, and avoiding costs a median 13.6 minutes — against 54.3%
   and 7.8 minutes on the volunteer map alone. Whether evasion is cheaper per camera where
   cameras are denser, as the map alone weakly suggested, the merged map does not bear out.
+- **What the app avoids.** The app routes around the volunteer map only; the readers that
+  only Flock's registry records are not in it. A route planned around the map alone is clean
+  of every mapped camera for 84.2% of commuters, but for 35.0% of them it still passes a
+  registry reader (44.1% of those whose usual route passes a mapped camera); 54.7% of
+  commuters get a route clean of both.
 - **The map filled in, and exposure with it.** From 1,112 mapped readers in January 2024 to
   142,257 in September 2026: about fifty a month until DeFlock was founded in October 2024,
   then 1,724 → 4,894 in a single month, then a median 14.1% a month from January 2025 — easing
