@@ -138,7 +138,7 @@
         A reader pointed at northbound traffic says nothing about the southbound
         carriageway. Treat it as a circle and the router detours around roads
         nobody is being read on. TRAMES models every camera as a <strong>cone
-        pointing where it actually looks</strong>, and asks for the fastest path
+        pointing where it actually looks</strong>, and asks the router for a path
         that crosses none of them.
       </p>
     </div>
@@ -258,7 +258,7 @@
   <div class="container">
     <div class="section-head">
       <span class="section-tag">avoidance strength</span>
-      <h2>Five levels, from fastest to leave-no-plate-unturned.</h2>
+      <h2>Five levels, from no detour to leave-no-plate-unturned.</h2>
       <p class="lead">The levels aren't evenly spaced, and that's deliberate:
       measured on the continental graph, everything from off down to about a third
       leaves most routes unchanged — a penalty can't outweigh a highway. So the
@@ -269,7 +269,7 @@
     <div class="tiers">
       <div class="tier tier-off">
         <div class="tier-name">OFF</div>
-        <p>Fastest route. No avoidance — TRAMES navigates like any other app.</p>
+        <p>The usual route. No avoidance — TRAMES navigates like any other app.</p>
       </div>
       <div class="tier tier-light">
         <div class="tier-name">LIGHT</div>
@@ -308,8 +308,8 @@
     </div>
 
     <div class="readout">
-      <div class="cell"><span class="big">56,131</span><span class="lbl">commutes routed, twice each</span></div>
-      <div class="cell warm"><span class="big">78.6%</span><span class="lbl">pass at least one reader</span></div>
+      <div class="cell"><span class="big">56,131</span><span class="lbl">trips to work, routed with and without avoidance</span></div>
+      <div class="cell warm"><span class="big">78.6%</span><span class="lbl">pass a reader on the way to work</span></div>
       <div class="cell good"><span class="big">80.8%</span><span class="lbl">can route to zero exposure</span></div>
       <div class="cell"><span class="big">+2.3<span style="font-size:.6em"> min</span></span><span class="lbl">median cost to do it (9.71%)</span></div>
     </div>

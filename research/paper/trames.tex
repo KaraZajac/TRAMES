@@ -75,7 +75,8 @@ routing engine models each camera's field of view and can find a route that cros
 route \num{56131} home--work commutes from all fifty states and the District of Columbia, with
 and without avoidance, past \num{186316} installations: \num{142257} mapped by volunteers in
 OpenStreetMap, and \num{44059} more in service that only the registry of the dominant vendor,
-Flock Safety, records. \SI{78.6}{\percent} of commuters pass at least one reader. Refusal is
+Flock Safety, records. \SI{78.6}{\percent} of commuters pass at least one reader on the way
+to work. Refusal is
 still cheap: \SI{80.8}{\percent} can reach work past none, and avoiding adds a median of
 \SI{2.29}{\minute}---about two-fifths more than the volunteer map alone implies. OpenStreetMap
 keeps every edit, so we also rebuild its camera map as it stood on the first of every month
@@ -104,8 +105,8 @@ subdivisions \citep{lum2019,stanley2022}.
 The public debate about this expansion is conducted in the vocabulary of policy: retention
 windows, warrant requirements, audit logs, data-sharing agreements. What that vocabulary
 lacks is a measurement of the thing being regulated. How much of this does a person
-actually drive through on an ordinary Tuesday? And if they would rather not, is declining
-a practical option or a theoretical one?
+actually drive through on the way to work on an ordinary Tuesday? And if they would rather
+not, is declining a practical option or a theoretical one?
 
 This paper answers both, and does so by building the instrument the question implies. We
 construct a routing engine that treats \alpr fields of view as first-class geometry and
@@ -493,13 +494,23 @@ drawn nine times. Collapsing repeats at equal weight, as this study's earlier ro
 under-represents precisely the heaviest flows; keeping the counts restores
 probability-proportional-to-workers sampling inside every state.
 
+The pairs are what LODES records, not trips anyone has been seen to make. The median routed
+commute is \SI{23.6}{\kilo\metre}, but one pair in eight lies more than \SI{100}{\kilo\metre}
+apart (\SI{12.8}{\percent} of commuters, weighted) and one in a hundred more than
+\SI{470}{\kilo\metre}: LODES places each job at an employer establishment, imputed where an
+employer has several, and pairs that far apart are unlikely to be driven daily. They are kept,
+since any cut-off would be arbitrary, and their weight is reported where it matters
+(\Cref{sec:results:exposure,sec:lim:scope}).
+
 \section{Method}
 \label{sec:method}
 
 \subsection{Two routes per commute}
 
-Each sampled pair is routed twice against the same graph: a \textbf{baseline} with no
-custom model, and an \textbf{avoided} route applying
+Only the trip to work is routed. A camera watches one direction of travel, so the journey home
+passes a different set of cameras; it is not measured here, and no figure in this paper should
+be doubled to stand for a day. Each sampled pair is routed twice against the same graph: a
+\textbf{baseline} with no custom model, and an \textbf{avoided} route applying
 \texttt{priority: [\{if: "in\_alpr", multiply\_by: 0.01\}]}. Both disable CH, which
 per-request custom models require.
 
@@ -662,9 +673,12 @@ Minutes per camera evaded   & 0.83 [0.82--0.85] & 1.38 & 0.76 [0.75--0.78] & 1.3
 \end{table}
 
 \textbf{\SI{78.6}{\percent} of American commuters pass at least one \alpr} on the way to
-work. The median commuter passes three, the \nth{90} percentile sixteen and the \nth{99}
-forty-two, and aggregate exposure is \num{0.117} cameras per kilometre driven
-(\Cref{tab:headline}). Against the map alone, the registry's readers add \num{1.09}
+work. The median commuter passes three and the \nth{90} percentile sixteen, and aggregate
+exposure is \num{0.117} cameras per kilometre driven (\Cref{tab:headline}). The \nth{99}
+percentile, forty-two, belongs mostly to the long pairs of \Cref{sec:data:commutes}: the
+commuters there travel a median \SI{290}{\kilo\metre} one way, and among the
+\SI{87}{\percent} whose pair lies within \SI{100}{\kilo\metre} the \nth{99} percentile is
+thirty-one. Against the map alone, the registry's readers add \num{1.09}
 encounters to the average commute [1.06--1.13], a fifth more, and \num{3.2} points
 [3.0--3.5] to the share passing any reader. They mostly thicken what the map already shows:
 the commuters the map alone exposes pass a median of five readers instead of four, while
@@ -838,10 +852,11 @@ installations in the fifty states and the District of Columbia, four-fifths of t
 vendor tag, and twenty-six jurisdictions had none at all. It grew by about fifty a month until
 DeFlock was founded in October 2024, and then abruptly: \num{1724} on 1 November, \num{4894}
 on 1 December, \num{7583} on 1 January 2025. From there the map grew by a median
-\SI{10.7}{\percent} a month---\num{22690} by July 2025, \num{63522} by January 2026,
+\SI{14.1}{\percent} a month---\num{22690} by July 2025, \num{63522} by January 2026,
 \num{109853} by July, and \num{142257} on 22 September 2026, a 128-fold increase in
-thirty-three months (\Cref{fig:trend}a)---and the pace has not slackened: the months of 2026
-added a median \SI{9.4}{\percent} each. By July 2025 only Hawaii, Vermont and Alaska had no
+thirty-three months (\Cref{fig:trend}a). As a rate the pace has eased, to a median
+\SI{9.2}{\percent} a month over the first eight months of 2026; in cameras it has quickened,
+from about \num{4700} a month during 2025 to \num{9200} in 2026. By July 2025 only Hawaii, Vermont and Alaska had no
 mapped reader; by January 2026 only Alaska; by July 2026 none. Flock's share of the mapped
 network went from \SI{17}{\percent} to \SI{71}{\percent} during 2024 and has stayed near
 four-fifths since, while the untagged share fell from \SI{81}{\percent} to \SI{5}{\percent}
@@ -1076,6 +1091,7 @@ interesting ones for a shipped application, and in informal tests whether one to
 depended on local camera density; a single slider-to-multiplier mapping is unlikely to serve.
 
 \subsection{Sample scope}
+\label{sec:lim:scope}
 
 All fifty states and the District of Columbia, but within-state commutes only
 (\texttt{od\_main}), so cross-border metropolitan areas---New York/New Jersey,
@@ -1085,6 +1101,15 @@ is most pointed. The District is the extreme case: most people who work there li
 Maryland or Virginia, so its sample describes only commutes with both ends inside the
 District. Alaska's flows are from 2016 and Michigan's from 2021, the latest LODES
 publishes; the other 49 jurisdictions' are from 2022.
+
+LODES pairs a home with a job's establishment, and one pair in eight in the sample lies more
+than \SI{100}{\kilo\metre} apart (\Cref{sec:data:commutes}). Those pairs make the tail, and
+they raise the price of refusal more than the share exposed: within \SI{100}{\kilo\metre},
+\SI{76.0}{\percent} [75.6--76.5] of commuters pass a reader rather than \SI{78.6}{\percent},
+but avoiding costs a median \SI{1.70}{\minute} [1.66--1.77] rather than \SI{2.29}{\minute},
+and the mean commute passes \num{4.90} cameras rather than \num{6.24}. The registry's effect
+is much the same at that range: on the map alone the figures are \SI{72.5}{\percent} and
+\SI{1.20}{\minute}.
 
 \subsection{Past maps record mapping, not deployment}
 

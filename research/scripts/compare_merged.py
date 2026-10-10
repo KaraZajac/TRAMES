@@ -164,6 +164,23 @@ def main():
           f"{bool((R['extra_km'][q] > 0).all())}; mean extra time {D.mean(R['extra']):.2f} min, "
           f"{D.mean(np.maximum(R['extra'], 0)):.2f} with negative values clipped to zero")
 
+    # LODES pairs a home with a job's establishment, and some pairs are far longer than anyone
+    # drives daily; they make the tail and lift the means, so their weight is reported here.
+    km = Ra["km"]; near = km <= 100
+    P("\nTRIP LENGTH (one way, home to work; the same routes on both maps)")
+    P(f"  median {D.quantile(km, .5):.1f} km, 90th percentile {D.quantile(km, .9):.0f} km, 99th {D.quantile(km, .99):.0f} km; "
+      f"over 100 km: {100*(km > 100).mean():.1f}% of sampled pairs, {100*D.share(km > 100):.1f}% of commuters")
+    for name, R in (("map alone", Ra), ("merged map", Rb)):
+        b, em = R["base"], R["extra"]
+        top = b >= D.quantile(b, .99)
+        P(f"  [{name}] 99th percentile {D.quantile(b, .99):.0f} cameras: those commuters travel a median "
+          f"{D.quantile(km, .5, top):.0f} km (IQR {D.quantile(km, .25, top):.0f}-{D.quantile(km, .75, top):.0f}), "
+          f"{100*D.share(km > 100, top):.0f}% over 100 km, a median {D.quantile(R['base_min'], .5, top):.0f} min drive")
+        lo, hi = ci(D.boot_ratio((b >= 1) & near, near)[:, 0]); mlo, mhi = ci(D.boot_quantile(em, .5, near))
+        P(f"  [{name}] within 100 km ({100*D.share(near):.1f}% of commuters): passing >=1 {100*D.share(b >= 1, near):.1f}% "
+          f"[{100*lo:.1f}-{100*hi:.1f}], median extra {D.quantile(em, .5, near):.2f} min [{mlo:.2f}-{mhi:.2f}], "
+          f"mean cameras {D.mean(b, near):.2f}, 90th / 99th percentile {D.quantile(b, .9, near):.0f} / {D.quantile(b, .99, near):.0f}")
+
     if args.by_state_a and args.by_state_b:
         Sa = {r["state"]: r for r in csv.DictReader(open(args.by_state_a))}
         Sb = {r["state"]: r for r in csv.DictReader(open(args.by_state_b))}

@@ -41,8 +41,9 @@ National figures weight each state by its commuters. Then we did it again on Ope
 camera map as it stood on the first of every month since January 2024, rebuilt exactly from
 its edit history; the registry carries no dates, so the trend is the map's alone.
 
-- **78.6%** of American commutes pass at least one licence-plate reader; the median
-  commute passes three.
+- **78.6%** of American commutes pass at least one licence-plate reader on the way to work
+  (only that leg is routed; cameras face one way, so the trip home passes others); the
+  median commute passes three.
 - **80.8%** can be routed to *zero* exposure: the fifth whose route passes none, and three
   in four of the rest. The avoiding route adds a median of **2.29 minutes** (an overhead of
   9.71%), or 3.92 minutes for commuters whose usual route passes a camera.
@@ -57,7 +58,8 @@ its edit history; the registry carries no dates, so the trend is the map's alone
   cameras are denser, as the map alone weakly suggested, the merged map does not bear out.
 - **The map filled in, and exposure with it.** From 1,112 mapped readers in January 2024 to
   142,257 in September 2026: about fifty a month until DeFlock was founded in October 2024,
-  then 1,724 → 4,894 in a single month, then a median 10.7% a month since. The share of
+  then 1,724 → 4,894 in a single month, then a median 14.1% a month from January 2025 — easing
+  to 9.2% a month in 2026, though the number added each month doubled. The share of
   commuters passing one went from 2.2% to 75.3%, crossing a tenth in January 2025, a quarter
   in June, a half in December; against the number of mapped cameras the elasticity is 0.89
   across 35 maps, and the curve is still rising by about two points a month.
