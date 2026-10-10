@@ -5,7 +5,7 @@ snapshot: 142991 unique camera nodes, OSM base 2026-09-22T01:19:20Z .. 2026-09-2
     via direction               138216   96.7%
     via camera:direction          2311    1.6%   (both keys: 415)
   multi-head (>1 parsed head)     9146    6.4%   (raw ';' values: 9150)
-  arc-range tokens                4632  tokens (3806 span exactly 45 deg = 82.2%)
+  arc-range tokens                4632  tokens (3806 span exactly 45 deg = 82.2%); on 4372 nodes
   unparseable direction value       69
   operator tagged                23872   16.7%
   cameras with >=1 cone         140043  -> 157084 cones before union

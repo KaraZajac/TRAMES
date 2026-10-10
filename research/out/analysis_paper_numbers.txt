@@ -1,0 +1,106 @@
+FIGURES THE PAPER QUOTES THAT NO OTHER REPORT PRINTS  (scripts/paper_numbers.py)
+(installations in the 50 states and DC unless a line says otherwise; inputs in the docstring)
+
+THE MAP ON 2026-09-22, BY VENDOR  (142,991 nodes in the Overpass regions; 142,257 in the 50 states and DC)
+  flock     all nodes 114,341 (80.4%)   with a usable bearing 113,593 (81.5%)
+  other     all nodes  21,202 (14.9%)   with a usable bearing  19,881 (14.3%)
+  untagged  all nodes   6,714 ( 4.7%)   with a usable bearing   5,917 ( 4.2%)
+  total     all nodes 142,257          with a usable bearing 139,391
+  with the registry's 44,059 readers in the 50 states and DC (of 44,176 discs), Flock holds 85.0% of all 186,316 installations (85.9% of those that contribute a cone or disc)
+  discs whose label names the traffic watched: 30,292 of 44,176
+
+MULTI-HEAD UNITS  (more than one parseable bearing, among nodes with a usable bearing)
+  flock      4,090 of 113,593 = 3.6%
+  other      4,625 of  19,881 = 23.3%
+  untagged     360 of   5,917 = 6.1%
+
+ENCOUNTERS PER UNIT DEPLOYED, ON THE MAP ALONE  (out/vendor.csv, commuter-weighted)
+  flock     share of exposure 67.8%  share of cone-contributing installations 81.5%  encounters per unit, relative 0.832
+  other     share of exposure 26.8%  share of cone-contributing installations 14.3%  encounters per unit, relative 1.878
+  untagged  share of exposure  5.4%  share of cone-contributing installations  4.2%  encounters per unit, relative 1.266
+  other makers' cameras against Flock's, per unit deployed: 2.26 times
+
+VENDOR SHARES OF THE MAPPED NETWORK, MONTH BY MONTH  (server/alpr/history_monthly)
+  2024-01-01    1,112   flock 17.4%   other  1.4%   untagged 81.1%
+  2024-02-01    1,157   flock 17.5%   other  1.4%   untagged 81.2%
+  2024-03-01    1,206   flock 18.3%   other  1.3%   untagged 80.3%
+  2024-04-01    1,267   flock 17.4%   other  1.3%   untagged 81.3%
+  2024-05-01    1,312   flock 17.1%   other  1.2%   untagged 81.7%
+  2024-06-01    1,374   flock 16.7%   other  1.2%   untagged 82.1%
+  2024-07-01    1,420   flock 17.3%   other  1.1%   untagged 81.5%
+  2024-08-01    1,463   flock 17.1%   other  1.1%   untagged 81.8%
+  2024-09-01    1,509   flock 19.2%   other  1.1%   untagged 79.7%
+  2024-10-01    1,581   flock 20.2%   other  1.0%   untagged 78.7%
+  2024-11-01    1,724   flock 21.3%   other  3.9%   untagged 74.7%
+  2024-12-01    4,894   flock 70.0%   other  4.4%   untagged 25.6%
+  2025-01-01    7,583   flock 71.5%   other  6.9%   untagged 21.6%
+  2025-02-01    9,980   flock 75.6%   other  6.8%   untagged 17.6%
+  2025-03-01   11,818   flock 77.3%   other  6.3%   untagged 16.5%
+  2025-04-01   14,238   flock 75.7%   other  6.6%   untagged 17.6%
+  2025-05-01   17,511   flock 76.7%   other  7.3%   untagged 16.0%
+  2025-06-01   20,044   flock 76.8%   other  8.3%   untagged 15.0%
+  2025-07-01   22,690   flock 78.0%   other  8.0%   untagged 14.0%
+  2025-08-01   25,011   flock 78.7%   other  8.0%   untagged 13.3%
+  2025-09-01   28,896   flock 79.4%   other  8.2%   untagged 12.4%
+  2025-10-01   34,383   flock 79.9%   other  8.7%   untagged 11.4%
+  2025-11-01   40,645   flock 79.3%   other  9.8%   untagged 10.9%
+  2025-12-01   52,688   flock 80.4%   other 10.8%   untagged  8.8%
+  2026-01-01   63,522   flock 81.5%   other 10.8%   untagged  7.8%
+  2026-02-01   72,281   flock 82.2%   other 10.8%   untagged  7.0%
+  2026-03-01   78,819   flock 83.0%   other 10.6%   untagged  6.4%
+  2026-04-01   85,845   flock 83.2%   other 10.8%   untagged  6.0%
+  2026-05-01   92,846   flock 83.2%   other 11.1%   untagged  5.7%
+  2026-06-01  100,390   flock 83.0%   other 11.7%   untagged  5.4%
+  2026-07-01  109,853   flock 82.8%   other 12.1%   untagged  5.1%
+  2026-08-01  123,455   flock 82.7%   other 12.6%   untagged  4.7%
+  2026-09-01  137,188   flock 81.7%   other 13.4%   untagged  4.8%
+  2026-09-22  142,257   flock 80.4%   other 14.9%   untagged  4.7%
+
+CAMERAS THAT LEFT THE MAP BETWEEN 2026-07-24 AND 2026-09-22  (a July node no longer an ALPR node)
+  WI: 2,027 in July, 2,134 in September (net +107); 190 of July's left the map, 297 were added
+  IA: 868 in July, 893 in September (net +25); 123 of July's left the map, 148 were added
+
+INSTALLATION DATES  (OSM start_date, the date a mapper recorded the camera going up)
+  47 of the 142,991 nodes in the Overpass regions; 47 of the 142,257 in the 50 states and DC
+
+THE EDIT HISTORY: 248,769 versions of ever-ALPR nodes  (../server/alpr/osm-history/node_versions.jsonl)
+
+STATE RANKS: MEAN EXPOSURE ON AN EARLIER MAP AGAINST 2026-09-22's  (Spearman, tied ranks averaged)
+  2024-01-01: rho = 0.54 over 51 jurisdictions (37 with no exposure then)
+  2025-01-01: rho = 0.80 over 51 jurisdictions (10 with no exposure then)
+  2026-01-01: rho = 0.90 over 51 jurisdictions (2 with no exposure then)
+
+THE REGISTRY  (out/supermap/alpr_supermap.json: its records in the 50 states, DC, Puerto Rico and the Virgin Islands)
+  records 334,936, of which in the 50 states and DC 334,525
+  in-service plate readers with no mapped node within pairing distance: 45,762
+    dropped 1,586 (flagged flock_internal, labelled_test, name_says_retired, possible_duplicate, shared_coordinate); 1,473 of them at a shared coordinate
+    kept as discs 44,176: 44,059 in the 50 states and DC, 117 in Puerto Rico and the Virgin Islands
+    of the kept, recorded on 2024-03-26 (the bulk import) 26,902; recorded in July-December 2025 2,150
+  plate readers with no mapped node, status planned: 34,397 (34,347 in the 50 states and DC)
+
+THE SAMPLE  (out/commutes.csv, out/sample_draws.csv)
+  58,421 distinct commutes from 61,200 draws; they carry 2,842,747 workers, a median of 16 and at most 2,832
+  repeat draws in the fifteen states of the earlier rounds: 0.53%
+    WY: 832 distinct of 1,200 draws, 30.7% repeats, one pair drawn 9 times
+    AK: 904 distinct of 1,200 draws, 24.7% repeats, one pair drawn 7 times
+    SD: 972 distinct of 1,200 draws, 19.0% repeats, one pair drawn 7 times
+    ND: 989 distinct of 1,200 draws, 17.6% repeats, one pair drawn 6 times
+    VT: 998 distinct of 1,200 draws, 16.8% repeats, one pair drawn 9 times
+    MT: 1,002 distinct of 1,200 draws, 16.5% repeats, one pair drawn 5 times
+    DC: 1,032 distinct of 1,200 draws, 14.0% repeats, one pair drawn 6 times
+    HI: 1,101 distinct of 1,200 draws, 8.2% repeats, one pair drawn 4 times
+  the most-drawn pair: 9 draws, in VT
+
+COMMUTES THAT COULD NOT BE ROUTED  (2,290 of 58,421)
+  by state, the five worst: AK 32.7%, HI 24.2%, MT 21.3%, WY 21.2%, NM 13.7%; median state 2.0%
+  those five hold 1.6% of the commuters
+  the routing server's refusals in the main run: 2,290; cannot snap a point to any road 2,090 (91%); no connection between the points 200 (9%)
+  a wider road search, tested on 100 already-routed commutes on 2026-09-24: 5 routes differ from the default's (server-reroute.log against server-check.log, the same requests)
+
+WEIGHTING  (share passing >=1 camera in the fifteen states of the earlier rounds: each routed commute counted once, against commuter-weighted)
+  map alone  unweighted 78.7%   weighted 81.1%
+  merged map unweighted 82.5%   weighted 84.3%
+
+STORED GEOMETRY RE-SCORED AGAINST THE ROUTER'S OWN COUNT  (135,210 cone parts, 56,131 stored routes)
+  fifteen states 17,580 commutes: 1.68% differ (1.68% by one camera; 137 up, 159 down); 5 change whether they pass any; totals 98,898 live, 98,875 re-scored (-0.02%)
+  all            56,131 commutes: 0.79% differ (0.78% by one camera; 171 up, 274 down); 10 change whether they pass any; totals 195,446 live, 195,345 re-scored (-0.05%)

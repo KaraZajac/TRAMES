@@ -81,10 +81,11 @@ still cheap: \SI{80.8}{\percent} can reach work past none, and avoiding adds a m
 \SI{2.29}{\minute}---about two-fifths more than the volunteer map alone implies. OpenStreetMap
 keeps every edit, so we also rebuild its camera map as it stood on the first of every month
 since January 2024, node for node, and re-ask the question of each on the same commutes and
-roads. The map grew 128-fold in thirty-three months, and exposure almost in proportion, from
-\SI{2.2}{\percent} of commuters passing a mapped reader to \SI{75.3}{\percent}. Refusal grew
-dearer per camera as well as in total: on the sparse maps of 2024 \SI{95}{\percent} of exposed
-commuters could reach zero, for a median of \SI{0.8}{\minute}; on today's map \SI{79}{\percent}
+roads. The map grew 128-fold in thirty-three months, and exposure almost in proportion: the
+cameras an average commute passes rose 94-fold, and the share of commuters passing one from
+\SI{2.2}{\percent} to \SI{75.3}{\percent}. Refusal grew dearer per camera as well as in
+total: on the first map of 2024 \SI{95}{\percent} of exposed commuters could reach zero, for a
+median of \SI{0.8}{\minute}; on today's map \SI{79}{\percent}
 can, for \SI{3.1}{\minute}, and \SI{75}{\percent} once the vendor's registry is added, for
 \SI{3.9}{\minute}. What a commute passes, and what declining costs, are functions of a map that
 is still filling in; we say when ours was drawn.
@@ -125,7 +126,8 @@ OpenStreetMap keeps every edit, so the measurement can be repeated on the map as
 any past instant. We repeat it on the first of every month for thirty-three months: the same
 commutes on the same roads, re-scored against each month's cameras and re-routed against each
 quarter's. How much surveillance a commuter drives through, and what declining it costs, turn
-out to be functions of how much of it had been mapped---and both have risen on every map since.
+out to be functions of how much of it had been mapped---and both have risen since, exposure
+on all but one of the monthly maps and the cost on every routed map from July 2024.
 
 A volunteer map is also a lower bound, and for the present it can be checked against the
 vendor's own records. Flock Safety's device registry as it stood in December 2025 has been
@@ -143,7 +145,8 @@ map still misses.
     bearing tag, making this feasible nationally; proximity counting would charge drivers
     for cameras aimed at the opposite carriageway.
   \item \textbf{Avoidance routing with no forked router.} Camera fields of view---the map's
-    \num{157084} cones, and with the registry's \num{44176} discs \num{159286} polygons---are
+    \num{157084} cones, merged where they overlap into \num{135210} polygons, and with the
+    registry's \num{44176} discs \num{159286}---are
     compiled into a stock GraphHopper spatial index at import time, so an ordinary per-request
     custom model can reference them by name.
   \item \textbf{A commute-weighted sample.} \num{56131} real home--work pairs in all fifty
@@ -220,7 +223,7 @@ map's coverage against the camera counts police departments publish.
 \section{The instrument}
 \label{sec:system}
 
-The measurement needs a router that treats ``avoid these \num{135210} polygons'' as a cost
+The measurement needs a router that treats ``avoid these \num{159286} polygons'' as a cost
 rather than a post-hoc filter. GraphHopper 11.0 \citep{graphhopper11} supplies it without a
 fork: it resolves a directory of custom areas into a spatial index \emph{at graph import
 time}, and---the documentation is ambiguous, so we verified it---an area registered that way
@@ -231,18 +234,21 @@ can be referenced by name from a \emph{per-request} custom model:
 \end{lstlisting}
 
 \noindent
-Shipping \num{135210} polygons in every request is not viable; naming them is. The cost is
+Shipping \num{159286} polygons in every request is not viable; naming them is. The cost is
 that a new cone set needs a full re-import, about two hours for North America. Two settings
 follow. Contraction Hierarchies \citep{geisberger2008} are disabled, since they bake edge
 weights into the prepared graph and a per-request avoidance strength needs them mutable;
 landmarks, the ALT algorithm of \citet{goldberg2005}, serve instead. And the avoiding profile
 shares the plain profile's landmark preparation, which is valid only because avoidance
 multiplies priority strictly downward, so the landmark distances remain the lower bounds ALT
-requires. The same engine and the map's cone geometry serve TRAMES, a fork of the OsmAnd
-navigation client \citep{osmand} that routes around the cameras on a phone; the routing server
-binds to localhost and is not internet-facing. The app avoids the volunteer map alone: the
-registry's readers that this paper's current figures count (\Cref{sec:data:registry}) are not
-in it, and \Cref{sec:discussion} measures what that leaves on a route the app calls clean.
+requires. The map's cone geometry also serves TRAMES, a fork of the OsmAnd navigation client
+\citep{osmand} that routes around the cameras on the phone itself: its offline maps tag every
+road a cone touches, and OsmAnd's own router penalises those roads with the same multipliers. A
+public instance of this engine served the app's optional online mode until 29 August 2026; the
+study's routing server binds to localhost and is not internet-facing. The app avoids the
+volunteer map alone: the registry's readers that this paper's current figures count
+(\Cref{sec:data:registry}) are not in it, and \Cref{sec:discussion} measures what that leaves
+on a route planned around the map alone.
 
 \section{Data}
 \label{sec:data}
@@ -443,7 +449,7 @@ in the map---most of it after DeFlock was founded in October
 \subsection{Road network}
 \label{sec:data:roads}
 
-Geofabrik North America extract \citep{geofabrik}, \SI{18}{\giga\byte}, retrieved 2026-07-24 and held
+Geofabrik North America extract \citep{geofabrik}, \SI{19.2}{\giga\byte}, retrieved 2026-07-24 and held
 fixed for every camera map, so that the trend of \Cref{sec:results:trend} isolates the
 camera data: every unavoided route is the same route on every date. Imported with
 \texttt{ignored\_highways = footway,\allowbreak construction,\allowbreak cycleway,\allowbreak path,\allowbreak steps}. \texttt{track} is
@@ -497,9 +503,9 @@ under-represents precisely the heaviest flows; keeping the counts restores
 probability-proportional-to-workers sampling inside every state.
 
 The pairs are what LODES records, not trips anyone has been seen to make. The median routed
-commute is \SI{23.6}{\kilo\metre}, but one pair in eight lies more than \SI{100}{\kilo\metre}
-apart (\SI{12.8}{\percent} of commuters, weighted) and one in a hundred more than
-\SI{470}{\kilo\metre}: LODES places each job at an employer establishment, imputed where an
+commute is \SI{23.6}{\kilo\metre}, but one pair in eight is more than \SI{100}{\kilo\metre}
+apart by road (\SI{12.8}{\percent} of commuters, weighted) and one commuter in a hundred more
+than \SI{470}{\kilo\metre}: LODES places each job at an employer establishment, imputed where an
 employer has several, and pairs that far apart are unlikely to be driven daily. They are kept,
 since any cut-off would be arbitrary, and their weight is reported where it matters
 (\Cref{sec:results:exposure,sec:lim:scope}).
@@ -596,15 +602,15 @@ fifteen-state paired comparison covers it (\Cref{sec:results:trend}).
     state's commuter total from the LODES frame, shared among that state's commutes in
     proportion to draw count; medians are weighted quantiles, and state figures need only
     the draw counts. Weighting alone moves the share of commuters passing a reader in the
-    fifteen states of the earlier rounds from \SI{78.7}{\percent} to \SI{81.1}{\percent},
+    fifteen states of the earlier rounds from \SI{82.5}{\percent} to \SI{84.3}{\percent} on the
+    merged map (from \SI{78.7}{\percent} to \SI{81.1}{\percent} on the map alone),
     because the populous states are the more surveilled ones.
   \item \textbf{Intervals from a bootstrap stratified by state} \citep{efron1993}:
     percentile, \num{2000} replicates, each resampling every state at its own size and
     re-deriving its weights, as the sample was drawn. Commutes from one county share corridors
     and cameras; resampling whole origin counties within states instead \citep{field2007}
     widens the headline intervals two- to three-and-a-half-fold---\SI{78.6}{\percent} becomes
-    [77.2--79.4], the median \SI{2.29}{\minute} [2.12--2.56]---and matters more on the sparse
-    early maps, where a few counties hold most of the cameras. Where the two disagree, both
+    [77.2--79.4], the median \SI{2.29}{\minute} [2.12--2.56]. Where the two disagree, both
     are shown.
   \item \textbf{Differences between the two maps are paired.} Both runs route the same
     commutes, and the bootstrap draws the same replicates for each, so a difference is
@@ -624,8 +630,8 @@ between Hawaiian islands. Five states lose more than a tenth of their sample (Al
 Mexico \SI{14}{\percent}); the median state loses \SI{2.0}{\percent}. Those five hold
 \SI{1.6}{\percent} of the nation's commuters, so the national figures barely register the
 loss, but their own estimates describe the routable, probably less remote, part of each
-state. A wider road search would recover most of them, but it moved 5 of 100 already-routed
-commutes to a different road, and the trend of \Cref{sec:results:trend} pairs every saved
+state. A wider road search could snap more of them, but in a test it moved 5 of 100
+already-routed commutes to a different road, and the trend of \Cref{sec:results:trend} pairs every saved
 route with new ones; consistency was kept over coverage. Commutes are processed in seeded
 random order, so any prefix of the output is a near-uniform sample of the whole. Against the
 merged map the \num{37725} commutes it exposes were routed again, none failing once 72
@@ -703,7 +709,8 @@ arterials and freeways (\SI{42}{\percent} within \SI{30}{\metre} of one in the f
 inventory \citep{hpms2024}, against \SI{26}{\percent} of Flock's). Where the operator is
 tagged, police departments run about two-thirds of both. The registry adds only Flock's
 readers, and as discs, so a per-unit comparison on the merged map would measure the disc
-rather than the vendor; on that map Flock holds \SI{85}{\percent} of installations. Each
+rather than the vendor; on that map Flock holds \SI{85}{\percent} of all installations,
+against \SI{80}{\percent} of the map's. Each
 commute's saved route re-scored against each vendor's cones gives the split without new
 routing; the avoidance model does not distinguish vendors.
 
@@ -736,7 +743,8 @@ median detour grows from \SI{3.14}{\minute} to \SI{4.12}{\minute}, and \SI{4.5}{
 all commuters [4.2--4.9] who could reach zero against the map cannot once the registry is
 added. Extra time rises for a third of commuters, is unchanged to within three seconds for
 three in five, and falls for one in twenty, where the router, finding its old detour watched
-too, more often keeps a camera (\SI{43}{\percent} of those routes do, against a quarter overall).
+too, more often keeps a camera (\SI{43}{\percent} of those routes do, against a quarter of all
+exposed commuters' routes).
 
 For most commuters, then, refusing licence-plate surveillance on the way to work costs a few
 minutes at most. This is conditional on the assumed camera field of view: it is stable if the
@@ -782,8 +790,9 @@ costs a median of \SI{13.6}{\minute}, an overhead of \SI{44.4}{\percent}. In Ill
 \SI{91.6}{\percent} pass one, in California \SI{89.4}{\percent}, in Florida
 \SI{89.1}{\percent}. At the other end \SI{14.8}{\percent} of New Hampshire's commuters pass
 one, \SI{12.0}{\percent} of Montana's, \SI{5.4}{\percent} of Vermont's, and none of Alaska's
-sampled commuters. In fifteen jurisdictions the median extra time is zero: most of their
-commuters have nothing to avoid. The registry moves some states far more than others, since
+sampled commuters. In fifteen jurisdictions the median extra time is zero: for at least half
+of their commuters the avoiding route takes no longer than the usual one, in eleven of them
+because most commuters pass no reader at all. The registry moves some states far more than others, since
 it adds only where Flock operates and mappers had not reached: Arizona's share rises from
 \SI{72.7}{\percent} to \SI{87.0}{\percent} and Massachusetts's and Wisconsin's by seven points,
 while New Hampshire, Vermont, Wyoming and Alaska do not move.
@@ -797,7 +806,8 @@ statewide density predicts, because commuting concentrates where cameras do whil
 is averaged over the whole state; Kansas's pass fewer.
 
 Whether evasion is cheaper per camera where cameras are denser, the data do not settle. On
-the map alone, across the 48 states with at least 100 evading commuters, the median price per
+the map alone, across the 47 states and the District with at least 100 sampled commutes that
+evade a camera, the median price per
 camera falls weakly as cameras per kilometre rise, from \SI{2.49}{\minute} in New Hampshire to
 \SI{0.17}{\minute} in the District of Columbia ($r=-0.29$ against the logarithm of cameras per
 kilometre; a Fisher interval excludes zero, $-0.53$ to $-0.01$, but a bootstrap over states
@@ -832,7 +842,9 @@ routed date, commuter-weighted. Exposure from re-scoring each saved route; avoid
 routing every commute exposed on that date, with the share reaching zero and the median extra
 time given for those commuters. The monthly maps between these dates are in \Cref{fig:trend}.
 The last row is the merged map: the September 2026 map with the registry's readers, routed in
-full, whose exposure columns come from the router rather than from re-scoring.}
+full, whose exposure columns come from the router rather than from re-scoring. Intervals
+come from the trend's own bootstrap and can differ from \Cref{tab:headline}'s in the last
+digit.}
 \label{tab:trend}
 \input{tables/trend.tex}
 \end{table}
@@ -859,7 +871,8 @@ on 1 December, \num{7583} on 1 January 2025. From there the map grew by a median
 thirty-three months (\Cref{fig:trend}a). As a rate the pace has eased, to a median
 \SI{9.2}{\percent} a month over the first eight months of 2026; in cameras it has quickened,
 from about \num{4700} a month during 2025 to \num{9200} in 2026. By July 2025 only Hawaii, Vermont and Alaska had no
-mapped reader; by January 2026 only Alaska; by July 2026 none. Flock's share of the mapped
+mapped reader; by January 2026 only Alaska; on 1 July 2026 none, though Alaska had none again
+on 24 July and 1 September. Flock's share of the mapped
 network went from \SI{17}{\percent} to \SI{71}{\percent} during 2024 and has stayed near
 four-fifths since, while the untagged share fell from \SI{81}{\percent} to \SI{5}{\percent}
 and the named non-Flock vendors rose from \SI{1}{\percent} to \SI{15}{\percent} as
@@ -893,22 +906,23 @@ forty-nine (\Cref{fig:trend_states}). In July 2025 Michigan's commuters were the
 of any state's (\SI{62.8}{\percent}), while Pennsylvania (\SI{2.4}{\percent}), Nevada
 (\SI{3.8}{\percent}), New Jersey (\SI{4.4}{\percent}) and North Carolina (\SI{8.2}{\percent})
 would have looked nearly camera-free; all four are between \SI{60}{\percent} and
-\SI{68}{\percent} today. A state's rank on the January 2025 map predicts its rank today only
-moderately (Spearman $\rho=0.79$ on mean exposure; from January 2024, $0.43$; from January
-2026, $0.90$). Nor does the map only grow. Wisconsin and Iowa each gained cameras on net
+\SI{68}{\percent} today. A state's rank on the January 2025 map predicts its rank today
+imperfectly (Spearman $\rho=0.80$ on mean exposure; from January 2024, when 37 jurisdictions
+had none, $0.54$; from January 2026, $0.90$). Nor does the map only grow. Wisconsin and Iowa each gained cameras on net
 between July and September 2026 yet lost about three points of exposure: 190 and 123 of their
 July cameras left the map, deleted or retagged, and the cameras newly mapped added less
 exposure than was lost.
 
 \paragraph{Refusal got dearer, and not only because there was more to refuse.} On the
 sparse maps of 2024 a commuter who passed a mapped camera could almost always get around it:
-\SI{95.0}{\percent} [92.7--96.9] of exposed commuters could reach zero, for a median of
-\SI{0.77}{\minute}. On the September 2026 map \SI{79.0}{\percent} [78.4--79.7] can, for a
+on the first, \SI{95.0}{\percent} [92.7--96.9] of exposed commuters could reach zero, for a
+median of \SI{0.77}{\minute}, and through 2024 the share held at \SIrange{95}{96}{\percent}
+for about a minute. On the September 2026 map \SI{79.0}{\percent} [78.4--79.7] can, for a
 median of \SI{3.14}{\minute}, and with the vendor's registry added \SI{75.5}{\percent}
 [74.9--76.1], for \SI{3.92}{\minute} [3.82--4.02] (\Cref{tab:trend}; \Cref{fig:trend}c). The
 registry moves the present about as far as the preceding months of mapping did: the share
-reaching zero by as much as the two months from July, the median detour by as much as the five
-from April. The quarterly maps show
+reaching zero by as much as the twelve weeks from the July map, the median detour by as much as
+the nearly six months from April's. The quarterly maps show
 the shape of the change. The share reaching zero held at \SIrange{95}{96}{\percent} through
 2024, stepped down to about \SI{92}{\percent} with the surge of mapping that followed
 DeFlock's founding and held there through 2025, and has fallen on every routed map since
@@ -919,9 +933,8 @@ commuter rose on every routed map, from \SI{1.00}{\minute} to \SI{3.14}{\minute}
 that rise is the number of cameras on each trip, but the price of evading each one rose too,
 from \SI{0.42}{\minute} [0.38--0.47] to \SI{0.76}{\minute} [0.75--0.78], and it too rose on
 every routed map from July 2024. Two things moved it, and a fixed sample can separate them.
-One is who was exposed: the early maps covered dense metropolitan grids, where on the map
-alone evasion tends to be cheaper per camera (\Cref{sec:results:geo}), and the later ones
-reached rural and intercity roads. The other happened on the same trips. Followed from the July 2025 map to September
+One is who was exposed: each fuller map reached commuters the sparser ones had not, on other
+roads with other alternatives. The other happened on the same trips. Followed from the July 2025 map to September
 2026's, the \num{12647} commutes exposed in July came to pass \num{9.9} cameras on average
 instead of \num{3.2}; the share of them that can reach zero fell from \SI{92.4}{\percent} to
 \SI{72.6}{\percent}, and the price per camera rose from \SI{0.65}{\minute} [0.63--0.68] to
@@ -942,13 +955,14 @@ the same \num{17580} commutes were routed in full against both 2026 snapshots on
 road extract, and every baseline route was identical to the metre and the second. Camera
 encounters grew by \SI{18.3}{\percent} against \SI{18.7}{\percent} more mapped cameras in
 those states, the median price of evading one stayed at \SI{0.78}{\minute} to the second
-decimal, and Pennsylvania's mean exposure rose \SI{88}{\percent} in two months.
+decimal, and Pennsylvania's mean exposure rose \SI{88.5}{\percent} in two months.
 
 \paragraph{What follows.} Two things. Absolute exposure figures from a volunteer map are a
-lower bound that has risen with every map and will keep rising; one vendor's records alone
+lower bound that has not fallen from one month's map to the next and will keep rising; one vendor's records alone
 raise them again, exposure by a fifth and the price of refusal by two-fifths. Any study built
 on crowdsourced surveillance data dates, and should say when its map was drawn. And the price
-of refusal dates as well: it has risen with every map, per camera as well as in total, and
+of refusal dates as well: it has risen on every routed map since July 2024, per camera as well
+as in total, and
 today's figures describe a record that is still filling in.
 
 \section{Discussion}
@@ -967,9 +981,9 @@ zero fell from \SI{95}{\percent} to \SI{79}{\percent}, and to \SI{75}{\percent} 
 vendor's registry is added, while the median cost for those with a camera to avoid quadrupled
 on the map alone and rises by a further quarter with the registry (\Cref{sec:results:trend}).
 
-Cheap refusal also presumes a router that knows where the cameras are. The app this study's
-engine serves avoids the volunteer map alone (\Cref{sec:system}). Routes planned that way are
-clean of the map for \SI{84.2}{\percent} of commuters, but for \SI{35.0}{\percent}
+Cheap refusal also presumes a router that knows where the cameras are. The app built on this
+study's cone geometry avoids the volunteer map alone (\Cref{sec:system}). Routes planned around
+the map alone are clean of it for \SI{84.2}{\percent} of commuters, but for \SI{35.0}{\percent}
 [34.4--35.7] of them the route still passes a reader that only the vendor's registry records,
 and for \SI{44.1}{\percent} of those whose usual route passes a mapped camera; \SI{54.7}{\percent}
 of commuters get a route clean of both. Avoidance is only as complete as the record it avoids.
@@ -1124,11 +1138,11 @@ is much the same at that range: on the map alone the figures are \SI{72.5}{\perc
 
 The trend of \Cref{sec:results:trend} is a trend in what had been mapped. The edit history
 gives the day each camera entered the map to the second; it does not give the day the camera
-went up, which OpenStreetMap records for 47 of \num{142991} nodes. A camera first mapped in
+went up, which OpenStreetMap records for 47 of the \num{142257}. A camera first mapped in
 2026 may have stood since 2021, and the 128-fold growth of the map cannot be read as a rate of
 deployment. Absolute figures date accordingly. The relative claims are the ones to carry
 forward, and they held on every map: the cheapness of refusal---under a minute per camera
-evaded on all twelve routed maps, though rising on each---and the near-proportionality of
+evaded on all twelve routed maps, though rising on each since July 2024---and the near-proportionality of
 measured exposure to the map across all thirty-five. What the maps cannot establish is that the
 current one is complete, and the merged map of the present has no past: the registry's record
 dates are not installation dates (\Cref{sec:data:registry}).
@@ -1177,9 +1191,9 @@ edit-history extraction through sampling, routing, the past-date runs and the an
 these figures and tables.
 
 \noindent
-The \SI{18}{\giga\byte} OSM extract, the \SI{14}{\giga\byte} graph caches, the
-\SI{163}{\giga\byte} OSM full-history dump, the \SI{1.2}{\giga\byte} of TIGER/Line boundaries and
-the \SI{5.3}{\giga\byte} HPMS geodatabase are not redistributed; the acquisition and import scripts rebuild all of them. The
+The \SI{19.2}{\giga\byte} OSM extract, the four \SI{14.7}{\giga\byte} graph caches, the
+\SI{163}{\giga\byte} OSM full-history dump, the \SI{1.3}{\giga\byte} of TIGER/Line boundaries and
+the \SI{5.6}{\giga\byte} HPMS geodatabase are not redistributed; the acquisition and import scripts rebuild all of them. The
 transparency-portal counts behind the coverage check come from a live service and are kept as
 retrieved, in \texttt{research/data/validation/}. The registry snapshot is not redistributed:
 it is available from its publisher \citep{michael2026}, and the scripts that read it, merge

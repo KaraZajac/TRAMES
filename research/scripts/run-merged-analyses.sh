@@ -28,9 +28,13 @@ log "exposure three ways, with the avoiding routes"
     --merged-results out/merged/results.csv --merged-routes out/merged/routes.jsonl.gz \
     -o out/merged/exposure.csv --report out/analysis_merged_exposure.txt > /dev/null
 
+log "the figures the paper quotes that no other report prints"
+"$PY" scripts/paper_numbers.py -o out/analysis_paper_numbers.txt > /dev/null
+(cd scripts && "$PY" snapshot_stats.py --cache ../../server/alpr/region_cache.2026-07-24 > ../out/snapshot_stats_2026-07-24.txt)
+
 log "figures (merged map; the map-alone versions as fig_*_osm), then tables"
 "$PY" paper/make_figures.py
 "$PY" paper/make_figures.py --osm-only
 "$PY" paper/make_tables.py
 "$PY" paper/make_tables.py --osm-only
-log "done: out/analysis_merged.txt out/analysis_compare_merged.txt out/analysis_merged_exposure.txt out/merged/by_state.csv"
+log "done: out/analysis_merged.txt out/analysis_compare_merged.txt out/analysis_merged_exposure.txt out/analysis_paper_numbers.txt out/merged/by_state.csv"

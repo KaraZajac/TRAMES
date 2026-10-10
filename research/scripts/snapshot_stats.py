@@ -80,7 +80,7 @@ def main():
     both = sum(1 for e in nodes.values()
                if (e.get("tags") or {}).get("direction") and (e.get("tags") or {}).get("camera:direction"))
     any_dir = via_dir + via_cam - both
-    multihead = semi = arc_tokens = arc45 = unparsed = kept = cones = 0
+    multihead = semi = arc_tokens = arc45 = arc_nodes = unparsed = kept = cones = 0
     for e in nodes.values():
         tags = e.get("tags") or {}
         raw, heads = heads_of(tags)
@@ -93,12 +93,15 @@ def main():
             cones += len(heads)
             if len(heads) > 1:
                 multihead += 1
+        has_arc = False
         for tok in str(raw or "").split(";"):
             m = ARC_RE.match(tok)
             if m:
                 arc_tokens += 1
+                has_arc = True
                 if (float(m.group(2)) - float(m.group(1))) % 360.0 == 45.0:
                     arc45 += 1
+        arc_nodes += has_arc
     operator = sum(1 for e in nodes.values() if (e.get("tags") or {}).get("operator"))
     stype = collections.Counter((e.get("tags") or {}).get("surveillance:type") for e in nodes.values())
 
@@ -110,7 +113,8 @@ def main():
     # ";" (7,014); the router's own notion is "more than one head parsed" (7,010) — the
     # difference is values like "N;" whose second token is empty.
     print(f"  multi-head (>1 parsed head)  {multihead:7d}  {pct(multihead, N)}   (raw ';' values: {semi})")
-    print(f"  arc-range tokens             {arc_tokens:7d}  tokens ({arc45} span exactly 45 deg = {pct(arc45, arc_tokens).strip()})")
+    print(f"  arc-range tokens             {arc_tokens:7d}  tokens ({arc45} span exactly 45 deg = {pct(arc45, arc_tokens).strip()})"
+          f"; on {arc_nodes} nodes")
     print(f"  unparseable direction value  {unparsed:7d}")
     print(f"  operator tagged              {operator:7d}  {pct(operator, N)}")
     print(f"  cameras with >=1 cone        {kept:7d}  -> {cones} cones before union")

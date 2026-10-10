@@ -70,8 +70,8 @@ its edit history; the registry carries no dates, so the trend is the map's alone
   commuters passing one went from 2.2% to 75.3%, crossing a tenth in January 2025, a quarter
   in June, a half in December; against the number of mapped cameras the elasticity is 0.89
   across 35 maps, and the curve is still rising by about two points a month.
-- **Refusing them grew dearer, per camera as well as in total.** On the 2024 maps 95% of
-  exposed commuters could reach zero, for a median 0.8 minutes; on today's map 79% can, for
+- **Refusing them grew dearer, per camera as well as in total.** On the first map of 2024 95%
+  of exposed commuters could reach zero, for a median 0.8 minutes; on today's map 79% can, for
   3.1 minutes (75%, for 3.9 minutes, once the registry is added), and the price per camera
   evaded rose from 0.42 to 0.76 minutes. Routed every
   quarter, the share able to reach zero held near 96% through 2024 and near 92% through 2025,
@@ -82,7 +82,7 @@ its edit history; the registry carries no dates, so the trend is the map's alone
   detours were being mapped too.
 - **Every date is a mapping date, not an installation date.** OpenStreetMap records when a
   camera entered the map (to the second, from the edit history); an installation date exists
-  for 47 of 142,991 nodes. Absolute figures are lower bounds that rise with every map.
+  for 47 of the 142,257. Absolute figures are lower bounds that keep rising as the map fills in.
 
 Paper: [`research/paper/trames.pdf`](research/paper/trames.pdf) — build with
 `tectonic -X compile research/paper/trames.tex`.
@@ -268,7 +268,8 @@ cd research
                                # registry reader it lacks, in a graph of its own; the
                                # commutes it exposes routed again (needs the device map above)
 ./scripts/run-merged-analyses.sh  # merged headline, paired comparison with the map alone,
-                               # directed scoring, then the paper's figures and tables
+                               # directed scoring, the figures no other report prints
+                               # (paper_numbers.py), then the paper's figures and tables
 ```
 
 ## What leaves the device
