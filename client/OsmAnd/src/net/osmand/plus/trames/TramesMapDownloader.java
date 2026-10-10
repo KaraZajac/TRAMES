@@ -43,11 +43,7 @@ import static net.osmand.util.Algorithms.isEmpty;
  */
 public class TramesMapDownloader {
 
-	/**
-	 * Public map host. Self-hosters who build their own ALPR maps can point a fork here;
-	 * kept as a constant (not a preference) for parity with {@link
-	 * net.osmand.plus.onlinerouting.engine.TramesEngine#getStandardUrl()}.
-	 */
+	/** Public map host. Anyone who builds their own ALPR maps can point a fork here. */
 	public static final String BASE_URL = "https://maps.blackflagintel.com/";
 
 	/** The catalogue: {@code {version, base_url, maps:[{name,file,size,date}, ...]}}. */
@@ -110,22 +106,26 @@ public class TramesMapDownloader {
 	}
 
 	/**
-	 * Fetch the offline camera pack if it isn't already here.
+	 * Fetch the camera pack again with every map download.
 	 *
 	 * <p>Rides along with a map download rather than being its own errand: about 1.4 MB
 	 * against a map measured in gigabytes, and a user who has downloaded a map for offline
-	 * use has already said what they want. Without it the map draws no cameras once the
-	 * network drops, while the router carries on avoiding them — the map and the route
-	 * would disagree exactly when the user can least check.
+	 * use has already said what they want. Without it the map draws no cameras, while the
+	 * router carries on avoiding them — the map and the route would disagree exactly when
+	 * the user can least check.
 	 *
-	 * <p>Best-effort: a failure here leaves the map perfectly usable, so it is logged by
-	 * the downloader and never surfaced as a map-download failure.
+	 * <p>Fetched every time, not only when absent. Until v1.2.4 an installed pack was kept,
+	 * so re-downloading a state for newly mapped cameras refreshed what the router avoided
+	 * but not what the map drew: the two disagreed until the user thought to tap "Camera
+	 * positions" too. The pack and the maps are built from one snapshot, so they are
+	 * refreshed together.
+	 *
+	 * <p>Best-effort: a failure here leaves the map perfectly usable — the old pack stays in
+	 * place (see {@link TramesCameraStore#download}) — so it is logged by the downloader and
+	 * never surfaced as a map-download failure.
 	 */
 	private void ensureCameraPack() {
-		TramesCameraStore store = new TramesCameraStore(app);
-		if (!store.isPresent()) {
-			store.download(null);
-		}
+		new TramesCameraStore(app).download(null);
 	}
 
 	/** The on-device path a map installs to (whether or not it exists yet). */

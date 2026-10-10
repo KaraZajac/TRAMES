@@ -1,11 +1,13 @@
 # TRAMES camera service
 
 Serves ALPR camera positions to the app's map layer from the same snapshot the
-routing graph's cones were built from. Exists because the map layer's original
-data path — the phone querying public Overpass instances directly — spent
-2026-07-28 answering 504 on both instances while the routing endpoint sat on a
-box already holding all 120,838 camera positions. The public Overpass instances
-remain in the client as fallback; this service is simply first in line.
+routing graph's cones were built from — for app versions up to v1.2.3, which ask it only
+while a profile routes online. v1.2.4 has no online routing and reads only the downloaded
+camera pack, so the service now matters only to older installs. It exists because the map
+layer's original data path — the phone querying public Overpass instances directly — spent
+2026-07-28 answering 504 on both instances while the routing endpoint sat on a box already
+holding all 120,838 camera positions. In those versions the public Overpass instances are
+the fallback; this service is first in line.
 
 Display and avoidance now come from the **same dataset**: the map shows exactly
 the cameras the router is steering around, not a fresher OSM state the graph

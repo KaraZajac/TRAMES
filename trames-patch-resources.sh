@@ -50,14 +50,15 @@ PROFILES = ("car", "bicycle", "pedestrian")
 # through to a picker — the same treatment the built-in "Driving style" group gets. That
 # is entirely OsmAnd's own machinery; the fork adds no UI code for it.
 #
-# The multipliers mirror TramesEngine.BERTH_MULTIPLIERS exactly, so a given level means
-# the same thing online and offline. They are NOT evenly spaced: measured on the
+# The multipliers are the ones the retired online engine used and the study's routing
+# server still uses (server/), so a level means the same thing there. They are NOT
+# evenly spaced: measured on the
 # continental graph, everything from 1.0 down to ~0.3 leaves most routes unchanged, so
 # the useful range is 0.3..0.01 and the levels are distributed across that instead of
 # across 0..1, where most of the control would do nothing.
 #
-# alpr_strong is default="true": camera avoidance is on out of the box at the same
-# strength the online engine defaults to. Opt-out, not opt-in.
+# alpr_strong is default="true": camera avoidance is on out of the box. Opt-out, not
+# opt-in.
 PARAMS = (
     '\t\t<!-- TRAMES: ALPR (licence-plate reader) avoidance level. -->\n'
     '\t\t<parameter group="alpr_avoidance" id="alpr_off" name="Off" '
@@ -70,7 +71,7 @@ PARAMS = (
     'description="Avoid readers wherever a reasonable alternative exists" '
     'type="boolean" default="true"/>\n'
     '\t\t<parameter group="alpr_avoidance" id="alpr_max" name="Maximum" '
-    'description="Avoid every mapped reader it can find a way around" type="boolean"/>\n'
+    'description="Avoid every known reader it can find a way around" type="boolean"/>\n'
 )
 
 # Placed FIRST inside <way attribute="priority">, and that position is load-bearing.

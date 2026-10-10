@@ -79,12 +79,11 @@ public class TramesMapsDialog {
 		OsmandApplication app = (OsmandApplication) activity.getApplication();
 		TramesCameraStore store = new TramesCameraStore(app);
 
-		// The camera pack leads the list. Without it the map draws no cameras at all under
-		// the default offline setup — the layer is forbidden from asking the network,
-		// because a camera query carries the user's location (TramesCameraSource's network
-		// policy). It normally arrives with a map, but it is offered on its own so someone
-		// who has not downloaded a state yet is not stuck looking at an empty map and
-		// reading that as "no cameras here".
+		// The camera pack leads the list. Without it the map draws no cameras at all — the
+		// layer has no network path, because a camera query would carry the user's location
+		// (see TramesCameraSource). It arrives with every map download, but it is offered on
+		// its own so someone who has not downloaded a state yet is not stuck looking at an
+		// empty map and reading that as "no cameras here".
 		String installed = "  ·  " + activity.getString(R.string.trames_maps_installed);
 		CharSequence[] labels = new CharSequence[maps.size() + 1];
 		labels[0] = activity.getString(R.string.trames_maps_camera_pack)

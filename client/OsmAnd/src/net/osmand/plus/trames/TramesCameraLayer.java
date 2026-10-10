@@ -29,9 +29,7 @@ import net.osmand.data.RotatedTileBox;
 import net.osmand.plus.OsmandApplication;
 import net.osmand.plus.R;
 import net.osmand.plus.routing.IRouteInformationListener;
-import net.osmand.plus.routing.RouteService;
 import net.osmand.plus.routing.RoutingHelper;
-import net.osmand.plus.settings.backend.ApplicationMode;
 import net.osmand.data.ValueHolder;
 import net.osmand.plus.utils.NativeUtilities;
 import net.osmand.plus.views.OsmandMapTileView;
@@ -106,19 +104,10 @@ public class TramesCameraLayer extends OsmandMapLayer implements IRouteInformati
 		routingHelper = app.getRoutingHelper();
 		routingHelper.addListener(this);
 		this.app = app;
-		// Lets the layer keep drawing with no network — see TramesCameraStore. Without it
-		// airplane mode renders a blank map over surveilled streets, which reads as safety.
+		// The layer draws only from the downloaded pack — see TramesCameraSource, which no
+		// longer has a network path. A camera lookup by bounding box would be a lookup by
+		// the user's location, so there is none to make.
 		source.setStore(new TramesCameraStore(app));
-		// Camera queries carry a bounding box around the current view — the user's location.
-		// They are only permitted once the user has chosen an online routing engine, i.e.
-		// has already accepted sending destinations to a server. Under the default offline
-		// setup nothing about where the user is ever leaves the device: the map draws from
-		// the downloaded pack instead. Evaluated per call so switching a profile back to
-		// offline stops the queries immediately, without needing a restart.
-		source.setNetworkPolicy(() -> {
-			ApplicationMode mode = routingHelper != null ? routingHelper.getAppMode() : null;
-			return mode != null && mode.getRouteService() == RouteService.ONLINE;
-		});
 		bitmapPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		bitmapPaint.setFilterBitmap(true);
 
@@ -282,8 +271,8 @@ public class TramesCameraLayer extends OsmandMapLayer implements IRouteInformati
 		}
 
 		QuadRect bounds = tileBox.getLatLonBounds();
-		// Self-throttling: only actually hits the network when the map has moved far
-		// enough, so calling it per frame is safe.
+		// Self-throttling: only re-reads the pack when the map has moved far enough, so
+		// calling it per frame is safe.
 		source.ensureLoaded(bounds, zoom, () -> {
 			if (view != null) {
 				view.refreshMap();
@@ -338,13 +327,11 @@ public class TramesCameraLayer extends OsmandMapLayer implements IRouteInformati
 	/**
 	 * Report how many cameras can see the freshly-calculated route.
 	 *
-	 * <p>Fetches every camera along the whole route — not just the visible map — so the
-	 * count is complete however the user has the map zoomed or panned. Both the fetch and
-	 * the scoring run off the UI thread. On a <em>total</em> fetch failure it falls back to
-	 * the cameras already loaded for the view, so a network hiccup degrades to a partial
-	 * count rather than a false "you're clear"; if it can't check at all, it stays silent
-	 * rather than claim zero. Stated as "on this route" rather than "avoided" because a
-	 * true avoided-count needs a second unavoided route to compare against.
+	 * <p>Reads every camera along the whole route from the pack — not just the visible map
+	 * — so the count is complete however the user has the map zoomed or panned. Both the
+	 * read and the scoring run off the UI thread. With no pack it cannot check, so it stays
+	 * silent rather than claim zero. Stated as "on this route" rather than "avoided" because
+	 * a true avoided-count needs a second unavoided route to compare against.
 	 */
 	@Override
 	public void newRouteIsCalculated(boolean newRoute, ValueHolder<Boolean> showToast) {
@@ -371,13 +358,13 @@ public class TramesCameraLayer extends OsmandMapLayer implements IRouteInformati
 			@Override
 			protected String doInBackground(Void... voids) {
 				// The whole-route set, so exposure covers cameras off the visible map too.
-				// null means every tile failed — only then fall back to the view cache, so
-				// a network hiccup degrades to the old behaviour, never a false "clear".
+				// null means there is no pack: fall back to the view cache, which is then
+				// empty too, so the result is silence, never a false "clear".
 				List<TramesCameraSource.Camera> fetched = source.fetchForRouteSync(s, w, n, e);
 				List<TramesCameraSource.Camera> use = fetched != null ? fetched : source.getCameras();
 				if (use.isEmpty()) {
-					// Empty after a successful fetch = genuinely no cameras (say "clear");
-					// empty after a failure = we truly couldn't check (say nothing).
+					// Empty from the pack = genuinely no known cameras (say "clear");
+					// empty with no pack = we truly couldn't check (say nothing).
 					return fetched != null ? app.getString(R.string.trames_exposure_none) : null;
 				}
 				TramesRouteExposure.Result r = TramesRouteExposure.count(route, use);

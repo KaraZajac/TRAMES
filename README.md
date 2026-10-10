@@ -13,12 +13,11 @@ modelled as **directional wedges**, not circles, because a reader watching north
 traffic says nothing about the southbound carriageway, and treating it as a circle makes
 the router detour around roads nobody is being read on.
 
-Since v1.2.0 it does this **offline by default**. Routes are computed on the device
-against ALPR-tagged maps, so a start, a destination and a departure time never leave the
-phone: sending a server your itinerary in order to dodge cameras trades one movement record
-for another. The hosted online server was **retired on 2026-08-29**. The app's online engine
-remains for anyone who runs their own (`server/`); left pointed at the retired address, as it
-is out of the box, it returns no route.
+It does this **offline**: by default since v1.2.0, and only since v1.2.4. Routes are
+computed on the device against ALPR-tagged maps, so a start, a destination and a departure
+time never leave the phone: sending a server your itinerary in order to dodge cameras trades
+one movement record for another. The hosted online server earlier versions could use was
+**retired on 2026-08-29**, and v1.2.4 removed the app's online engine.
 
 ---
 
@@ -26,8 +25,8 @@ is out of the box, it returns no route.
 
 | Path | What it is |
 |---|---|
-| `client/` | Android app — a fork of [OsmAnd](https://github.com/osmandapp/OsmAnd) (GPLv3): offline ALPR avoidance for car/bike/foot, an ALPR-avoiding online engine for a self-hosted server, a camera map layer, and an in-app map downloader |
-| `server/alpr`, `server/graphhopper` | Online routing backend, to self-host (the public instance was retired) and the engine the study routes against — stock GraphHopper 11 plus a preprocessor that turns OSM ALPR data into camera-cone geometry |
+| `client/` | Android app — a fork of [OsmAnd](https://github.com/osmandapp/OsmAnd) (GPLv3): offline ALPR avoidance for car/bike/foot, a camera map layer, and an in-app map downloader |
+| `server/alpr`, `server/graphhopper` | The routing server the study routes against — stock GraphHopper 11 plus a preprocessor that turns OSM ALPR data into camera-cone geometry. The app no longer uses one; the public instance was retired on 2026-08-29 |
 | `server/offline/` | The offline pipeline — tags camera-watched ways, builds `.obf` maps that carry the tag, and packs camera positions for the map layer |
 | `research/` | The measurement study: pipeline, results, and the paper |
 
@@ -128,8 +127,8 @@ specification.
 
 ## How it works — offline
 
-The offline path has to solve a different problem from the online one: OsmAnd's router
-reads only what is inside the `.obf` map, so the cameras have to be *in the map*.
+The app's router has a different problem from the study's: OsmAnd's router reads only what
+is inside the `.obf` map, so the cameras have to be *in the map*.
 
 1. **Tag the roads.** `server/offline/tag_ways.py` intersects the same 60 m / 45° cones
    against an OSM extract and writes `alpr=yes` onto every way a camera watches.
@@ -140,9 +139,8 @@ reads only what is inside the `.obf` map, so the cameras have to be *in the map*
    (`alpr_off` … `alpr_max`) in the `car`, `bicycle` and `pedestrian` profiles, sharing
    an `alpr_avoidance` group so OsmAnd renders them as one picker with no UI code.
 
-The multipliers are the same numbers the online engine uses — `0.3 / 0.1 / 0.05 / 0.01`,
-default *Strong* — so a level means the same thing whichever engine routes, by
-construction rather than by coincidence.
+The multipliers are `0.3 / 0.1 / 0.05 / 0.01`, default *Strong* — the numbers the study's
+routing server uses too, so the app's *Maximum* is the setting the study measured.
 
 Two things worth knowing:
 
@@ -160,10 +158,11 @@ Two things worth knowing:
 Prebuilt maps for all 50 states + DC are hosted at
 **[maps.blackflagintel.com](https://maps.blackflagintel.com)** and download in-app.
 
-## How it works — online
+## How it works — the study's routing server
 
-This is the self-hosted path, and the engine the study routes against; the public instance
-was retired on 2026-08-29 (see [`server/README.md`](server/README.md)).
+The app no longer routes online: the public instance of this server was retired on
+2026-08-29, and v1.2.4 removed the app's online engine (see [`server/README.md`](server/README.md)).
+It is the engine the study routes against.
 
 GraphHopper resolves `custom_areas.directory` into a spatial index **at graph import
 time**. Register the camera cones (157,084 on the 2026-09-22 map, merged into 135,210
@@ -175,8 +174,8 @@ no geometry in the request at all:
 ```
 
 That is the whole trick, and it is why this needs no forked routing engine. Avoidance
-strength stays a continuous per-request knob, so the client can expose it as a slider.
-The cost is that regenerating cones requires a full re-import.
+strength stays a continuous per-request knob. The cost is that regenerating cones requires
+a full re-import.
 
 Two consequences worth knowing before changing the config:
 
@@ -188,8 +187,8 @@ Two consequences worth knowing before changing the config:
 
 ## Getting started
 
-Building the app needs only steps 0 and 1 — the graph is for running your own online
-endpoint, which the app no longer requires.
+Building the app needs only steps 0 and 1 — the graph is for the study's routing server,
+which the app does not use.
 
 ```sh
 # 0. third-party OsmAnd assets the client build reads (~70 MB)
@@ -199,7 +198,7 @@ endpoint, which the app no longer requires.
 cd client && ./trames-build.sh
 ```
 
-Optional, to host the online endpoint yourself:
+Optional, to run the study's routing server yourself:
 
 ```sh
 # camera geometry (Overpass -> cones)
@@ -274,22 +273,21 @@ cd research
 
 ## What leaves the device
 
-Under the default configuration, nothing about where you are. Routes are computed
-on-device and the map draws cameras from a downloaded pack.
+Nothing about where you are. Routes are computed on-device, and the map draws cameras from
+a downloaded pack.
 
-A camera query carries a bounding box around the current view — which is to say, the
-user's location — so those requests **default to denied** and are permitted only while
-the active profile uses an online routing engine. They then go to the TRAMES camera service
-(`routing.blackflagintel.com/cameras`) or, if it fails, a public Overpass instance, whichever
-server the routing itself uses. The gate lives inside the single function that builds the
-request rather than at its call sites, so a later change cannot reintroduce the leak by
-forgetting a check. Until v1.2.3 this was wrong: a fresh install queried cameras before the
-user had opted into anything.
+TRAMES's own code makes three kinds of request, all plain downloads from
+`maps.blackflagintel.com` that follow from a tap, and none carries coordinates: the map
+list (`manifest.json`), a state's map file — which tells the server which state you chose —
+and the camera pack, fetched again with every map download. Like any request, each shows
+the server your IP address.
 
-The remaining network calls carry no location and are all user-initiated: a static map
-manifest, a map file by name, and the camera pack. Choosing online routing sends start
-and destination coordinates to whichever endpoint is configured — that is what routing
-is — which is why self-hosting is supported.
+Earlier versions sent more. Until v1.2.4 the app had an online routing engine, which sends
+a server your start and destination, and the camera layer could ask for the cameras in a
+box around the current view, which is to say your location — permitted only while a profile
+routed online, and, until v1.2.3, on a fresh install before you had opted into anything.
+v1.2.4 removed both. OsmAnd's own optional online features — online map sources, routing
+engines you add yourself, map editing — are unchanged and off by default.
 
 ## Security note
 

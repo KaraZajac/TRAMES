@@ -286,8 +286,8 @@ public class OsmandApplication extends MultiDexApplication {
 
 		localeHelper.onCreateApplication();
 		appInitializer.onCreateApplication();
-		// TRAMES: ALPR avoidance works out of the box — first launch seeds the online
-		// routing engine and points the car profile at it. No-op on every later start.
+		// TRAMES: ALPR avoidance works out of the box, offline. Removes the retired TRAMES
+		// online engine an earlier version saved, moving any profile on it to offline routing.
 		net.osmand.plus.trames.TramesDefaults.ensureSeeded(this);
 		osmandMap.getMapLayers().createLayers(osmandMap.getMapView());
 		startApplication();

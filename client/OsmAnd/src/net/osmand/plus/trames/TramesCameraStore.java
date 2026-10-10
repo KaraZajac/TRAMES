@@ -20,20 +20,19 @@ import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 /**
- * On-device camera positions, so the map can draw cones with no network.
+ * On-device camera positions: since v1.2.4 the map layer's only source of cameras.
  *
- * <p><b>Why this exists.</b> {@link TramesCameraSource} only ever asked the network. In
+ * <p><b>Why this exists.</b> {@link TramesCameraSource} once only asked the network. In
  * airplane mode — or anywhere with no signal — the layer drew nothing, which on a map is
  * indistinguishable from "no cameras here". Meanwhile the offline router was busily
  * avoiding those same cameras. A map that looks clear over surveilled streets is the
  * failure mode this app exists to prevent, and it is the direction of the error that
  * matters: showing nothing reads as safety.
  *
- * <p>The pack is the same snapshot the routing graph and the ALPR-tagged {@code .obf}
- * files were built from, so what the map draws offline is exactly what the offline router
- * avoided. Stripped to position and direction, the 142,991 North American cameras of the
- * 2026-09-22 snapshot compress to about 1.4 MB — negligible next to the maps it rides
- * along with.
+ * <p>The pack is the same snapshot the ALPR-tagged {@code .obf} maps were built from, so
+ * what the map draws is exactly what the offline router avoids. Stripped to position and
+ * direction, the 142,991 North American cameras of the 2026-09-22 snapshot compress to
+ * about 1.4 MB — negligible next to the maps it rides along with.
  *
  * <p>Parsed with a streaming {@link JsonReader} into parallel primitive arrays rather than
  * a JSON tree of 143k objects: the tree costs tens of MB transiently and this runs on
@@ -70,18 +69,30 @@ public class TramesCameraStore {
 		return f.exists() && f.length() > 0;
 	}
 
-	/** Download the pack. Blocking; returns null on success or an error string. */
+	/**
+	 * Download the pack. Blocking; returns null on success or an error string.
+	 *
+	 * <p>Written to a side file and moved into place only once complete, so a failed or
+	 * interrupted refresh leaves the installed pack as it was rather than half-overwritten.
+	 */
 	@Nullable
 	public String download(@Nullable IProgress progress) {
 		File dest = file();
+		File part = new File(dest.getPath() + ".part");
 		// gzip=false: the file is stored gzipped and decompressed at parse time, so the
 		// transfer must stay byte-for-byte. Asking for transport-level gzip here would
 		// hand back a decoded stream and write a .gz that is not gzipped.
-		String error = AndroidNetworkUtils.downloadFile(PACK_URL, dest, false, progress);
-		if (error == null) {
+		String error = AndroidNetworkUtils.downloadFile(PACK_URL, part, false, progress);
+		if (error == null && part.length() > 0) {
+			if (!part.renameTo(dest)) {
+				part.delete();
+				return "could not install the camera pack";
+			}
 			invalidate();
+			return null;
 		}
-		return error;
+		part.delete();
+		return error != null ? error : "empty camera pack";
 	}
 
 	/** Drop the parsed copy so the next read picks up a freshly downloaded pack. */

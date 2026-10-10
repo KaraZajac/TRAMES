@@ -10,7 +10,5 @@ public enum EngineParameter {
 	APPROXIMATION_DERIVED_PROFILE,
 	USE_EXTERNAL_TIMESTAMPS,
 	USE_ROUTING_FALLBACK,
-	API_KEY,
-	/** TRAMES: ALPR avoidance level, index into TramesEngine.BERTH_MULTIPLIERS. */
-	TRAMES_BERTH
+	API_KEY
 }

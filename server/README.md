@@ -4,10 +4,11 @@ Routing backend for [TRAMES](https://github.com/KaraZajac/TRAMES) — GraphHoppe
 automated licence-plate reader (ALPR) camera cones baked into the routing graph, so
 navigation can avoid the cameras that can actually see you.
 
-Since v1.2.0 the app routes **offline by default** on ALPR-tagged maps and needs no
-server at all — `offline/` is the pipeline that builds those maps. The GraphHopper
-backend here is the **opt-in online path** for self-hosters (the public instance was
-retired on 2026-08-29 — see below) and the engine the research study routes against.
+Since v1.2.0 the app routes **offline** on ALPR-tagged maps — by default, and since v1.2.4
+only — and needs no server at all — `offline/` is the pipeline that builds those maps. The GraphHopper
+backend here is the engine the research study routes against. It was also the app's
+opt-in online path until v1.2.4 removed the online engine; the public instance was
+retired on 2026-08-29 (see below).
 
 ```
 alpr/         OSM/Overpass -> directional camera cones -> GeoJSON
@@ -82,12 +83,13 @@ default since v1.2.0: the continental graph was the whole memory footprint of th
 — 18.8 GiB of 22.9 GiB, on a host that also serves thirteen websites — to keep an
 opt-in path warm. Caddy now answers `/route`, `/info` and `/health` with a 503 whose
 body says to route offline and where the ALPR-tagged maps are — a sentence a person can
-act on rather than a 502. The app itself does not show it: it reads the body as a route,
-cannot parse it, and reports "The calculated route is empty."
+act on rather than a 502. App versions up to v1.2.3 do not show it: they read the body as a
+route, cannot parse it, and report "The calculated route is empty." v1.2.4 removed the
+online engine and moves any profile still on it to offline routing.
 `/cameras` (the camera map-layer service, `cameras/`) is unaffected and stays up.
 
-The client keeps the online engine for self-hosters: point it at your own instance.
-Everything below still applies to running one. What the public instance ran under, for
+The client no longer has an online engine. Everything below still applies to running
+the server for the study, or for anything else that speaks GraphHopper. What the public instance ran under, for
 whoever hosts the next:
 
 ```ini

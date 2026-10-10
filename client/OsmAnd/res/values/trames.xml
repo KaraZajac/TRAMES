@@ -17,28 +17,13 @@
         <item name="android:windowBackground">@drawable/trames_splash_screen</item>
     </style>
 
-    <!-- ── ALPR avoidance routing ───────────────────────────────────────────── -->
-    <string name="trames_routing_engine_title">TRAMES (ALPR avoidance)</string>
-    <string name="trames_berth_title">Camera avoidance</string>
-    <string name="trames_berth_descr">How hard to avoid roads watched by licence-plate readers. Stronger settings take longer routes.</string>
-
     <!--
-      Slider labels. The underlying GraphHopper priority multiplier is NOT linear and
-      its useful range is roughly 0.3 down to 0.01 — measured on the continental graph,
-      everything from 1.0 to 0.3 changes nothing on most routes. Exposing raw numbers
-      would give the user a control that appears dead for two thirds of its travel, so
-      the UI offers named steps mapped onto the range that actually does something.
+      Route exposure readout. "Known" rather than "mapped" or bare: the count is of the
+      cameras in the downloaded pack, which is what the maps avoid, not of every camera
+      that exists.
     -->
-    <string name="trames_berth_off">Off — usual route</string>
-    <string name="trames_berth_light">Light — avoid where it\'s cheap</string>
-    <string name="trames_berth_moderate">Moderate</string>
-    <string name="trames_berth_strong">Strong</string>
-    <string name="trames_berth_maximum">Maximum — avoid every mapped camera it can</string>
-
-
-    <!-- Route exposure readout -->
-    <string name="trames_exposure_none">No mapped licence-plate readers can see this route</string>
-    <string name="trames_exposure_count">%1$d mapped licence-plate reader(s) can see this route</string>
+    <string name="trames_exposure_none">No known licence-plate readers can see this route</string>
+    <string name="trames_exposure_count">%1$d known licence-plate reader(s) can see this route</string>
 
     <!--
       Offline avoidance levels. These names are not free-form: OsmAnd looks up a routing
@@ -48,8 +33,10 @@
       five ids that trames-patch-resources.sh adds to routing.xml. Defined here rather
       than in OsmAnd's strings.xml because that file is CC-BY-NC-ND — see the header.
 
-      The level names deliberately mirror the online berth labels above: the same word
-      means the same multiplier whichever engine is routing.
+      The levels are not evenly spaced: the priority multipliers are 0.3, 0.1, 0.05 and
+      0.01, because measured on the continental graph everything from 1.0 to 0.3 changes
+      nothing on most routes, and a control that is dead for two thirds of its travel
+      tells the user nothing.
     -->
     <string name="routing_attr_alpr_avoidance_name">Camera avoidance</string>
     <string name="routing_attr_alpr_avoidance_description">How hard to avoid roads watched by licence-plate readers</string>
@@ -62,21 +49,21 @@
     <string name="routing_attr_alpr_strong_name">Strong</string>
     <string name="routing_attr_alpr_strong_description">Avoid readers wherever a reasonable alternative exists</string>
     <string name="routing_attr_alpr_max_name">Maximum</string>
-    <string name="routing_attr_alpr_max_description">Avoid every mapped reader it can find a way around</string>
+    <string name="routing_attr_alpr_max_description">Avoid every known reader it can find a way around</string>
 
     <!-- ── offline map catalogue (TramesMapsDialog) ─────────────────────────── -->
     <string name="trames_maps_title">TRAMES offline maps</string>
-    <string name="trames_maps_descr">Maps that carry the licence-plate readers mapped in OpenStreetMap, so offline routing avoids them</string>
+    <string name="trames_maps_descr">Maps with the known licence-plate readers built in, so offline routing avoids them</string>
     <string name="trames_maps_loading">Loading available maps…</string>
     <string name="trames_maps_unavailable">Could not reach the TRAMES map server. Check your connection and try again.</string>
     <string name="trames_maps_installed">installed</string>
-    <string name="trames_maps_download_prompt">Download the %1$s map (%2$s)? It replaces the standard map for that area and lets offline routing avoid mapped cameras there.</string>
-    <string name="trames_maps_redownload_prompt">%1$s is already installed. Download it again (%2$s) to pick up newly mapped cameras?</string>
+    <string name="trames_maps_download_prompt">Download the %1$s map (%2$s)? It replaces the standard map for that area and lets offline routing avoid known cameras there.</string>
+    <string name="trames_maps_redownload_prompt">%1$s is already installed. Download it again (%2$s) to pick up newly added cameras?</string>
     <string name="trames_maps_camera_pack">Camera positions — about 1.4 MB (needed to show cameras offline)</string>
     <string name="trames_maps_camera_pack_downloading">Downloading camera positions…</string>
     <string name="trames_maps_camera_pack_ready">Camera positions ready — the map can now show cameras offline</string>
     <string name="trames_maps_downloading">Downloading %1$s…</string>
-    <string name="trames_maps_ready">%1$s is ready — offline routing now avoids mapped cameras there</string>
+    <string name="trames_maps_ready">%1$s is ready — offline routing now avoids known cameras there</string>
     <string name="trames_maps_failed">Download failed: %1$s</string>
 
 </resources>

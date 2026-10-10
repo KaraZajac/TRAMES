@@ -6,6 +6,13 @@ import net.osmand.util.Algorithms;
 
 public class EngineType {
 
+	/**
+	 * TRAMES: the retired TRAMES online engine. Deliberately not in {@link #values()}, so it
+	 * can no longer be chosen for a new engine; still recognised by name, so an engine an
+	 * earlier version saved is read back as what it is and TramesDefaults can remove it.
+	 * Without this, {@link #getTypeByName} would fall back to GraphHopper and quietly leave
+	 * a profile pointed at a third-party server.
+	 */
 	public static final OnlineRoutingEngine TRAMES_TYPE = new TramesEngine(null);
 	public static final OnlineRoutingEngine GRAPHHOPPER_TYPE = new GraphhopperEngine(null);
 	public static final OnlineRoutingEngine OSRM_TYPE = new OsrmEngine(null);
@@ -17,7 +24,6 @@ public class EngineType {
 	public static OnlineRoutingEngine[] values() {
 		if (enginesTypes == null) {
 			enginesTypes = new OnlineRoutingEngine[]{
-					TRAMES_TYPE,
 					GRAPHHOPPER_TYPE,
 					OSRM_TYPE,
 					ORS_TYPE,
@@ -29,6 +35,9 @@ public class EngineType {
 
 	@NonNull
 	public static OnlineRoutingEngine getTypeByName(@NonNull String typeName) {
+		if (Algorithms.objectEquals(TRAMES_TYPE.getTypeName(), typeName)) {
+			return TRAMES_TYPE;
+		}
 		for (OnlineRoutingEngine type : values()) {
 			if (Algorithms.objectEquals(type.getTypeName(), typeName)) {
 				return type;

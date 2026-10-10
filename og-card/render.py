@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Stamp the version line and tagline onto the site's Open Graph card.
 
-    ./og-card/render.py --version v1.2.3                       # writes docs/og.png
-    ./og-card/render.py --version v1.2.3 --tagline "Directional cones, not circles · Offline by default"
+    ./og-card/render.py --version v1.2.4                       # writes docs/og.png
+    ./og-card/render.py --version v1.2.4 --tagline "Directional cones, not circles · Offline"
     ./og-card/render.py --make-base                            # (re)build og-card/base.png from docs/og.png
 
 og-card/base.png is the card with its two variable strings erased — the wordmark, the
@@ -92,7 +92,7 @@ def render(version, tagline, out):
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--version", help="e.g. v1.2.3")
-    ap.add_argument("--tagline", default="Directional cones, not circles · Offline by default")
+    ap.add_argument("--tagline", default="Directional cones, not circles · Offline")
     ap.add_argument("--make-base", action="store_true")
     ap.add_argument("-o", "--out", default=CARD)
     a = ap.parse_args()

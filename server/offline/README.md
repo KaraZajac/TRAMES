@@ -1,8 +1,9 @@
 # TRAMES offline routing — ALPR-baked maps
 
 Offline navigation that still avoids licence-plate readers, with no server in the loop.
-**Shipped in v1.2.0 and the app's default since**: the online engine bakes camera cones
-into a GraphHopper graph; this pipeline bakes the same knowledge into OsmAnd's offline
+**Shipped in v1.2.0, the app's default since, and since v1.2.4 its only routing** (the
+online engine was removed; its server was retired on 2026-08-29). The online engine baked
+camera cones into a GraphHopper graph; this pipeline bakes the same knowledge into OsmAnd's offline
 router by stamping `alpr=yes` onto the road ways a camera watches, building `.obf` maps
 that carry the tag, and penalising it in `routing.xml`.
 
@@ -34,9 +35,9 @@ wall. That is precisely the offline twin of the server's per-request
 | STRONG | 0.05 | 0.05 |
 | MAXIMUM | 0.01 | 0.01 |
 
-Same numbers as `TramesEngine.BERTH_MULTIPLIERS`, same 60 m / 45° cone geometry
-(`TramesGeometry` / `build_cones.py`). Online and offline agree by construction rather
-than by coincidence.
+Same numbers as the online engine used and the study's routing server still uses, same
+60 m / 45° cone geometry (`TramesGeometry` / `build_cones.py`). Online and offline agree by
+construction rather than by coincidence.
 
 ## The pipeline
 
@@ -101,11 +102,13 @@ the server venv, which carries only `shapely`).
   directory with an immediate re-index — no restart, no file picker.
 - **The camera pack.** `build_camera_pack.py` slims the served snapshot to position +
   direction (~1.4 MB gzipped for the 142,991 North American cameras of the 2026-09-22
-  snapshot; 1.1 MB for July's 120,838); it rides along with a map download
-  so the offline map draws exactly the cameras the offline router is avoiding.
-- **The default.** `TramesDefaults` points the car profile at OsmAnd's offline engine;
-  the online TRAMES engine is seeded but not selected. Offline is the default because
-  sending a server your itinerary to dodge cameras trades one movement record for another.
+  snapshot; 1.1 MB for July's 120,838); it rides along with every map download (since
+  v1.2.4, also when one is already installed), so the map draws exactly the cameras the
+  router avoids.
+- **The default, and since v1.2.4 the only routing.** `TramesDefaults` points the car
+  profile at OsmAnd's offline engine, and removes the TRAMES online engine earlier
+  versions saved, moving any profile on it to offline routing. Sending a server your
+  itinerary to dodge cameras trades one movement record for another.
 
 ## Hosted maps
 
