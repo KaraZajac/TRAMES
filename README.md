@@ -17,7 +17,8 @@ It does this **offline**: by default since v1.2.0, and only since v1.2.4. Routes
 computed on the device against ALPR-tagged maps, so a start, a destination and a departure
 time never leave the phone: sending a server your itinerary in order to dodge cameras trades
 one movement record for another. The hosted online server earlier versions could use was
-**retired on 2026-08-29**, and v1.2.4 removed the app's online engine.
+**retired on 2026-08-29**, and v1.2.4 removed the app's online engine. v1.2.5 also shut off
+what the OsmAnd code underneath sent on its own — see [What leaves the device](#what-leaves-the-device).
 
 ---
 
@@ -131,7 +132,9 @@ The app's router has a different problem from the study's: OsmAnd's router reads
 is inside the `.obf` map, so the cameras have to be *in the map*.
 
 1. **Tag the roads.** `server/offline/tag_ways.py` intersects the same 60 m / 45° cones
-   against an OSM extract and writes `alpr=yes` onto every way a camera watches.
+   against an OSM extract and writes `alpr=yes` onto every way a cone touches — the whole
+   way as OpenStreetMap draws it, which can run past several junctions, and in both
+   directions unless its carriageways are mapped as separate ways.
 2. **Keep the tag through the build.** A `.obf` drops unknown tags unless they are
    declared, so `rendering_types.xml` gains a `<routing_type tag="alpr">` — the one
    genuinely uncertain step, proven on a spike before the continent was built.
@@ -142,7 +145,12 @@ is inside the `.obf` map, so the cameras have to be *in the map*.
 The multipliers are `0.3 / 0.1 / 0.05 / 0.01`, default *Strong* — the numbers the study's
 routing server uses too, so the app's *Maximum* is the setting the study measured.
 
-Two things worth knowing:
+A camera with no recorded facing gets no cone, so the router does not avoid it: 2,948 of
+the 142,991 North American cameras in the 2026-09-22 snapshot (2,866 of the 142,257 in the
+50 states and DC). The map layer draws them as plain pins, without a wedge, and the route
+readout counts one as seeing the route if the route passes within 60 m of it.
+
+Three things worth knowing:
 
 - **Rule order is load-bearing.** `GeneralRouter` returns the *first* matching priority
   rule and stops; priorities do not accumulate. The ALPR rules are therefore first in
@@ -154,9 +162,20 @@ Two things worth knowing:
   loudly if upstream moves. Without it the app builds clean and quietly avoids nothing,
   which is the worst failure this project has: routing still works, it just stops doing
   the one thing the app is for.
+- **Only TRAMES maps carry the tag.** On OsmAnd's standard maps the levels select fine and
+  change nothing. Where a standard map of the same area is also installed, the router keeps
+  whichever copy of a road it loads first (or the one with more points), so it may route on
+  roads without the tag. OsmAnd's fast routing, its default for car and bike, plans on a
+  network precomputed into the map at OsmAnd's default costs: TRAMES maps carry none, so on
+  them the router falls back to standard routing, but a standard map does (OsmAnd's
+  Delaware map has two such sections), and on that network the camera penalty would never
+  apply. Since v1.2.5 every profile defaults to standard routing, and the app asks people
+  to delete any standard map of an area they have a TRAMES map for. Neither failure has
+  been observed on a device; both follow from OsmAnd's code.
 
 Prebuilt maps for all 50 states + DC are hosted at
-**[maps.blackflagintel.com](https://maps.blackflagintel.com)** and download in-app.
+**[maps.blackflagintel.com](https://maps.blackflagintel.com)** and download in-app, from
+**TRAMES offline maps** in the drawer; since v1.2.5 the app offers them on first start.
 
 ## How it works — the study's routing server
 
@@ -204,7 +223,7 @@ Optional, to run the study's routing server yourself:
 # camera geometry (Overpass -> cones)
 cd server/alpr && ./fetch-na-cones.sh
 
-# import the graph, then serve  (~82 min for North America)
+# import the graph, then serve  (1.5–2 h for North America with cones)
 cd ../graphhopper && ./rebuild-with-cones.sh
 ```
 
@@ -273,21 +292,76 @@ cd research
 
 ## What leaves the device
 
-Nothing about where you are. Routes are computed on-device, and the map draws cameras from
-a downloaded pack.
+Your trips don't. Routes are computed on the device, and the map draws cameras from a
+downloaded pack. Since v1.2.5 the app sends nothing on a fresh install until you tap
+something; what the phone itself does when an app asks for location is at the end.
 
 TRAMES's own code makes three kinds of request, all plain downloads from
 `maps.blackflagintel.com` that follow from a tap, and none carries coordinates: the map
 list (`manifest.json`), a state's map file — which tells the server which state you chose —
-and the camera pack, fetched again with every map download. Like any request, each shows
-the server your IP address.
+and the camera pack, fetched again with every map download. The host sits behind
+Cloudflare, so Cloudflare sees what the server sees: your IP address and the files you fetch.
+
+**What the OsmAnd code underneath sent on its own, until v1.2.5.** On first start OsmAnd's
+welcome screen asked `osmand.net/api/geo-ip` where the phone was, fetched OsmAnd's map index
+and offered OsmAnd's standard map of that region, which carries no cameras; OsmAnd also
+downloaded its help index from `osmand.net`. On about one start in five it fetched the map
+index from `download.osmand.net` to look for map updates. At zooms 9 to 11, wherever no
+installed map covered the view — before a TRAMES map is installed, everywhere — it fetched
+the index again to show a banner offering its own map. On phones with Google Play it checked
+subscriptions with `osmand.net` daily, then asked for sale messages. None of these carried
+coordinates. Each showed OsmAnd's servers the phone's IP address, and most carried a random
+install ID that OsmAnd renews every three months. v1.2.5 turns them all off: the install ID,
+the welcome screen and the banner in `TramesDefaults`, the rest in `TramesPrivacy`.
+
+**What sent coordinates once tapped, until v1.2.5.** *Calculate online*, offered when a route
+needs a map you don't have, sent the start (or the last known location), every stop and the
+destination to `maptile.osmand.net`. *Online photos*, a row in a place's menu, sent that
+place's coordinates and your last known location to `osmand.net`, and once opened it stayed
+open for every place after. *Nearby places*, a card in search, shared that row's saved open
+state, so opening it opened the photos everywhere. v1.2.5 removes all three.
+
+**What still can, if you open it.** Nothing goes out on its own, but OsmAnd's features still
+talk to their servers when you use them:
+
+- *OsmAnd's own maps* (Maps & resources, or the Required maps screen a route can open) tell
+  `download.osmand.net` the region you pick, with the days since install and the number of
+  starts. Their places, and those in OsmAnd's Wikipedia maps, carry photos that search
+  results and the Wikipedia layer load from `data.osmand.net`, naming the places you look
+  at. TRAMES maps carry no such photos — one more reason to keep to them.
+- *Online map sources*, overlays and underlays fetch the tiles you view (from
+  `tile.osmand.net` by default), which is the area you are looking at.
+- *OpenStreetMap editing and notes* send what you edit, and the notes layer the area you
+  view, to `openstreetmap.org`.
+- *OsmAnd Cloud*: signing up sends your email and an install ID; a backup uploads favourites
+  and OSM edits, which hold coordinates.
+- *The Wikipedia layer*, if you switch its source to online, sends the map area to
+  `osmand.net`.
+- *Online address search* sends your query and an area around the search point to
+  `nominatim.openstreetmap.org`; *Send* on an empty result sends the query and your location
+  to `osmand.net`.
+- *Live monitoring*, in trip recording, sends your position every 5 seconds to the URL you
+  set, which by default is a placeholder at `example.com`.
+- *Online routing engines you add yourself* get your start, stops and destination.
+- *Settings → Purchases* contacts Google Play and `osmand.net`.
+- Between days 5 and 30 OsmAnd asks once whether to share anonymous usage data with
+  `osmand.net`. If you agree, it uploads the events it has logged since install, including
+  the names of maps you downloaded.
+
+**What your phone does when TRAMES asks it.** Location comes through Google Play services
+where they are installed; with the phone's Google Location Accuracy on, Android sends Wi-Fi
+and cell scans to Google for any app that asks for location. When TRAMES opens, at most
+every 16 hours, OsmAnd asks the GPS to refresh its assistance data, which the phone fetches
+from its chip vendor's or Google's servers. Android's own backup, when on, copies TRAMES's
+settings, including the last map position and the navigation destination, to the phone's
+backup account. And spoken directions come from the phone's text-to-speech engine, which
+may synthesize them online.
 
 Earlier versions sent more. Until v1.2.4 the app had an online routing engine, which sends
 a server your start and destination, and the camera layer could ask for the cameras in a
 box around the current view, which is to say your location — permitted only while a profile
 routed online, and, until v1.2.3, on a fresh install before you had opted into anything.
-v1.2.4 removed both. OsmAnd's own optional online features — online map sources, routing
-engines you add yourself, map editing — are unchanged and off by default.
+v1.2.4 removed both.
 
 ## Security note
 
@@ -302,11 +376,20 @@ from source.
 
 ## Licensing and provenance
 
-`client/` derives from OsmAnd and is **GPLv3**. Upstream history is not carried here: the
-project does not track OsmAnd continuously, and the fork cost 1.17 GB to hold five commits
-of TRAMES work. `client/` is the upstream tree at `99f04deacd` with those five commits
-replayed; `LICENSE`, `AUTHORS.md` and all per-file copyright headers are preserved
-verbatim. See [`client/TRAMES-NOTICE.md`](client/TRAMES-NOTICE.md).
+The parts carry different licences; [`LICENSE`](LICENSE) maps them:
+
+- **`client/`**, the app, derives from OsmAnd and is **GPLv3**, under OsmAnd's notice in
+  [`client/LICENSE`](client/LICENSE). Its artwork is CC-BY-NC-ND 4.0 (below).
+- **`server/`** and **`research/`**, the map pipeline, the study's routing server and the
+  study, are TRAMES's own code under the **MIT** licence.
+- **Camera and map data** are © OpenStreetMap contributors under the **ODbL**.
+
+Upstream history is not carried here: the project does not track OsmAnd continuously, and
+the fork cost 1.17 GB to hold five commits of TRAMES work. `client/` started as the
+upstream tree at `99f04deacd` with those five commits replayed; every TRAMES change since is
+an ordinary commit here (`git log -- client`). OsmAnd's `LICENSE`, `AUTHORS.md` and all
+per-file copyright headers are preserved verbatim. See
+[`client/TRAMES-NOTICE.md`](client/TRAMES-NOTICE.md).
 
 To diff against or re-sync with upstream:
 
@@ -318,9 +401,10 @@ git remote add osmand https://github.com/osmandapp/OsmAnd.git
 > derivative work — it has to be replaced. This is a live obligation for anyone
 > rebranding the client, not a footnote.
 
-Camera data comes from OpenStreetMap (ODbL) via the Overpass API, the same corpus
-surfaced by [DeFlock](https://deflock.me). It is contributed by volunteers and is
-**incomplete in ways that are not random** — the central caveat of the study.
+Camera data comes from OpenStreetMap (ODbL), fetched with the Overpass API when the maps
+and the camera pack are built — the same corpus surfaced by [DeFlock](https://deflock.me).
+It is contributed by volunteers and is **incomplete in ways that are not random** — the
+central caveat of the study.
 
 The study also reads Flock Safety's device registry as it stood in December 2025, from the
 map an independent researcher published at [flocksurveillance.org](https://flocksurveillance.org).

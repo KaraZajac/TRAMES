@@ -1,11 +1,15 @@
 # TRAMES routing backend
 
-GraphHopper 11.0. Phase 1 status: **working, proven against the stock OsmAnd request
-shape.** No ALPR data yet — that's phase 2.
+GraphHopper 11.0 — the engine the research study routes against. Camera cones are loaded
+at import as one custom area named `alpr` (see [`../README.md`](../README.md)), and each
+request applies avoidance through a per-request custom model. The app does not use this
+server: it has routed offline by default since v1.2.0 and only offline since v1.2.4, and
+the public instance was retired on 2026-08-29.
 
 ```sh
-./import.sh data/delaware.osm.pbf   # build the graph
-./serve.sh                          # serve on localhost:8989
+./import.sh data/delaware.osm.pbf        # build a graph
+./rebuild-with-cones.sh                  # North America with cones (1.5–2 h)
+./serve.sh                               # serve on localhost:8989
 ```
 
 Requires a JDK 17+ (JDK 25 verified working — note this is *not* the JDK the OsmAnd
@@ -15,15 +19,20 @@ Android build needs, which is pinned to 17/21 by AGP 8.7.3).
 
 | Profile | Prep | Purpose |
 |---|---|---|
-| `car` | CH + LM | Baseline "fastest route". CH makes it fast. |
-| `car_alpr` | LM only | Camera-avoidant. LM (hybrid) so the custom model stays tunable. |
+| `car` | LM | Every route the study computes. Plain requests give the usual route; the avoiding route is the same profile with a per-request custom model, `{"priority": [{"if": "in_alpr", "multiply_by": 0.01}]}`. |
+| `car_alpr` | LM (borrows `car`'s) | Left from the July phase-1 spike: a fixed box over the DE-1 corridor (`custom_models/car_alpr_demo.json`). The study does not use it. |
 
-`car_alpr` has no CH preparation, so requests **must** pass `ch.disable=true` or
-GraphHopper returns `Cannot find CH preparation for the requested profile`. This is
-intentional: CH bakes the weighting into the graph, which would make the avoidance
-strength fixed at import time.
+There is no CH preparation (`profiles_ch: []`): CH bakes the weighting into the graph,
+which would fix the avoidance strength at import time. Requests pass `ch.disable=true`,
+as the study's scripts do.
 
-## Wiring up stock OsmAnd (no fork needed)
+## History: the phase-1 spike (July 2026)
+
+Everything below records how the design was proven before the cones existed. The stock
+OsmAnd wiring it describes was how the online path started; the app no longer has an
+online engine.
+
+### Wiring up stock OsmAnd (no fork needed)
 
 This is the phase-1 validation path — real turn-by-turn navigation over
 camera-avoidant routes with zero Android code written.
@@ -40,7 +49,7 @@ OsmAnd only consumes the route *geometry* — it re-derives every turn instructi
 street name and voice prompt from its own offline maps via "Attach to the roads".
 So this backend only has to return a sane polyline.
 
-## Verified phase-1 results (Delaware extract)
+### Verified phase-1 results (Delaware extract)
 
 Wilmington → Dover:
 
@@ -56,7 +65,7 @@ polyline, and instructions carrying `distance`/`text`/`street_name`/`time`/`inte
 Hybrid-mode (LM) request latency on this extract: **38–135 ms** for a 106 km route.
 Needs re-benchmarking at North America scale.
 
-## Known finding: the avoidance "slider" is not smooth
+### Known finding: the avoidance "slider" is not smooth
 
 Sweeping `multiply_by` against a single large avoid polygon:
 
@@ -70,13 +79,17 @@ small camera cones instead of one blob the tradeoff space should be much smoothe
 but **the berth slider's feel is an empirical question to settle in phase 2**, not a
 given.
 
-## Caveat: `car_alpr_demo.json` is a placeholder
+### Caveat: `car_alpr_demo.json` is a placeholder
 
 `custom_models/car_alpr_demo.json` hardcodes a rectangle over the DE-1 corridor purely
 to prove the mechanism. Phase 2 replaces it: cone-snap DeFlock/OSM ALPR points onto the
 ways they actually watch (respecting `camera:direction`), write an `alpr_exposure`
 encoded value at import via a custom TagParser, and reduce the custom model to a single
 rule with no per-request geometry.
+
+Phase 2 went another way: the cones became an import-time custom area, `alpr`, that a
+per-request custom model references by name, with no TagParser and no geometry in the
+request.
 
 ## North America import
 
@@ -115,6 +128,9 @@ Resulting graph: **82,932,093 nodes / 103,104,339 edges**, 14 GB graph cache.
 | Flush | 10 s |
 | **total** | **~1 h 22 min** |
 
+That was the July graph, without cones. With the cones, the imports of September and
+October 2026 took 1 h 30 min to 2 h 3 min (`logs/*import*.log`).
+
 LM peaked at **28.1 GB of the 32 GB heap**. CH preparation on top of that would very
 likely have exceeded it — another reason `profiles_ch` stays empty for now.
 
@@ -147,10 +163,12 @@ rather than computing its own. Verified on Delaware to produce byte-identical ro
 valid while every custom model multiplies priority *down*; see the config comment.
 
 Note `car_alpr` on a North America graph behaves identically to `car` outside the
-hardcoded Delaware test polygon — that's expected until phase 2 supplies real data.
+hardcoded Delaware test polygon; the cones never went into that profile (see above).
 
-## Not yet done
+## Status
 
-- Real ALPR data (`car_alpr_demo.json` is a placeholder rectangle)
-- Caddy config / deployment to api.blackflagintel.com
-- No auth or rate limiting — do not expose port 8989
+- Camera data: in, as the `alpr` custom area. `car_alpr_demo.json` is still the phase-1
+  rectangle, and nothing uses it.
+- Public deployment: served at routing.blackflagintel.com from 2026-07-25 to 2026-08-29,
+  then retired; the study runs a local instance.
+- No auth or rate limiting — do not expose port 8989.

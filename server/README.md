@@ -12,7 +12,7 @@ retired on 2026-08-29 (see below).
 
 ```
 alpr/         OSM/Overpass -> directional camera cones -> GeoJSON
-cameras/      Overpass-compatible bbox service feeding the app's camera map layer
+cameras/      Overpass-compatible bbox service that fed the app's camera layer (up to v1.2.3)
 graphhopper/  config, import and serve scripts
 offline/      ALPR-tagged .obf map pipeline (offline routing — see offline/README.md)
 ```
@@ -25,7 +25,7 @@ python3 -m venv .venv && .venv/bin/pip install shapely
 # 1. build camera cones (five regional Overpass queries, ~10 min)
 cd alpr && ./fetch-na-cones.sh
 
-# 2. import the graph (North America: ~1h22m, needs ~32 GB heap)
+# 2. import the graph (North America: 1.5–2 h with cones, needs ~32 GB heap)
 cd ../graphhopper
 curl -O https://download.geofabrik.de/north-america-latest.osm.pbf   # 19.2 GB
 mv north-america-latest.osm.pbf data/north-america.osm.pbf
@@ -36,7 +36,8 @@ TRAMES_XMX=40g ./serve.sh
 ./healthcheck.sh
 ```
 
-Then point the TRAMES app's routing engine at `http://<host>:8989/route`.
+The study's scripts route against `http://localhost:8989/route`. The app has no online
+engine to point at it since v1.2.4.
 
 ## How avoidance works
 

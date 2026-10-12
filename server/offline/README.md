@@ -23,7 +23,7 @@ gated by a user parameter. It already does this for toll roads:
 </if>
 ```
 
-`priority ×0.1` halves-and-then-some the road's effective speed — a discouragement, not a
+`priority ×0.1` makes the road count as ten times slower — a discouragement, not a
 wall. That is precisely the offline twin of the server's per-request
 `{"if": "in_alpr", "multiply_by": "0.1"}`. So the berth maps one-to-one:
 
@@ -99,16 +99,24 @@ the server venv, which carries only `shapely`).
   block); the script documents why.
 - **The maps.** An in-app catalogue (`TramesMapsDialog` / `TramesMapDownloader`) reads
   `manifest.json` from the map host and installs a `.obf` straight into the maps
-  directory with an immediate re-index — no restart, no file picker.
+  directory with an immediate re-index — no restart, no file picker. Since v1.2.5 the app
+  offers it on first start, in place of OsmAnd's welcome screen, and asks before fetching
+  anything.
 - **The camera pack.** `build_camera_pack.py` slims the served snapshot to position +
   direction (~1.4 MB gzipped for the 142,991 North American cameras of the 2026-09-22
   snapshot; 1.1 MB for July's 120,838); it rides along with every map download (since
-  v1.2.4, also when one is already installed), so the map draws exactly the cameras the
-  router avoids.
+  v1.2.4, also when one is already installed), so the map draws the cameras the router
+  avoids. The app reads each camera's `direction` with the same rules as the cone builder
+  since v1.2.5, which added compass points (`N`, `WSW`): before that, 401 cameras the
+  router avoided were drawn without a wedge. The 2,948 with no usable facing get no cone
+  and are not avoided; they show as plain pins.
 - **The default, and since v1.2.4 the only routing.** `TramesDefaults` points the car
   profile at OsmAnd's offline engine, and removes the TRAMES online engine earlier
   versions saved, moving any profile on it to offline routing. Sending a server your
-  itinerary to dodge cameras trades one movement record for another.
+  itinerary to dodge cameras trades one movement record for another. Since v1.2.5 it
+  also defaults every profile to OsmAnd's standard router rather than fast routing (see
+  below), and turns off OsmAnd's install ID and welcome screen; `TramesPrivacy` closes
+  the rest of what OsmAnd sent on its own.
 
 ## Hosted maps
 
@@ -116,8 +124,10 @@ All 50 states + DC are published at **https://maps.blackflagintel.com** — 51 f
 (rendering + POI + routing), ~22 GB, built 2026-09-22 → 23 from the 142,991-camera
 snapshot on fresh Geofabrik extracts (the first set, 2026-07-29 → 31, was built from the
 120,838-camera snapshot). `manifest.json` is `{version, maps: [{name, file, size, date},
-…]}`; the `date` is the freshness stamp the in-app catalogue shows, and re-downloading a
-map is how a user picks up newly mapped cameras.
+…]}`; the `date` is the map file's modification date on the host. The app parses it but
+its catalogue shows only each map's name, size and whether it is installed, so a user
+cannot yet see how old a map is. Re-downloading a map is how a user picks up newly mapped
+cameras.
 
 What a full rebuild costs on a 62 GB / 16-core machine, measured on the September run:
 Texas 3.5 h, California 3.6 h (with an hour lost to swapping — see below), New York
@@ -140,7 +150,18 @@ sibling beside it filled swap and stalled both for an hour before it was killed.
   automated build cadence yet; maps age as DeFlock contributors add cameras.
 - **Avoidance only works on these maps.** Stock OsmAnd maps have no `alpr` tag, so on
   them the levels select fine and change nothing. The app steers users to this catalogue,
-  but a region covered only by a stock map silently gets no offline avoidance there.
+  but a region covered only by a stock map silently gets no offline avoidance there, and
+  OsmAnd's "Required maps" screen, shown when a route needs a map that is missing, still
+  offers stock maps. A stock map of an area that also has a TRAMES map is a risk too: the
+  router keeps whichever copy of a road it loads first (or the one with more points), and
+  OsmAnd's fast routing — its default for car and bike — plans on a network precomputed
+  into the map at OsmAnd's default costs. TRAMES maps carry no such section (checked on
+  the served Delaware, Texas and California files), so on them the router falls back to
+  standard routing, which reads the tag; OsmAnd's own Delaware map carries two, and on
+  that network the penalty would never apply. Since v1.2.5 every profile defaults to standard routing, and the app asks
+  people to delete stock maps of areas they have a TRAMES map for. Neither failure has been
+  observed on a device; both follow from OsmAnd's code (`RoutingContext`,
+  `HHRoutePlanner`).
 - **The two `rendering_types.xml` lines are non-negotiable.** Without the
   `<routing_type>` declaration the tag survives into the map section but not the routing
   section, and the router ignores it — see `rendering_types.delta.md` for the proof.

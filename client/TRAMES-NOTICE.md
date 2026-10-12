@@ -15,9 +15,11 @@ Copyright © 2010–2026 OsmAnd BV (Amstelveen, Netherlands — KvK 62066714, BT
 | TRAMES-original artwork (`ic_trames_*`) | see below |
 | Map data | **ODbL** (OpenStreetMap contributors) |
 | ALPR camera data | **ODbL** (OpenStreetMap contributors, via Overpass) |
+| TRAMES's server and study code, outside `client/` | **MIT** (`server/LICENSE`, `research/LICENSE`) |
 
-TRAMES is distributed under **GPLv3**, and its full source is published. As required,
-modifications to OsmAnd's code are made available under the same terms.
+The TRAMES app is distributed under **GPLv3**, and its full source is published. As
+required, modifications to OsmAnd's code are made available under the same terms. The
+repository's root `LICENSE` maps which licence covers which part.
 
 ## What the CC-BY-NC-ND artwork means in practice
 
@@ -39,16 +41,19 @@ from, based on, or traced from any OsmAnd artwork. OsmAnd's own icon files remai
 tree unmodified and unused by this build.
 
 > OsmAnd's LICENSE additionally warns: *"Please be aware that some artwork uses a
-> proprietary license"* — without enumerating which. This is an unresolved risk. Before
-> any public release, audit `OsmAnd/res` for third-party-branded assets (partner logos,
-> integration marks) and remove them.
+> proprietary license"* — without enumerating which. This is an unresolved risk: public
+> releases have shipped without that audit, and `OsmAnd/res` still needs checking for
+> third-party-branded assets (partner logos, integration marks), which should be removed.
 
 ## Why the fork exists
 
 TRAMES adds routing that avoids automated licence-plate readers (ALPRs). Camera
-positions come from OpenStreetMap surveillance tagging via the Overpass API; routing
-runs on a self-hosted GraphHopper instance with camera field-of-view cones baked into
-the graph as custom areas.
+positions come from OpenStreetMap surveillance tagging, fetched with the Overpass API
+when the maps are built. Each camera with a recorded facing becomes a cone, every road a cone
+touches is tagged in TRAMES's own offline maps, and OsmAnd's offline router, given five
+avoidance levels, steers around those roads on the phone. (Until v1.2.4 the app could
+also route online, through a self-hosted GraphHopper instance with the cones baked into
+its graph; that server now serves only the research study.)
 
 Everything else — offline maps, search, turn-by-turn guidance, voice, the OSM editor —
 is OsmAnd's work, and the credit for it is theirs.
