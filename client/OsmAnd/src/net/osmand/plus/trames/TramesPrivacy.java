@@ -6,7 +6,8 @@ package net.osmand.plus.trames;
  * <p>Each flag is read by a short guard in the upstream file named beside it
  * ({@code grep -rn TramesPrivacy}), which leaves OsmAnd's own code in place and keeps the fork's
  * diff against upstream small. The settings TRAMES changes for the same reason — the install
- * ID, the welcome screen, the stock-map suggestion — are applied in {@link TramesDefaults}.
+ * ID, the welcome screen, the stock-map suggestion, Android backup — are applied in
+ * {@link TramesDefaults}.
  *
  * <p>Two kinds of path are closed, since v1.2.5:
  * <ul>
@@ -14,7 +15,9 @@ package net.osmand.plus.trames;
  *   index from download.osmand.net to look for updates; on first start it fetches its help
  *   index from osmand.net; and on phones with Google Play it checks subscriptions with
  *   osmand.net daily and then asks it for sale messages. None of them carries coordinates, but
- *   each shows OsmAnd's servers the phone's IP address and, for most, a random install ID.</li>
+ *   each shows OsmAnd's servers the phone's IP address and, for most, a random install ID.
+ *   Since v1.2.6, also the rate-us check, which after 15 days or 100 starts asks Google Play
+ *   for its review screen.</li>
  *   <li><b>Features that send coordinates once tapped.</b> "Calculate online" sends the whole
  *   trip. The online photos row sends a place and your last known location, and stays open —
  *   sending again for every later place — once opened. The search screen's nearby places card
@@ -46,6 +49,13 @@ public final class TramesPrivacy {
 	 * ({@code DiscountHelper}) they unlock. TRAMES sells nothing.
 	 */
 	public static final boolean IN_APP_PURCHASES = false;
+
+	/**
+	 * {@code RateUsHelper}: the rate-us prompt. From 15 days or 100 starts after install, on a
+	 * phone with the Play Store, it asks Google Play for its in-app review screen with no tap —
+	 * and it asks people to rate an app that is not on the Play Store. Off since v1.2.6.
+	 */
+	public static final boolean RATE_US = false;
 
 	/**
 	 * {@code RequiredMapsController}: "Calculate online" — the start (or last known location),

@@ -39,12 +39,12 @@ import org.apache.commons.logging.Log;
  * the default is {@code STANDARD_ONLY}. On TRAMES maps alone that changes no route and slows
  * nothing: fast routing found no network there and fell back to standard routing anyway.
  *
- * <p><b>OsmAnd's check-ins, off.</b> See {@link #ensurePrivacyDefaults} and
- * {@link TramesPrivacy}.
+ * <p><b>OsmAnd's check-ins, off.</b> See {@link #ensurePrivacyDefaults},
+ * {@link #ensureBackupOptOut} and {@link TramesPrivacy}.
  *
  * <p>Runs on every start and is idempotent: {@link #removeRetiredEngine} finds nothing once
  * it has run, the routing default is only an in-memory default (a choice a user saves still
- * wins), and the two one-time switches are each guarded by a global preference.
+ * wins), and the one-time switches are each guarded by a global preference.
  */
 public class TramesDefaults {
 
@@ -56,6 +56,9 @@ public class TramesDefaults {
 	/** Guards the one-time privacy switches (see ensurePrivacyDefaults). */
 	private static final String PRIVACY_DEFAULTS_PREF = "trames_privacy_defaults_applied";
 
+	/** Guards the one-time backup opt-out (see ensureBackupOptOut), added in v1.2.6. */
+	private static final String BACKUP_OPT_OUT_PREF = "trames_backup_opt_out_applied";
+
 	private TramesDefaults() {
 	}
 
@@ -64,6 +67,28 @@ public class TramesDefaults {
 		ensureOfflineDefault(app);
 		app.getSettings().ROUTE_CALCULATION_METHOD.setDefaultValue(RouteCalculationMethod.STANDARD_ONLY);
 		ensurePrivacyDefaults(app);
+		ensureBackupOptOut(app);
+	}
+
+	/**
+	 * Turn off, once, OsmAnd's Android backup ({@code AUTO_BACKUP_ENABLED}, which gates
+	 * {@code OsmandBackupAgent}). With the phone's backup on, Android otherwise copies the app's
+	 * settings — the last map position and the navigation destination among them — together with
+	 * the favourites backup and the map-marker and OSM-note databases, to the phone's backup
+	 * account and onto a new phone. Its own guard rather than {@link #ensurePrivacyDefaults}'s,
+	 * so that installs which already ran v1.2.5 get it too. Once, because it is a user setting:
+	 * turning backup back on is the user's call.
+	 */
+	private static void ensureBackupOptOut(@NonNull OsmandApplication app) {
+		OsmandSettings settings = app.getSettings();
+		CommonPreference<Boolean> applied =
+				settings.registerBooleanPreference(BACKUP_OPT_OUT_PREF, false).makeGlobal();
+		if (applied.get()) {
+			return;
+		}
+		settings.AUTO_BACKUP_ENABLED.set(false);
+		applied.set(true);
+		LOG.info("TRAMES: turned off OsmAnd's Android backup");
 	}
 
 	/**

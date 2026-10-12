@@ -54,6 +54,10 @@ public class RateUsHelper {
 	}
 
 	public static boolean shouldShowRateDialog(OsmandApplication app) {
+		// TRAMES: no rate-us prompt (see TramesPrivacy.RATE_US).
+		if (!net.osmand.plus.trames.TramesPrivacy.RATE_US) {
+			return false;
+		}
 		long firstInstalledDays = app.getAppInitializer().getFirstInstalledDays();
 		//Do not show dialog if not google play version or more than 350 days left from the first start
 		if (!Version.isGooglePlayEnabled() || firstInstalledDays > 350
