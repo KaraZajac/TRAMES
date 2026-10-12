@@ -321,8 +321,8 @@ place's coordinates and your last known location to `osmand.net`, and once opene
 open for every place after. *Nearby places*, a card in search, shared that row's saved open
 state, so opening it opened the photos everywhere. v1.2.5 removes all three.
 
-**What still can, if you open it.** Nothing goes out on its own, but OsmAnd's features still
-talk to their servers when you use them:
+**What still can, if you open it.** Apart from what the phone does below, nothing else goes
+out on its own, but OsmAnd's features still talk to their servers when you use them:
 
 - *OsmAnd's own maps* (Maps & resources, or the Required maps screen a route can open) tell
   `download.osmand.net` the region you pick, with the days since install and the number of
@@ -354,8 +354,10 @@ and cell scans to Google for any app that asks for location. When TRAMES opens, 
 every 16 hours, OsmAnd asks the GPS to refresh its assistance data, which the phone fetches
 from its chip vendor's or Google's servers. Android's own backup, when on, copies TRAMES's
 settings, including the last map position and the navigation destination, to the phone's
-backup account. And spoken directions come from the phone's text-to-speech engine, which
-may synthesize them online.
+backup account. From 15 days or 100 starts after install, on a phone with the Play Store,
+OsmAnd's rate-us check asks Google Play for its in-app review screen, without a tap. And
+spoken directions come from the phone's text-to-speech engine, which may synthesize them
+online.
 
 Earlier versions sent more. Until v1.2.4 the app had an online routing engine, which sends
 a server your start and destination, and the camera layer could ask for the cameras in a
