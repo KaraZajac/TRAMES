@@ -17,8 +17,9 @@ It does this **offline**: by default since v1.2.0, and only since v1.2.4. Routes
 computed on the device against ALPR-tagged maps, so a start, a destination and a departure
 time never leave the phone: sending a server your itinerary in order to dodge cameras trades
 one movement record for another. The hosted online server earlier versions could use was
-**retired on 2026-08-29**, and v1.2.4 removed the app's online engine. v1.2.5 also shut off
-what the OsmAnd code underneath sent on its own — see [What leaves the device](#what-leaves-the-device).
+**retired on 2026-08-29**, and v1.2.4 removed the app's online engine. v1.2.5 and v1.2.6 also
+shut off what the OsmAnd code underneath sent on its own — see
+[What leaves the device](#what-leaves-the-device).
 
 ---
 
@@ -293,8 +294,8 @@ cd research
 ## What leaves the device
 
 Your trips don't. Routes are computed on the device, and the map draws cameras from a
-downloaded pack. Since v1.2.5 the app sends nothing on a fresh install until you tap
-something; what the phone itself does when an app asks for location is at the end.
+downloaded pack. Since v1.2.6 the app sends nothing until you tap something; what the phone
+itself does when an app asks for location is at the end.
 
 TRAMES's own code makes three kinds of request, all plain downloads from
 `maps.blackflagintel.com` that follow from a tap, and none carries coordinates: the map
@@ -352,12 +353,20 @@ out on its own, but OsmAnd's features still talk to their servers when you use t
 where they are installed; with the phone's Google Location Accuracy on, Android sends Wi-Fi
 and cell scans to Google for any app that asks for location. When TRAMES opens, at most
 every 16 hours, OsmAnd asks the GPS to refresh its assistance data, which the phone fetches
-from its chip vendor's or Google's servers. Android's own backup, when on, copies TRAMES's
-settings, including the last map position and the navigation destination, to the phone's
-backup account. From 15 days or 100 starts after install, on a phone with the Play Store,
-OsmAnd's rate-us check asks Google Play for its in-app review screen, without a tap. And
-spoken directions come from the phone's text-to-speech engine, which may synthesize them
-online.
+from its chip vendor's or Google's servers. And spoken directions come from the phone's
+text-to-speech engine, which may synthesize them online.
+
+**What the phone did until v1.2.6.** With the phone's backup on, Android copied TRAMES's
+settings, including the last map position and the navigation destination, along with the
+favourites backup and the map-marker and OSM-note databases, to the phone's backup account
+and onto a new phone. v1.2.6 turns OsmAnd's backup off once (Settings → OsmAnd settings →
+Auto-backup turns it back on), so nothing more is copied — but it deletes nothing: a copy made
+before stays in the backup account until you remove it, and Android can restore it into
+TRAMES if you reinstall. To remove it, delete the phone's backup in Google Drive, which takes
+every app's with it, or run `adb shell bmgr wipe <transport> org.soulstone.trames`, taking
+the transport from `adb shell bmgr list transports`. And from 15 days or 100 starts after
+install, on a phone with the Play Store, OsmAnd's rate-us check asked Google Play for its
+in-app review screen without a tap; v1.2.6 removes it.
 
 Earlier versions sent more. Until v1.2.4 the app had an online routing engine, which sends
 a server your start and destination, and the camera layer could ask for the cameras in a

@@ -116,7 +116,9 @@ the server venv, which carries only `shapely`).
   itinerary to dodge cameras trades one movement record for another. Since v1.2.5 it
   also defaults every profile to OsmAnd's standard router rather than fast routing (see
   below), and turns off OsmAnd's install ID and welcome screen; `TramesPrivacy` closes
-  the rest of what OsmAnd sent on its own.
+  the rest of what OsmAnd sent on its own. v1.2.6 also turns off OsmAnd's Android backup,
+  which copied the settings — the last map position and destination among them — to the
+  phone's backup account.
 
 ## Hosted maps
 

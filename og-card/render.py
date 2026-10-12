@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Stamp the version line and tagline onto the site's Open Graph card.
 
-    ./og-card/render.py --version v1.2.5                       # writes docs/og.png
-    ./og-card/render.py --version v1.2.5 --tagline "Directional cones, not circles · Offline"
+    ./og-card/render.py --version v1.2.6                       # writes docs/og.png
+    ./og-card/render.py --version v1.2.6 --tagline "Directional cones, not circles · Offline"
     ./og-card/render.py --make-base                            # (re)build og-card/base.png from docs/og.png
 
 og-card/base.png is the card with its two variable strings erased — the wordmark, the
