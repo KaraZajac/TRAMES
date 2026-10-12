@@ -161,8 +161,11 @@ public class QuickSearchHistoryListFragment extends QuickSearchListFragment impl
 	public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 		QuickSearchDialogFragment dialogFragment = (QuickSearchDialogFragment) getParentFragment();
-		nearbyPlacesCard = new NearbyPlacesCard(requireMapActivity(), this, nightMode, !dialogFragment.isSearchHidden());
-		getListView().addHeaderView(nearbyPlacesCard, null, false);
+		// TRAMES: no nearby places card (see TramesPrivacy.NEARBY_PLACES).
+		if (net.osmand.plus.trames.TramesPrivacy.NEARBY_PLACES) {
+			nearbyPlacesCard = new NearbyPlacesCard(requireMapActivity(), this, nightMode, !dialogFragment.isSearchHidden());
+			getListView().addHeaderView(nearbyPlacesCard, null, false);
+		}
 		View historyHeader = inflate(R.layout.recently_visited_header, getListView(), false);
 		historyTitleContainer = historyHeader.findViewById(R.id.history_title_container);
 		historyCollapseIndicator = historyHeader.findViewById(R.id.explicit_indicator);
@@ -194,6 +197,9 @@ public class QuickSearchHistoryListFragment extends QuickSearchListFragment impl
 
 	@Override
 	public void onVisibilityChanged(boolean visible) {
+		if (nearbyPlacesCard == null) {
+			return;
+		}
 		if (visible) {
 			nearbyPlacesCard.onResume();
 		} else {

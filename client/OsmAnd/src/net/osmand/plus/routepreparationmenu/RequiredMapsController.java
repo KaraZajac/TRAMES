@@ -273,7 +273,9 @@ public class RequiredMapsController implements IDialogController, DownloadEvents
 	}
 
 	public boolean shouldShowOnlineCalculationBanner() {
-		return !onlineCalculationRequested && !isLoadingInProgress() && isInternetConnectionAvailable();
+		// TRAMES: never offer "Calculate online" (see TramesPrivacy.CALCULATE_ONLINE).
+		return net.osmand.plus.trames.TramesPrivacy.CALCULATE_ONLINE
+				&& !onlineCalculationRequested && !isLoadingInProgress() && isInternetConnectionAvailable();
 	}
 
 	public boolean shouldShowUseDownloadedMapsBanner() {

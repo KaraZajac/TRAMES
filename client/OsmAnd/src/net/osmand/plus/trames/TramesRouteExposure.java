@@ -32,7 +32,11 @@ public class TramesRouteExposure {
 	/** Half the capture wedge; the full 45° is what OSM contributors record. */
 	private static final double HALF_SPAN_DEG = TramesGeometry.CONE_HALF_SPAN_DEG;
 
-	/** Cameras with no direction tag are treated as watching everything. */
+	/**
+	 * A camera with no usable facing (2,948 of the 142,991 in the September 2026 pack) has no
+	 * cone, so the router does not avoid it. The readout counts it as watching every direction
+	 * within the capture radius, so a route that passes close by one is never reported clean.
+	 */
 	private static final boolean OMNI_IF_UNKNOWN = true;
 
 	public static class Result {

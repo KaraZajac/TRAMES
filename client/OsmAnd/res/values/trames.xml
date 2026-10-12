@@ -49,7 +49,7 @@
     <string name="routing_attr_alpr_strong_name">Strong</string>
     <string name="routing_attr_alpr_strong_description">Avoid readers wherever a reasonable alternative exists</string>
     <string name="routing_attr_alpr_max_name">Maximum</string>
-    <string name="routing_attr_alpr_max_description">Avoid every known reader it can find a way around</string>
+    <string name="routing_attr_alpr_max_description">Avoid every watched road it can find a way around</string>
 
     <!-- ── offline map catalogue (TramesMapsDialog) ─────────────────────────── -->
     <string name="trames_maps_title">TRAMES offline maps</string>
@@ -57,7 +57,14 @@
     <string name="trames_maps_loading">Loading available maps…</string>
     <string name="trames_maps_unavailable">Could not reach the TRAMES map server. Check your connection and try again.</string>
     <string name="trames_maps_installed">installed</string>
-    <string name="trames_maps_download_prompt">Download the %1$s map (%2$s)? It replaces the standard map for that area and lets offline routing avoid known cameras there.</string>
+    <string name="trames_maps_download_prompt">Download the %1$s map (%2$s)? It carries the known licence-plate readers, so offline routing avoids them there. Delete any standard OsmAnd map of this area: its roads carry no cameras, and the router may use them.</string>
+    <!--
+      First start with no TRAMES map. Stands in for OsmAnd's welcome screen, which TRAMES
+      turns off: that screen looked the user up by IP at osmand.net and offered a stock map.
+      "Later" is OsmAnd's own string (R.string.later).
+    -->
+    <string name="trames_maps_first_run_prompt">TRAMES routes offline, so it needs a TRAMES map of your area: these carry the known licence-plate readers. OsmAnd\'s standard maps don\'t, and on them routing avoids nothing.</string>
+    <string name="trames_maps_first_run_open">Choose a state</string>
     <string name="trames_maps_redownload_prompt">%1$s is already installed. Download it again (%2$s) to pick up newly added cameras?</string>
     <string name="trames_maps_camera_pack">Camera positions — about 1.4 MB (needed to show cameras offline)</string>
     <string name="trames_maps_camera_pack_downloading">Downloading camera positions…</string>

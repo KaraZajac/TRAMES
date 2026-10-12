@@ -97,6 +97,10 @@ public class OsmandInAppPurchaseActivity extends AppCompatActivity implements In
 	}
 
 	private void initInAppPurchaseHelper() {
+		// TRAMES: no purchase or promo checks on resume (see TramesPrivacy.IN_APP_PURCHASES).
+		if (!net.osmand.plus.trames.TramesPrivacy.IN_APP_PURCHASES) {
+			return;
+		}
 		stopInAppPurchaseHelper();
 		if (purchaseHelper == null) {
 			InAppPurchaseHelper purchaseHelper = app.getInAppPurchaseHelper();

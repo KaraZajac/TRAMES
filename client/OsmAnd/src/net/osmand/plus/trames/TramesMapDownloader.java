@@ -134,6 +134,16 @@ public class TramesMapDownloader {
 		return app.getAppPath(map.file);
 	}
 
+	/**
+	 * True when any TRAMES map is on the device. Read from the maps directory rather than the
+	 * manifest, so it needs no network; every hosted map is named {@code <state>-alpr.obf}.
+	 * A stock OsmAnd map does not count — the router avoids nothing on one.
+	 */
+	public boolean isAnyInstalled() {
+		File[] maps = app.getAppPath(null).listFiles(f -> f.getName().endsWith("-alpr.obf") && f.length() > 0);
+		return maps != null && maps.length > 0;
+	}
+
 	/** True once the map is present on device. */
 	public boolean isInstalled(@NonNull TramesMap map) {
 		File f = localFile(map);

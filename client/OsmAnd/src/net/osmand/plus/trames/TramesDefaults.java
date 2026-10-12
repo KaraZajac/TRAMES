@@ -9,7 +9,9 @@ import net.osmand.plus.onlinerouting.engine.OnlineRoutingEngine;
 import net.osmand.plus.onlinerouting.engine.TramesEngine;
 import net.osmand.plus.routing.RouteService;
 import net.osmand.plus.settings.backend.ApplicationMode;
+import net.osmand.plus.settings.backend.OsmandSettings;
 import net.osmand.plus.settings.backend.preferences.CommonPreference;
+import net.osmand.plus.settings.enums.RouteCalculationMethod;
 
 import org.apache.commons.logging.Log;
 
@@ -26,11 +28,23 @@ import org.apache.commons.logging.Log;
  *
  * <p><b>Trade-off, stated plainly:</b> offline routing needs a downloaded map. With none
  * present the router cannot produce a route at all — so a fresh install must visit
- * "TRAMES offline maps" in the drawer first. That is a real first-run cost, accepted
- * deliberately: the alternative routes everyone through a server.
+ * "TRAMES offline maps" first ({@link TramesMapsDialog#promptIfNoMaps} offers it). That is a
+ * real first-run cost, accepted deliberately: the alternative routes everyone through a server.
+ *
+ * <p><b>Standard routing, not fast routing.</b> OsmAnd's fast routing ({@code AUTO}, its
+ * default for car and bike) runs on a road network precomputed into the map, at OsmAnd's
+ * default costs. TRAMES maps carry none, so on them the router falls back to standard routing,
+ * which reads the {@code alpr} tag. A stock OsmAnd map of the same area does carry one, and
+ * fast routing could then plan the route on it, where the camera penalty is never applied. So
+ * the default is {@code STANDARD_ONLY}. On TRAMES maps alone that changes no route and slows
+ * nothing: fast routing found no network there and fell back to standard routing anyway.
+ *
+ * <p><b>OsmAnd's check-ins, off.</b> See {@link #ensurePrivacyDefaults} and
+ * {@link TramesPrivacy}.
  *
  * <p>Runs on every start and is idempotent: {@link #removeRetiredEngine} finds nothing once
- * it has run, and {@link #ensureOfflineDefault} is guarded by its own global preference.
+ * it has run, the routing default is only an in-memory default (a choice a user saves still
+ * wins), and the two one-time switches are each guarded by a global preference.
  */
 public class TramesDefaults {
 
@@ -39,12 +53,50 @@ public class TramesDefaults {
 	/** Guards the one-time explicit switch to offline routing (see ensureOfflineDefault). */
 	private static final String OFFLINE_DEFAULT_PREF = "trames_offline_default_applied";
 
+	/** Guards the one-time privacy switches (see ensurePrivacyDefaults). */
+	private static final String PRIVACY_DEFAULTS_PREF = "trames_privacy_defaults_applied";
+
 	private TramesDefaults() {
 	}
 
 	public static void ensureSeeded(@NonNull OsmandApplication app) {
 		removeRetiredEngine(app);
 		ensureOfflineDefault(app);
+		app.getSettings().ROUTE_CALCULATION_METHOD.setDefaultValue(RouteCalculationMethod.STANDARD_ONLY);
+		ensurePrivacyDefaults(app);
+	}
+
+	/**
+	 * Turn off, once, the three OsmAnd settings behind its untapped check-ins with OsmAnd's
+	 * servers (the code paths behind the rest are closed in {@link TramesPrivacy}):
+	 * <ul>
+	 *   <li>{@code SEND_UNIQUE_USER_IDENTIFIER}: a random install ID, renewed every three
+	 *   months, that OsmAnd adds to its requests ({@code aid}).</li>
+	 *   <li>{@code SHOW_OSMAND_WELCOME_SCREEN}: the first-start wizard, shown until any map is
+	 *   installed. With a connection it asks osmand.net/api/geo-ip where the phone is, fetches
+	 *   the stock map index, and offers the stock map of that region — which carries no
+	 *   cameras, so routing on it avoids nothing. {@link TramesMapsDialog#promptIfNoMaps}
+	 *   takes its place.</li>
+	 *   <li>{@code SHOW_SUGGEST_MAP_DIALOG}: the banner offering a stock map for wherever the
+	 *   map shows no installed one, at zooms 9 to 11. To fill it, OsmAnd fetches its map index
+	 *   from download.osmand.net with no tap — and before a TRAMES map is installed, that is
+	 *   everywhere.</li>
+	 * </ul>
+	 * Once rather than on every start: the install-ID and suggestion switches are user
+	 * settings, and turning them back on is the user's call.
+	 */
+	private static void ensurePrivacyDefaults(@NonNull OsmandApplication app) {
+		OsmandSettings settings = app.getSettings();
+		CommonPreference<Boolean> applied =
+				settings.registerBooleanPreference(PRIVACY_DEFAULTS_PREF, false).makeGlobal();
+		if (applied.get()) {
+			return;
+		}
+		settings.SEND_UNIQUE_USER_IDENTIFIER.set(false);
+		settings.SHOW_OSMAND_WELCOME_SCREEN.set(false);
+		settings.SHOW_SUGGEST_MAP_DIALOG.set(false);
+		applied.set(true);
+		LOG.info("TRAMES: turned off OsmAnd's install ID, welcome screen and map suggestions");
 	}
 
 	/**

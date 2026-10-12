@@ -336,6 +336,10 @@ public class MenuBuilder {
 	}
 
 	public void buildPhotosRow(@NonNull ViewGroup view, @Nullable Object object) {
+		// TRAMES: no online photos (see TramesPrivacy.ONLINE_PHOTOS).
+		if (!net.osmand.plus.trames.TramesPrivacy.ONLINE_PHOTOS) {
+			return;
+		}
 		if (customization.isFeatureEnabled(CONTEXT_MENU_ONLINE_PHOTOS_ID) && showOnlinePhotos) {
 			Map<String, String> imageParams = new LinkedHashMap<>(getAdditionalImageParams());
 			GalleryKey.Location galleryKey = new GalleryKey.Location(latLon, imageParams);

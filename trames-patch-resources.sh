@@ -71,7 +71,7 @@ PARAMS = (
     'description="Avoid readers wherever a reasonable alternative exists" '
     'type="boolean" default="true"/>\n'
     '\t\t<parameter group="alpr_avoidance" id="alpr_max" name="Maximum" '
-    'description="Avoid every known reader it can find a way around" type="boolean"/>\n'
+    'description="Avoid every watched road it can find a way around" type="boolean"/>\n'
 )
 
 # Placed FIRST inside <way attribute="priority">, and that position is load-bearing.

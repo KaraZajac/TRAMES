@@ -11,6 +11,7 @@ import net.osmand.data.QuadRect;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -152,21 +153,33 @@ public class TramesCameraSource {
 		return pack != null && pack.isPresent() ? pack.forBox(south, west, north, east) : null;
 	}
 
+	/** The 16 compass points, in 22.5-degree steps from north — as the cone builder reads them. */
+	private static final String[] COMPASS_POINTS = {"N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
+			"S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"};
+
 	/**
 	 * Parse an OSM direction value into zero or more bearings.
 	 *
-	 * <p>Handles the four shapes that actually occur:
+	 * <p>Handles the shapes that actually occur:
 	 * <pre>
 	 *   "137"                single bearing
 	 *   "144-189"            arc range -> its midpoint
 	 *   "338-23"             arc wrapping past 0 degrees
 	 *   "320;190"            multi-head unit -> two bearings
 	 *   "0;72;144;216;288"   five-head 360 unit -> five bearings
+	 *   "NE", "wsw"          compass point -> its bearing
 	 * </pre>
 	 *
 	 * <p>The semicolon case matters for more than tidiness: multi-head units are exactly
 	 * the ones covering both carriageways, so dropping them would draw a single arrow on
 	 * a camera that in fact watches every direction.
+	 *
+	 * <p>Which values yield a bearing must match the cone builder that tags the maps
+	 * ({@code server/alpr/build_cones.py}), or the map and the route readout disagree with
+	 * the router about which cameras face a way. Until v1.2.5 compass points were skipped
+	 * here though the builder reads them: 401 of the 142,991 cameras of the September 2026
+	 * pack were avoided by the router yet drawn without a wedge, and counted by the readout
+	 * as watching every direction. The two now agree on every camera in that pack.
 	 */
 	@NonNull
 	static float[] parseDirections(@Nullable String raw) {
@@ -191,8 +204,12 @@ public class TramesCameraSource {
 					out.add((Float.parseFloat(t) % 360f + 360f) % 360f);
 				}
 			} catch (NumberFormatException e) {
-				// Cardinal names and junk (serial numbers do appear in this field) are
-				// simply skipped — the camera is still drawn, just without an arrow.
+				float compass = compassBearing(t);
+				if (compass >= 0) {
+					out.add(compass);
+				}
+				// Anything else is junk (serial numbers do appear in this field) and is
+				// skipped — the camera is still drawn, just without a wedge.
 			}
 		}
 		float[] arr = new float[out.size()];
@@ -200,5 +217,16 @@ public class TramesCameraSource {
 			arr[i] = out.get(i);
 		}
 		return arr;
+	}
+
+	/** "NE" -> 45, "wsw" -> 247.5; -1 for anything that is not one of the 16 compass points. */
+	static float compassBearing(@NonNull String token) {
+		String key = token.toUpperCase(Locale.ROOT).replace(" ", "");
+		for (int i = 0; i < COMPASS_POINTS.length; i++) {
+			if (COMPASS_POINTS[i].equals(key)) {
+				return i * 22.5f;
+			}
+		}
+		return -1;
 	}
 }

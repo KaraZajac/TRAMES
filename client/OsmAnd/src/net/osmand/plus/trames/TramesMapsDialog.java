@@ -44,7 +44,33 @@ import java.util.Locale;
  */
 public class TramesMapsDialog {
 
+	/** Once per run: someone who declines is not asked again every time they return to the map. */
+	private static boolean promptedThisRun;
+
 	private TramesMapsDialog() {
+	}
+
+	/**
+	 * Offer the catalogue when no TRAMES map is installed. This stands in for OsmAnd's welcome
+	 * screen, which TRAMES turns off ({@link TramesDefaults}): that screen looked the user up by
+	 * IP at osmand.net and offered a stock map, on which routing avoids nothing. This one asks
+	 * first and sends nothing until tapped — the manifest request is the catalogue's own.
+	 */
+	public static void promptIfNoMaps(@NonNull Activity activity) {
+		if (promptedThisRun || activity.isFinishing()) {
+			return;
+		}
+		OsmandApplication app = (OsmandApplication) activity.getApplication();
+		if (new TramesMapDownloader(app).isAnyInstalled()) {
+			return;
+		}
+		promptedThisRun = true;
+		new AlertDialog.Builder(activity)
+				.setTitle(R.string.trames_maps_title)
+				.setMessage(R.string.trames_maps_first_run_prompt)
+				.setPositiveButton(R.string.trames_maps_first_run_open, (d, w) -> show(activity))
+				.setNegativeButton(R.string.later, null)
+				.show();
 	}
 
 	/** Open the catalogue. Fetches the manifest first, so it shows a spinner immediately. */

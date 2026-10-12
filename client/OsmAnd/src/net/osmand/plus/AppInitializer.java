@@ -225,6 +225,10 @@ public class AppInitializer implements IProgress {
 	}
 
 	private void checkMapUpdates() {
+		// TRAMES: no background map-index fetch (see TramesPrivacy.AUTO_MAP_UPDATE_CHECK).
+		if (!net.osmand.plus.trames.TramesPrivacy.AUTO_MAP_UPDATE_CHECK) {
+			return;
+		}
 		long diff = System.currentTimeMillis() - app.getSettings().LAST_CHECKED_UPDATES.get();
 		if (diff >= 2 * 24 * 60 * 60L && new Random().nextInt(5) == 0 &&
 				app.getSettings().isInternetConnectionAvailable()) {
@@ -558,7 +562,10 @@ public class AppInitializer implements IProgress {
 			notifyEvent(SEARCH_UI_CORE_INITIALIZED);
 			checkLiveUpdatesAlerts();
 			connectToBRouter();
-			app.helpArticlesHelper.loadArticles();
+			// TRAMES: no help-index preload at start (see TramesPrivacy.HELP_INDEX_AT_START).
+			if (net.osmand.plus.trames.TramesPrivacy.HELP_INDEX_AT_START) {
+				app.helpArticlesHelper.loadArticles();
+			}
 			notifyEvent(HELP_ARTICLES_INITIALIZED);
 		} catch (RuntimeException e) {
 			LOG.error(e);

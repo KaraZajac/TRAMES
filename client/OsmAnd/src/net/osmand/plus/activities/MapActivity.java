@@ -781,6 +781,11 @@ public class MapActivity extends OsmandActionBarActivity implements DownloadEven
 			SecondSplashScreenFragment.SHOW = false;
 		} else if (SendAnalyticsBottomSheetDialogFragment.shouldShowDialog(app)) {
 			SendAnalyticsBottomSheetDialogFragment.showInstance(app, fragmentManager, null);
+		} else {
+			// TRAMES: offer TRAMES offline maps while none is installed, in place of OsmAnd's
+			// welcome screen (off, see TramesDefaults). It asks first and fetches nothing
+			// until tapped.
+			net.osmand.plus.trames.TramesMapsDialog.promptIfNoMaps(this);
 		}
 		if (fragmentsHelper.isFirstScreenShowing() && (!settings.SHOW_OSMAND_WELCOME_SCREEN.get() || !showOsmAndWelcomeScreen)) {
 			fragmentsHelper.disableFirstUsageFragment();
