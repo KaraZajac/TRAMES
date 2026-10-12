@@ -361,8 +361,9 @@ settings, including the last map position and the navigation destination, along 
 favourites backup and the map-marker and OSM-note databases, to the phone's backup account
 and onto a new phone. v1.2.6 turns OsmAnd's backup off once (Settings → OsmAnd settings →
 Auto-backup turns it back on), so nothing more is copied — but it deletes nothing: a copy made
-before stays in the backup account until you remove it, and Android can restore it into
-TRAMES if you reinstall. To remove it, delete the phone's backup in Google Drive, which takes
+before stays in the backup account until you remove it. With backup off the app also takes
+nothing back, so reinstalling v1.2.6 or later restores none of it; installing an earlier
+version would. To remove it, delete the phone's backup in Google Drive, which takes
 every app's with it, or run `adb shell bmgr wipe <transport> org.soulstone.trames`, taking
 the transport from `adb shell bmgr list transports`. And from 15 days or 100 starts after
 install, on a phone with the Play Store, OsmAnd's rate-us check asked Google Play for its
