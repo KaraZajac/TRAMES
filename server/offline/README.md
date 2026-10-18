@@ -9,8 +9,8 @@ that carry the tag, and penalising it in `routing.xml`.
 
 The design keeps the soft, continuous berth — OFF / LIGHT / MODERATE / STRONG / MAXIMUM —
 rather than the hard road-blocking of OsmAnd's impassable-roads feature, and it reuses
-the exact same geometry and multipliers as the online engine, so a level means the same
-thing whichever engine routes.
+the online engine's cone geometry and multipliers. A level is not quite the same thing in
+both, though: see the note under the table below.
 
 ## Why this works — the one thing that had to be true
 
@@ -36,8 +36,11 @@ wall. That is precisely the offline twin of the server's per-request
 | MAXIMUM | 0.01 | 0.01 |
 
 Same numbers as the online engine used and the study's routing server still uses, same
-60 m / 45° cone geometry (`TramesGeometry` / `build_cones.py`). Online and offline agree by
-construction rather than by coincidence.
+60 m / 45° cone geometry (`TramesGeometry` / `build_cones.py`). What a number is applied to
+differs: GraphHopper applies it to each edge, junction to junction, that a cone touches;
+`tag_ways.py` tags the whole OSM way, which can run past several junctions, so the penalty
+covers more road than the cone does; and OsmAnd's router, speeds and turn costs are its own.
+The app's detours are therefore not the study's.
 
 ## The pipeline
 
