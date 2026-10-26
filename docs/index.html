@@ -6,14 +6,14 @@
 <title>TRAMES — navigation that routes around licence-plate readers</title>
 <meta name="description" content="A native Android app that routes you around automated licence-plate readers — offline, on your phone. ALPR cameras are modelled as directional wedges, not circles, so you only detour around roads a camera can actually see. Offline maps for all 50 states + DC. On by default. Built on OsmAnd and OpenStreetMap.">
 <meta property="og:title" content="TRAMES — route around licence-plate readers">
-<meta property="og:description" content="Android navigation that avoids the fields of view of mapped ALPR cameras — the 139,391 of the 142,257 in the 50 states and DC whose facing is recorded — routed offline, so your start and destination stay on the phone. Directional cones, not circles. Driving, cycling and walking. Offline maps for all 50 states + DC.">
+<meta property="og:description" content="Android navigation that avoids the fields of view of mapped ALPR cameras — the 141,775 of the 143,721 in the 50 states and DC whose facing is recorded — routed offline, so your start and destination stay on the phone. Directional cones, not circles. Driving, cycling and walking. Offline maps for all 50 states + DC.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://trames.karazajac.io/">
-<meta property="og:image" content="https://trames.karazajac.io/og.png?v=1260">
+<meta property="og:image" content="https://trames.karazajac.io/og.png?v=1270">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://trames.karazajac.io/og.png?v=1260">
+<meta name="twitter:image" content="https://trames.karazajac.io/og.png?v=1270">
 <meta name="theme-color" content="#eff1f5">
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 
@@ -54,7 +54,7 @@
   <div class="container hero-inner">
     <div class="hero-eyebrow">
       <span class="dot dot-pulse"></span>
-      v1.2.6 · Android · offline
+      v1.2.7 · Android · offline
     </div>
     <h1 class="hero-title">
       <span class="display-wordmark">TRAMES</span>
@@ -74,9 +74,9 @@
 
     <div class="stats-row" id="stats-row">
       <div class="stat-chip"><span class="num" data-target="5">0</span><span>avoidance levels</span></div>
-      <div class="stat-chip stat-warm"><span class="num">142,257</span><span>cameras mapped</span></div>
+      <div class="stat-chip stat-warm"><span class="num">143,721</span><span>cameras mapped</span></div>
       <div class="stat-chip stat-vfy"><span class="num" data-target="51">0</span><span>states, offline</span></div>
-      <div class="stat-chip"><span class="num">v1.2.6</span><span>latest APK</span></div>
+      <div class="stat-chip"><span class="num">v1.2.7</span><span>latest APK</span></div>
     </div>
 
     <div class="cta-row">
@@ -138,7 +138,7 @@
         A reader pointed at northbound traffic says nothing about the southbound
         carriageway. Treat it as a circle and the router detours around roads
         nobody is being read on. TRAMES models each mapped camera whose facing is
-        recorded — 98% of them — as a <strong>cone pointing where it actually
+        recorded — 98.6% of them — as a <strong>cone pointing where it actually
         looks</strong>, and the router steers around the roads those cones touch.
       </p>
     </div>
@@ -156,8 +156,8 @@
             <p>Each camera becomes a wedge aimed the way it faces, and only the
             roads a wedge touches are marked. Where a road's two directions are mapped
             as separate carriageways, a wedge on one can leave the other clean; a road
-            mapped as a single line is marked in both directions, along the whole
-            stretch OpenStreetMap draws as one way.</p>
+            mapped as a single line is marked in both directions, from the junction
+            before the wedge to the junction after it.</p>
           </div>
         </div>
         <div class="annotation">
@@ -165,8 +165,9 @@
           <div>
             <strong>Baked into the map</strong>
             <p>The offline maps carry the cameras: when a state's map is built,
-            every road a cone touches is tagged <code>alpr=yes</code>, so the router
-            on your phone knows which roads are watched without asking anyone.</p>
+            each stretch of road a cone touches, junction to junction, is tagged
+            <code>alpr=yes</code>, so the router on your phone knows which roads are
+            watched without asking anyone.</p>
           </div>
         </div>
         <div class="annotation">
@@ -184,7 +185,7 @@
             <strong>See what you're avoiding</strong>
             <p>The map draws the cameras from a pack built from the same snapshot
             as the maps, and refreshed with every map download, so the picture
-            matches the route. The 2% with no recorded facing get no cone: they
+            matches the route. The 1.4% with no recorded facing get no cone: they
             show as plain pins, and the router does not avoid them.</p>
           </div>
         </div>
@@ -210,7 +211,7 @@
         <h3>On by default, and offline</h3>
         <p>
           First launch sets the driving profile to the <strong>offline</strong>
-          engine at <strong>Strong</strong> avoidance. Download your state, enter
+          engine at <strong>Maximum</strong> avoidance. Download your state, enter
           where you're going, and the route already bends around camera fields of
           view — computed on the phone, so the trip is sent nowhere. Use the TRAMES
           map, not OsmAnd's own: standard maps carry no cameras, and routing on them
@@ -282,13 +283,13 @@
         <div class="tier-name">MODERATE</div>
         <p>A balanced trade between detour and exposure.</p>
       </div>
-      <div class="tier tier-strong is-default">
-        <div class="tier-name">STRONG<span class="tier-badge">default</span></div>
-        <p>Avoid readers wherever a reasonable alternative exists. Where TRAMES ships.</p>
+      <div class="tier tier-strong">
+        <div class="tier-name">STRONG</div>
+        <p>Avoid readers wherever a reasonable alternative exists.</p>
       </div>
-      <div class="tier tier-max">
-        <div class="tier-name">MAXIMUM</div>
-        <p>Avoid every watched road it can find a way around: each counts as a hundred times slower.</p>
+      <div class="tier tier-max is-default">
+        <div class="tier-name">MAXIMUM<span class="tier-badge">default</span></div>
+        <p>Avoid every watched road it can find a way around: each counts as a hundred times slower. Where TRAMES ships, and the study's setting.</p>
       </div>
     </div>
   </div>
@@ -301,20 +302,20 @@
       <span class="section-tag">the measurement study</span>
       <h2>Does avoidance actually cost anything? We measured it.</h2>
       <p class="lead">
-        We routed <strong>56,131 real home–work commutes</strong> — drawn from
+        We routed <strong>56,133 real home–work commutes</strong> — drawn from
         Census LEHD LODES in proportion to how many workers actually make each
         trip, in all 50 states and DC — twice each: once normally, once avoiding
-        the fields of view of <strong>186,316 ALPR installations</strong>: the 142,257
-        mapped in OpenStreetMap, and 44,059 more that only Flock's own device registry
-        records.
+        the fields of view of <strong>186,247 ALPR installations</strong>: the 143,721
+        mapped in OpenStreetMap, less 168 since taken down, and 42,694 more that only
+        Flock's own device registry records.
       </p>
     </div>
 
     <div class="readout">
-      <div class="cell"><span class="big">56,131</span><span class="lbl">trips to work, routed with and without avoidance</span></div>
+      <div class="cell"><span class="big">56,133</span><span class="lbl">trips to work, routed with and without avoidance</span></div>
       <div class="cell warm"><span class="big">78.6%</span><span class="lbl">pass a reader on the way to work</span></div>
-      <div class="cell good"><span class="big">80.8%</span><span class="lbl">can route to zero exposure</span></div>
-      <div class="cell"><span class="big">+2.3<span style="font-size:.6em"> min</span></span><span class="lbl">median cost to do it (9.71%)</span></div>
+      <div class="cell good"><span class="big">80.6%</span><span class="lbl">can route to zero exposure</span></div>
+      <div class="cell"><span class="big">+2.3<span style="font-size:.6em"> min</span></span><span class="lbl">median cost to do it (9.65%)</span></div>
     </div>
 
     <div class="callout" style="margin-top:2.6rem">
@@ -323,9 +324,9 @@
         <h3>The vendor's own records make refusal two-fifths dearer</h3>
         <p>
           Volunteers have mapped most of Flock's cameras, but not all: its own
-          registry records 44,059 more in service. Counting them, the median detour
+          registry records 42,694 more in service. Counting them, the median detour
           grows from 1.6 to 2.3 minutes, and in Georgia, the most densely watched
-          state, only <strong>37.5%</strong> of commuters can get to work past
+          state, only <strong>37.0%</strong> of commuters can get to work past
           none, and avoiding costs a median of 13.6 extra minutes. The app itself
           avoids the volunteer map only. Routed around that map alone, about a
           third of the commuters whose route clears every mapped camera still pass
@@ -337,11 +338,11 @@
     <div class="callout callout-warm" style="margin-top:1.4rem">
       <div class="callout-mark">🕰</div>
       <div>
-        <h3>The map filled in 128-fold since 2024 — and exposure with it</h3>
+        <h3>The map filled in 129-fold since 2024 — and exposure with it</h3>
         <p>
           Rebuilt from OpenStreetMap's edit history, the mapped network grew from
-          <strong>1,112</strong> readers in January 2024 to <strong>142,257</strong>
-          in September 2026, and the share of commuters passing one from 2% to 75%.
+          <strong>1,112</strong> readers in January 2024 to <strong>143,721</strong>
+          in October 2026, and the share of commuters passing one from 2% to 76%.
           Avoiding them got dearer as it did, partly because the detours are being mapped
           too. The full method and its limitations are in the paper.
           <a href="https://github.com/KaraZajac/TRAMES/blob/main/research/paper/trames.pdf" style="display:inline-block;margin-top:.7rem">Read the paper (PDF) →</a>
@@ -371,7 +372,7 @@
       <figure class="shot">
         <img class="phone" src="img/trames-cameras.png" width="640" height="1495"
           alt="Map of Reston, Virginia with red ALPR camera markers, each drawn with a translucent wedge indicating the direction it faces." loading="lazy">
-        <figcaption><strong>Directional camera layer</strong>Mapped readers drawn as wedges pointing where they look — the same cones the router avoids. The 2% with no recorded facing show as plain pins; the router has no cone for them.</figcaption>
+        <figcaption><strong>Directional camera layer</strong>Mapped readers drawn as wedges pointing where they look — the same cones the router avoids. The 1.4% with no recorded facing show as plain pins; the router has no cone for them.</figcaption>
       </figure>
       <figure class="shot">
         <img class="phone" src="img/trames-nav.png" width="640" height="1495"
@@ -495,7 +496,7 @@
           <ul>
             <li>Grab the latest debug-signed APK from
               <a href="https://github.com/KaraZajac/TRAMES/releases/latest">Releases</a>
-              (currently <strong>v1.2.6</strong>, arm64-v8a, Android 7.0+).</li>
+              (currently <strong>v1.2.7</strong>, arm64-v8a, Android 7.0+).</li>
           </ul>
         </div>
         <div class="tl-col tl-active">
@@ -574,7 +575,7 @@
       laws — it is a navigator, and you are driving.
     </p>
     <p class="footer-meta">
-      v1.2.6 · <a href="https://github.com/KaraZajac/TRAMES">github.com/KaraZajac/TRAMES</a>
+      v1.2.7 · <a href="https://github.com/KaraZajac/TRAMES">github.com/KaraZajac/TRAMES</a>
       · camera data © OpenStreetMap contributors (ODbL)
     </p>
     <div class="onion-line">

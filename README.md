@@ -34,12 +34,13 @@ shut off what the OsmAnd code underneath sent on its own — see
 
 ## The finding
 
-We routed **56,131 real home–work commutes** — drawn from Census LEHD LODES with
+We routed **56,133 real home–work commutes** — drawn from Census LEHD LODES with
 probability proportional to the number of workers actually making each trip, in all 50
 states and the District of Columbia — twice each: once normally, once avoiding the fields
-of view of every licence-plate reader we can place: the **142,257 mapped in OpenStreetMap**
-in the 50 states and DC (snapshot of 2026-09-22), and **44,059 more in service that only
-Flock Safety's own device registry records** (as of December 2025) — **186,316 in all**.
+of view of every licence-plate reader we can place: the **143,721 mapped in OpenStreetMap**
+in the 50 states and DC (snapshot of 2026-10-21), less 168 since taken down, and **42,694
+more in service that only Flock Safety's own device registry records** (as of December 2025,
+less those confirmed removed since) — **186,247 in all**.
 National figures weight each state by its commuters. Then we did it again on OpenStreetMap's
 camera map as it stood on the first of every month since January 2024, rebuilt exactly from
 its edit history; the registry carries no dates, so the trend is the map's alone.
@@ -47,43 +48,46 @@ its edit history; the registry carries no dates, so the trend is the map's alone
 - **78.6%** of American commutes pass at least one licence-plate reader on the way to work
   (only that leg is routed; cameras face one way, so the trip home passes others); the
   median commute passes three.
-- **80.8%** can be routed to *zero* exposure: the fifth whose route passes none, and three
+- **80.6%** can be routed to *zero* exposure: the fifth whose route passes none, and three
   in four of the rest. The avoiding route adds a median of **2.29 minutes** (an overhead of
-  9.71%), or 3.92 minutes for commuters whose usual route passes a camera.
+  9.65%), or 3.91 minutes for commuters whose usual route passes a camera.
 - **The vendor's own records make refusal two-fifths dearer than the volunteer map shows.**
   On the same commutes, the readers only the registry records add a fifth more camera
-  encounters, cut the share who can reach zero by 3.5 points and add 0.67 minutes to the
+  encounters, cut the share who can reach zero by 3.5 points and add 0.65 minutes to the
   median detour (paired intervals in the paper). Scored by the travel direction each reader's
   label names instead of as a 60 m disc, the share passing a reader moves by under a point.
-- **Where refusal stops being cheap: Georgia.** 93.9% of its commuters pass a reader, only
-  37.5% can reach work past none, and avoiding costs a median 13.6 minutes — against 54.3%
+- **Where refusal stops being cheap: Georgia.** 94.3% of its commuters pass a reader, only
+  37.0% can reach work past none, and avoiding costs a median 13.6 minutes — against 53.2%
   and 7.8 minutes on the volunteer map alone. Whether evasion is cheaper per camera where
-  cameras are denser, as the map alone weakly suggested, the merged map does not bear out.
+  cameras are denser, the data do not settle, on either map.
 - **What the app avoids.** The app routes around the volunteer map only; the readers that
   only Flock's registry records are not in it. A route planned around the map alone — by the
-  study's router, at its strongest setting — is clean of every mapped camera for 84.2% of
-  commuters, but for 35.0% of them it still passes a registry reader (44.1% of those whose
-  usual route passes a mapped camera); 54.7% of commuters get a route clean of both.
+  study's router, at its strongest setting — is clean of every mapped camera for 84.1% of
+  commuters, but for 34.1% of them it still passes a registry reader (42.8% of those whose
+  usual route passes a mapped camera); 55.5% of commuters get a route clean of both.
 - **The map filled in, and exposure with it.** From 1,112 mapped readers in January 2024 to
-  142,257 in September 2026: about fifty a month until DeFlock was founded in October 2024,
-  then 1,724 → 4,894 in a single month, then a median 14.1% a month from January 2025 — easing
-  to 9.2% a month in 2026, though the number added each month doubled. The share of
-  commuters passing one went from 2.2% to 75.3%, crossing a tenth in January 2025, a quarter
-  in June, a half in December; against the number of mapped cameras the elasticity is 0.89
-  across 35 maps, and the curve is still rising by about two points a month.
+  143,721 in October 2026: about fifty a month until DeFlock was founded in October 2024,
+  then 1,724 → 4,894 in a single month, then a median 13.8% a month from January 2025 — easing
+  to 9.2% a month over the first eight months of 2026, though the number added each month
+  doubled — until September, when only 5,121 were added (3.7%), and 1,416 in the three weeks
+  to 21 October. The share of commuters passing one went from 2.2% to 75.6%, crossing a tenth
+  in January 2025, a quarter in June, a half in December; against the number of mapped
+  cameras the elasticity is 0.90 across 37 maps. It rose about two points a month from March
+  to September 2026, then slowed with the map: 0.8 points in September, 0.2 in the three
+  weeks to 21 October.
 - **Refusing them grew dearer, per camera as well as in total.** On the first map of 2024 95%
   of exposed commuters could reach zero, for a median 0.8 minutes; on today's map 79% can, for
-  3.1 minutes (75%, for 3.9 minutes, once the registry is added), and the price per camera
-  evaded rose from 0.42 to 0.76 minutes. Routed every
+  3.2 minutes (75%, for 3.9 minutes, once the registry is added), and the price per camera
+  evaded rose from 0.41 to 0.76 minutes. Routed every
   quarter, the share able to reach zero held near 96% through 2024 and near 92% through 2025,
   then fell on every map since October 2025; the extra time and the price per camera rose on
   every routed map since July 2024. Followed from July
-  2025 to September 2026, the same 12,647 exposed commutes went from passing 3.2 cameras to
+  2025 to October 2026, the same 12,642 exposed commutes went from passing 3.2 cameras to
   9.9, and the price per camera on those very trips rose a quarter — partly because the
   detours were being mapped too.
 - **Every date is a mapping date, not an installation date.** OpenStreetMap records when a
   camera entered the map (to the second, from the edit history); an installation date exists
-  for 47 of the 142,257. Absolute figures are lower bounds that keep rising as the map fills in.
+  for 49 of the 143,721. Absolute figures are lower bounds that keep rising as the map fills in.
 
 Paper: [`research/paper/trames.pdf`](research/paper/trames.pdf) — build with
 `tectonic -X compile research/paper/trames.tex`.
@@ -93,34 +97,38 @@ Paper: [`research/paper/trames.pdf`](research/paper/trames.pdf) — build with
 Every camera source the study uses, resolved to one device list:
 
 ```bash
-research/scripts/build_supermap.py -o research/out/supermap/alpr_supermap.json \
-    --report research/out/analysis_supermap.txt --gzip        # ~4 min cold, ~80 s cached; 523 MB (54 MB gzipped)
+research/scripts/build_supermap.py --removals research/data/registry_removals_2026-10.json \
+    -o research/out/supermap/alpr_supermap.json \
+    --report research/out/analysis_supermap.txt --gzip        # ~4 min cold, ~100 s cached; 527 MB (54 MB gzipped)
 ```
 
-**389,308 devices in the United States** — 88,754 carried by both OpenStreetMap and Flock's own
-device registry, 246,182 by the registry alone, 54,372 mapped but absent from it. 238,561 of them
-are licence-plate readers, 140,160 with a surveyed bearing; 180,761 devices read plates and are
+**390,180 devices in the United States** — 89,363 carried by both OpenStreetMap and Flock's own
+device registry, 245,573 by the registry alone, 55,244 mapped but absent from it. 239,433 of them
+are licence-plate readers, 142,549 with a surveyed bearing; 180,644 devices read plates and are
 either in service or mapped by OpenStreetMap, which records no status. Each device carries where
 it is, which sources say so and how far apart they put it, what it is (plate reader, video, audio
 detector, speaker, drone, infrastructure), its status, its bearings where anyone surveyed them,
 its operator and transparency portal where they are known, its tract and place, and the map
 snapshot in which its node first appears. Around each device: the traffic on the road it
-watches (HPMS AADT and functional class, for the 241,033 devices within 100 m of a counted
+watches (HPMS AADT and functional class, for the 241,994 devices within 100 m of a counted
 road), the OSM road class a mapped node stands on, the one police portal of the place it stands
-in (106,013 devices; the likely operator of a municipal camera, not a recorded one), an operator
-inferred from other devices on the same pole (7,281), the fleet number an agency gives it, and
+in (109,085 devices; the likely operator of a municipal camera, not a recorded one), an operator
+inferred from other devices on the same pole (7,326), the fleet number an agency gives it, and
 flags for what a registry name says its status is, and for probable duplicates on either side.
 Every device also lists the roads it watches: the drivable ways its cone crosses (the same
 60 m, 45° sector the router uses, one per surveyed head), or, **where no source records which
 way a camera looks, the ways within a 60 m circle of it** — the cone's length, in every
 direction, so a camera of unknown bearing is taken to see as far as one with a bearing. A
 first pass used 40 ft and left 13% of bearing-less plate readers touching no road, because
-cameras stand set back from the carriageways they watch; at 60 m, 435 of 98,401 (0.4%) do.
-Of the 5,579 bearing-less devices of any kind still touching no road, most are indoor and
+cameras stand set back from the carriageways they watch; at 60 m, 428 of 96,884 (0.4%) do.
+Of the 5,990 bearing-less devices of any kind still touching no road, most are indoor and
 campus video cameras that the registry places at one building's coordinate.
 The study's merged map is drawn from it: the in-service plate readers it holds from the registry
-alone, 44,059 in the 50 states and DC, each given a 60 m disc
-([`cones_from_supermap.py`](research/scripts/cones_from_supermap.py)).
+alone, 42,694 in the 50 states and DC, each given a 60 m disc
+([`cones_from_supermap.py`](research/scripts/cones_from_supermap.py)). Registry readers confirmed
+taken down by 21 October 2026 (989, each with its source in
+[`registry_removals_2026-10.json`](research/data/registry_removals_2026-10.json)) carry the status
+`removed` and stay out, with the mapped nodes that stand on them.
 The registry's `rotationAngle` is *not* a bearing — its median
 disagreement with a surveyed one is 90°, which is what unrelated angles would give — so it is
 carried verbatim and never used as one. The report beside it counts everything, by state, class,
@@ -133,9 +141,12 @@ The app's router has a different problem from the study's: OsmAnd's router reads
 is inside the `.obf` map, so the cameras have to be *in the map*.
 
 1. **Tag the roads.** `server/offline/tag_ways.py` intersects the same 60 m / 45° cones
-   against an OSM extract and writes `alpr=yes` onto every way a cone touches — the whole
-   way as OpenStreetMap draws it, which can run past several junctions, and in both
-   directions unless its carriageways are mapped as separate ways.
+   against an OSM extract and writes `alpr=yes` onto each stretch of road, junction to
+   junction, that a cone touches, splitting a way where its watched and unwatched stretches
+   meet. Where a cut would change routes even with avoidance off, as on a bend, the tag runs
+   on to the next junction, so a little more road is tagged, never less. The tag holds in
+   both directions unless the carriageways are mapped as separate ways. Maps before v1.2.7 tagged the whole way as OpenStreetMap draws it, which can run
+   past several junctions: one cone tagged 2.9 km of the Dulles Toll Road.
 2. **Keep the tag through the build.** A `.obf` drops unknown tags unless they are
    declared, so `rendering_types.xml` gains a `<routing_type tag="alpr">` — the one
    genuinely uncertain step, proven on a spike before the continent was built.
@@ -143,15 +154,15 @@ is inside the `.obf` map, so the cameras have to be *in the map*.
    (`alpr_off` … `alpr_max`) in the `car`, `bicycle` and `pedestrian` profiles, sharing
    an `alpr_avoidance` group so OsmAnd renders them as one picker with no UI code.
 
-The multipliers are `0.3 / 0.1 / 0.05 / 0.01`, default *Strong* — the numbers the study's
-routing server uses too, so the app's *Maximum* has the study's multiplier. It does not have
-the study's routes: the study's server applies the multiplier only to the stretch of road
-between junctions that a cone touches, the app to the whole way (step 1), and the app's
-router, speeds and turn costs are OsmAnd's. The study's detours are not a measurement of the
-app's.
+The multipliers are `0.3 / 0.1 / 0.05 / 0.01`, default *Maximum* since v1.2.7 (*Strong*
+before) — the numbers the study's routing server uses too — and since v1.2.7's maps the app
+applies them to nearly the same stretches of road: those, junction to junction, that a cone
+touches (step 1). So the app's default is the study's setting. It still does not have the
+study's routes, because the app's router, speeds and turn costs are OsmAnd's; the study's
+detours are not a measurement of the app's.
 
-A camera with no recorded facing gets no cone, so the router does not avoid it: 2,948 of
-the 142,991 North American cameras in the 2026-09-22 snapshot (2,866 of the 142,257 in the
+A camera with no recorded facing gets no cone, so the router does not avoid it: 2,032 of
+the 144,692 North American cameras in the 2026-10-21 snapshot (1,946 of the 143,721 in the
 50 states and DC). The map layer draws them as plain pins, without a wedge, and the route
 readout counts one as seeing the route if the route passes within 60 m of it.
 
@@ -189,7 +200,7 @@ The app no longer routes online: the public instance of this server was retired 
 It is the engine the study routes against.
 
 GraphHopper resolves `custom_areas.directory` into a spatial index **at graph import
-time**. Register the camera cones (157,084 on the 2026-09-22 map, merged into 135,210
+time**. Register the camera cones (160,230 on the 2026-10-21 map, merged into 138,046
 polygons) as one area named `alpr`, and a per-request custom model can then reference it with
 no geometry in the request at all:
 
@@ -423,6 +434,8 @@ It is contributed by volunteers and is **incomplete in ways that are not random*
 central caveat of the study.
 
 The study also reads Flock Safety's device registry as it stood in December 2025, from the
-map an independent researcher published at [flocksurveillance.org](https://flocksurveillance.org).
+map an independent researcher published at [flocksurveillance.org](https://flocksurveillance.org),
+less the 989 in-service readers confirmed taken down by 21 October 2026 (each listed with its
+source in [`research/data/registry_removals_2026-10.json`](research/data/registry_removals_2026-10.json)).
 That data is not redistributed here: the device list and the registry's discs are built
 locally and gitignored, and the app does not carry them.
