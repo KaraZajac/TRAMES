@@ -57,8 +57,9 @@ PROFILES = ("car", "bicycle", "pedestrian")
 # the useful range is 0.3..0.01 and the levels are distributed across that instead of
 # across 0..1, where most of the control would do nothing.
 #
-# alpr_strong is default="true": camera avoidance is on out of the box. Opt-out, not
-# opt-in.
+# alpr_max is default="true": camera avoidance is on out of the box, at the study's
+# setting. Opt-out, not opt-in. Until v1.2.7 the default was alpr_strong; OsmAnd keeps a
+# level the user has chosen, so only installs that never chose one move to Maximum.
 PARAMS = (
     '\t\t<!-- TRAMES: ALPR (licence-plate reader) avoidance level. -->\n'
     '\t\t<parameter group="alpr_avoidance" id="alpr_off" name="Off" '
@@ -68,11 +69,18 @@ PARAMS = (
     '\t\t<parameter group="alpr_avoidance" id="alpr_moderate" name="Moderate" '
     'description="A balanced trade between detour and exposure" type="boolean"/>\n'
     '\t\t<parameter group="alpr_avoidance" id="alpr_strong" name="Strong" '
-    'description="Avoid readers wherever a reasonable alternative exists" '
-    'type="boolean" default="true"/>\n'
+    'description="Avoid readers wherever a reasonable alternative exists" type="boolean"/>\n'
     '\t\t<parameter group="alpr_avoidance" id="alpr_max" name="Maximum" '
-    'description="Avoid every watched road it can find a way around" type="boolean"/>\n'
+    'description="Avoid every watched road it can find a way around" '
+    'type="boolean" default="true"/>\n'
 )
+
+# The PARAMS block as an earlier version of this script may have written it, so a checkout
+# patched before a change here (v1.2.7 moved the default) is brought up to date instead of
+# being skipped as already patched.
+PARAMS_BLOCK = re.compile(
+    r'\t\t<!-- TRAMES: ALPR \(licence-plate reader\) avoidance level\. -->\n'
+    r'(?:\t\t<parameter group="alpr_avoidance"[^\n]*\n)+')
 
 # Placed FIRST inside <way attribute="priority">, and that position is load-bearing.
 # GeneralRouter's RouteAttributeContext.evaluate() returns the value of the FIRST rule
@@ -110,7 +118,27 @@ if "alpr_avoidance" in src:
                                 src, re.S) and "alpr_avoidance" in
                    re.search(r'<routingProfile name="%s" baseProfile=.*?</routingProfile>' % m,
                              src, re.S).group(0)})
-    print(f"  ok      routing.xml already carries ALPR levels for: {', '.join(have)}")
+    blocks = PARAMS_BLOCK.findall(src)
+    if len(blocks) != len(PROFILES):
+        print(f"  FAILED  routing.xml has {len(blocks)} TRAMES level blocks, expected "
+              f"{len(PROFILES)} — fix it by hand or re-run setup-resources.sh", file=sys.stderr)
+        sys.exit(1)
+    if all(b == PARAMS for b in blocks):
+        print(f"  ok      routing.xml already carries ALPR levels for: {', '.join(have)}")
+        sys.exit(0)
+    if check_only:
+        print("  STALE   routing.xml carries an older version of the ALPR levels "
+              "(e.g. the old default) — run without --check to update")
+        sys.exit(1)
+    out = PARAMS_BLOCK.sub(lambda m: PARAMS, src)
+    open(path, "w", encoding="utf-8").write(out)
+    try:
+        xml.dom.minidom.parse(path)
+    except Exception as e:
+        print(f"  FAILED  updated routing.xml is not well-formed: {e}", file=sys.stderr)
+        sys.exit(1)
+    print(f"  ok      routing.xml updated: ALPR levels in {', '.join(have)} "
+          f"(off/light/moderate/strong/max, default max)")
     sys.exit(0)
 if check_only:
     print("  MISSING routing.xml has no ALPR levels — run without --check to apply")
@@ -155,5 +183,5 @@ except Exception as e:
     print(f"  FAILED  patched routing.xml is not well-formed: {e}", file=sys.stderr)
     sys.exit(1)
 print(f"  ok      routing.xml patched: alpr_avoidance levels in {', '.join(PROFILES)} "
-      f"(off/light/moderate/strong/max, default strong)")
+      f"(off/light/moderate/strong/max, default max)")
 PY

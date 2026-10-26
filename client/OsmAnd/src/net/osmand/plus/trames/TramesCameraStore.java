@@ -126,7 +126,7 @@ public class TramesCameraStore {
 				// downstream needs them for is de-duplicating merged tiles. Index-based ids
 				// are unique within the pack, which is all that requires.
 				out.add(new TramesCameraSource.Camera(-(long) (i + 1), la[i], lo[i],
-						TramesCameraSource.parseDirections(dr[i]), null, null));
+						TramesGeometry.parseHeads(dr[i]), null, null));
 			}
 		}
 		return out;

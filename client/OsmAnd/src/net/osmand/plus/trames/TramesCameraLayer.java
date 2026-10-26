@@ -66,11 +66,11 @@ public class TramesCameraLayer extends OsmandMapLayer implements IRouteInformati
 	 * zoom, which implied a different real-world coverage each time you zoomed. This is
 	 * now a true ground sector — and it is drawn at exactly the geometry the router avoids
 	 * and the exposure count uses, from the single source of truth in {@link TramesGeometry}
-	 * (60 m / 45°, mirroring the server's build_cones.py). So the wedge on the map is the
-	 * wedge the route was planned around; it is not an independent display knob.
+	 * (60 m, 45° wide unless the camera is mapped with an arc, mirroring the server's
+	 * build_cones.py). So the wedge on the map is the wedge the route was planned around; it
+	 * is not an independent display knob.
 	 */
 	private static final double CONE_RADIUS_M = TramesGeometry.CONE_RADIUS_M;
-	private static final float CONE_SPAN_DEG = (float) TramesGeometry.CONE_SPAN_DEG;
 
 	/** Camera dot icon size in DP — a screen-space point symbol, unlike the ground cones. */
 	private static final float ICON_DP = 26f;
@@ -196,7 +196,7 @@ public class TramesCameraLayer extends OsmandMapLayer implements IRouteInformati
 						// Higher base order than the pins, so the fill renders beneath them.
 						.setBaseOrder(getPointsOrder() + 1)
 						.setIsHidden(false)
-						.setPoints(sectorPoints31(cam.lat, cam.lon, cam.directions[i]))
+						.setPoints(sectorPoints31(cam.lat, cam.lon, cam.directions[i], cam.spans[i]))
 						.setFillColor(fill)
 						.buildAndAddToCollection(cones);
 			}
@@ -225,21 +225,30 @@ public class TramesCameraLayer extends OsmandMapLayer implements IRouteInformati
 
 	/**
 	 * A filled field-of-view sector — apex at the camera, arc at {@link #CONE_RADIUS_M}
-	 * metres — as 31-tile points. Built in geographic space so the GL renderer scales it
-	 * with zoom and lays it flat on the ground when the view is tilted.
+	 * metres, {@code span} degrees wide — as 31-tile points; a disc with no apex when the
+	 * camera sees all round. Built in geographic space so the GL renderer scales it with zoom
+	 * and lays it flat on the ground when the view is tilted.
 	 */
 	@NonNull
-	private QVectorPointI sectorPoints31(double lat, double lon, float bearing) {
+	private QVectorPointI sectorPoints31(double lat, double lon, float bearing, float span) {
 		QVectorPointI pts = new QVectorPointI();
-		pts.add(point31(lat, lon));
-		int steps = 14;
-		float start = bearing - CONE_SPAN_DEG / 2f;
-		for (int i = 0; i <= steps; i++) {
-			double b = start + CONE_SPAN_DEG * i / steps;
+		boolean allRound = span >= 360f;
+		if (!allRound) {
+			pts.add(point31(lat, lon));
+		}
+		int steps = arcSteps(span);
+		float start = bearing - span / 2f;
+		for (int i = 0; i <= (allRound ? steps - 1 : steps); i++) {
+			double b = start + span * i / steps;
 			LatLon edge = MapUtils.rhumbDestinationPoint(lat, lon, CONE_RADIUS_M, b);
 			pts.add(point31(edge.getLatitude(), edge.getLongitude()));
 		}
 		return pts;
+	}
+
+	/** Points along an arc: 14 for a 45° wedge, proportionally more for a wider one. */
+	private static int arcSteps(float span) {
+		return Math.max(14, (int) Math.ceil(span / TramesGeometry.CONE_SPAN_DEG * 14));
 	}
 
 	public void setEnabled(boolean enabled) {
@@ -291,8 +300,8 @@ public class TramesCameraLayer extends OsmandMapLayer implements IRouteInformati
 			}
 			// Ground sectors, projected from real lat/lon so they scale with zoom and
 			// follow map rotation for free (getPixXFromLatLon already accounts for it).
-			for (float bearing : cam.directions) {
-				drawConeGeo(canvas, tileBox, cam.lat, cam.lon, bearing);
+			for (int i = 0; i < cam.directions.length; i++) {
+				drawConeGeo(canvas, tileBox, cam.lat, cam.lon, cam.directions[i], cam.spans[i]);
 			}
 			if (icon != null) {
 				float x = tileBox.getPixXFromLatLon(cam.lat, cam.lon);
@@ -309,16 +318,24 @@ public class TramesCameraLayer extends OsmandMapLayer implements IRouteInformati
 	 * zoom and follows map rotation with no explicit rotation maths.
 	 */
 	private void drawConeGeo(@NonNull Canvas canvas, @NonNull RotatedTileBox tb,
-	                         double lat, double lon, float bearing) {
+	                         double lat, double lon, float bearing, float span) {
 		conePath.reset();
-		conePath.moveTo(tb.getPixXFromLatLon(lat, lon), tb.getPixYFromLatLon(lat, lon));
-		int steps = 14;
-		float start = bearing - CONE_SPAN_DEG / 2f;
-		for (int i = 0; i <= steps; i++) {
-			double b = start + CONE_SPAN_DEG * i / steps;
+		boolean allRound = span >= 360f;
+		if (!allRound) {
+			conePath.moveTo(tb.getPixXFromLatLon(lat, lon), tb.getPixYFromLatLon(lat, lon));
+		}
+		int steps = arcSteps(span);
+		float start = bearing - span / 2f;
+		for (int i = 0; i <= (allRound ? steps - 1 : steps); i++) {
+			double b = start + span * i / steps;
 			LatLon edge = MapUtils.rhumbDestinationPoint(lat, lon, CONE_RADIUS_M, b);
-			conePath.lineTo(tb.getPixXFromLatLon(edge.getLatitude(), edge.getLongitude()),
-					tb.getPixYFromLatLon(edge.getLatitude(), edge.getLongitude()));
+			float x = tb.getPixXFromLatLon(edge.getLatitude(), edge.getLongitude());
+			float y = tb.getPixYFromLatLon(edge.getLatitude(), edge.getLongitude());
+			if (allRound && i == 0) {
+				conePath.moveTo(x, y);
+			} else {
+				conePath.lineTo(x, y);
+			}
 		}
 		conePath.close();
 		canvas.drawPath(conePath, conePaint);

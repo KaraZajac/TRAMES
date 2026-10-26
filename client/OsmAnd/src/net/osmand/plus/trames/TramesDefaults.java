@@ -21,10 +21,11 @@ import org.apache.commons.logging.Log;
  *
  * <p><b>Offline only.</b> Every profile routes with OsmAnd's offline engine against
  * ALPR-tagged maps ({@link TramesMapsDialog}), where camera avoidance comes from the
- * {@code alpr_avoidance} levels baked into {@code routing.xml}, {@code alpr_strong} by
- * default. Until v1.2.4 an online TRAMES engine was seeded as well, pointed at a public
- * server; that server was retired on 2026-08-29, and the app now has no online routing of
- * its own. Avoiding cameras while streaming your itinerary to a host is not privacy.
+ * {@code alpr_avoidance} levels baked into {@code routing.xml}, {@code alpr_max} by
+ * default ({@code alpr_strong} until v1.2.7). Until v1.2.4 an online TRAMES engine was
+ * seeded as well, pointed at a public server; that server was retired on 2026-08-29, and
+ * the app now has no online routing of its own. Avoiding cameras while streaming your
+ * itinerary to a host is not privacy.
  *
  * <p><b>Trade-off, stated plainly:</b> offline routing needs a downloaded map. With none
  * present the router cannot produce a route at all — so a fresh install must visit
