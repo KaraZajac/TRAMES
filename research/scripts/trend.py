@@ -33,7 +33,7 @@ import sys
 from multiprocessing import Pool
 
 import numpy as np
-from shapely.geometry import LineString, Point, shape
+from shapely.geometry import LineString
 from shapely.strtree import STRtree
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -74,24 +74,42 @@ def state_populations():
 
 
 def state_locator():
-    """Point -> state code, from the boundaries make_figures.py draws (simplified, so a
-    point that falls just outside every polygon — a coastal camera — takes the nearest
-    state within ~20 km; beyond that it is Canada or Mexico and belongs to no state)."""
-    fc = json.load(open(os.path.join(ROOT, "paper", "figures", "us-states.json")))
-    polys, codes = [], []
-    for f in fc["features"]:
-        c = CODES.get(f["properties"]["name"])
-        if c:
-            polys.append(shape(f["geometry"])); codes.append(c)
-    tree = STRtree(polys)
+    """Point -> state code, by the census tract (TIGER/Line 2022, geo.load_units) that holds it.
+    Tracts tile each state, its coastal water included, and stop at the national border, so a
+    camera on an island or across a border river is placed where it stands. The simplified
+    outlines make_figures.py draws, used here until October 2026, put 659 of the 21 October
+    map's cameras in a neighbouring state, left out 13 on the Florida Keys, Hatteras Island,
+    Oahu and Nantucket, and counted 16 in Ontario and British Columbia. A point on a tract's
+    edge, which no tract contains, takes the nearest tract within 50 m; anything else is
+    outside the 50 states and DC."""
+    import geo
+    import shapely
+    U = geo.load_units("tract")
+    regs = np.array([str(r) for r in U["region"]])
+    trees = [(reg, idx, STRtree(U["geom"][idx])) for reg in ("conus", "ak", "hi")
+             for idx in [np.where(regs == reg)[0]]]
+    code = {f: c for c, f in FIPS.items()}
+    cache = {}
 
     def locate(lat, lon):
-        p = Point(lon, lat)
-        for i in tree.query(p):
-            if polys[i].contains(p):
-                return codes[i]
-        i = tree.nearest(p)
-        return codes[i] if polys[i].distance(p) < 0.2 else None
+        k = (lat, lon)
+        if k not in cache:
+            pts = [(idx, tree, shapely.Point(*(float(v[0]) for v in geo.albers([lon], [lat], reg))))
+                   for reg, idx, tree in trees]
+            hit = None
+            for idx, tree, p in pts:
+                h = tree.query(p, predicate="within")
+                if len(h):
+                    hit = idx[h[0]]
+                    break
+            if hit is None:
+                for idx, tree, p in pts:
+                    h = tree.query_nearest(p, max_distance=50.0)
+                    if len(h):
+                        hit = idx[h[0]]
+                        break
+            cache[k] = None if hit is None else code[str(U["state"][hit])]
+        return cache[k]
     return locate
 
 

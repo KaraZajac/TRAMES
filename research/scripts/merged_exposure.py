@@ -204,8 +204,8 @@ def main():
     P(f"\nnewly exposed by the registry (no mapped camera, >=1 on the merged map): "
       f"{100*Dz.share((routed == 0) & (X['merged'] >= 1)):.2f}% of commuters against the routed map-alone run, as "
       f"compare_merged.py and the paper count it; {100*Dz.share((X['osm'] == 0) & (X['merged'] >= 1)):.2f}% against "
-      f"the wedges rebuilt here, which draw the 31 full-circle cameras as discs and are scored on stored rather than "
-      f"live geometry. Encounters +{100*(Dz.mean(X['merged'])/Dz.mean(X['osm'])-1):.1f}%")
+      f"the merged map's own wedges, which leave out the mapped nodes that stand on registry readers confirmed removed "
+      f"and are scored on stored rather than live geometry. Encounters +{100*(Dz.mean(X['merged'])/Dz.mean(X['osm'])-1):.1f}%")
     rd = Dz.boot_ratio(X["directed"], ones)[:, 0] / Dz.boot_ratio(X["merged"], ones)[:, 0]
     lo, hi = ci(rd)
     P(f"directed against merged: mean encounters x{Dz.mean(X['directed'])/Dz.mean(X['merged']):.3f} [{lo:.3f}-{hi:.3f}]; "

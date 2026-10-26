@@ -1,0 +1,6019 @@
+{
+ "title": "Flock Safety registry records (December 2025 snapshot) confirmed removed by 21 October 2026",
+ "registry": "flocksurveillance.org (Michael 2026): Flock Safety's device records as of December 2025; record ids as in its device list",
+ "cutoff": "2026-10-21",
+ "how": "Two kinds of evidence. 'news': the operating agency, or the press reporting it, says the readers were removed; each place's in-service registry records were matched to the agency by their labels and counts (the notes say where a count or an identity is uncertain). 'osm_deletion': the OpenStreetMap node paired with the record in September 2026 was deleted with a comment saying the camera was removed (the changeset is the source). Sources checked 2026-10-22.",
+ "counts": {
+  "records": 989,
+  "news": 417,
+  "osm_deletion": 572,
+  "places": 32
+ },
+ "places": [
+  {
+   "place": "Mayflower, AR",
+   "records": 2,
+   "removed": "by 2026-08-26",
+   "source": "https://katv.com/news/local/city-of-mayflower-latest-to-get-rid-of-flock-cameras-and-terminate-contract-with-company-flock-safety-mass-surveillance-community-termination-agreement-contracts",
+   "confidence": "high",
+   "decision": "apply",
+   "note": "KATV gives no count; the city removed all of its cameras, and the registry has two in service there.",
+   "evidence": "\"The city of Mayflower has announced that they have removed all of their Flock cameras and terminated services with the company.\"",
+   "verdict": "SUPPORTED"
+  },
+  {
+   "place": "Flagstaff, AZ",
+   "records": 32,
+   "removed": "by 2026-02-19",
+   "source": "https://www.flagstaff.az.gov/m/newsflash/Home/Detail/2229?arc=4065",
+   "confidence": "high",
+   "decision": "apply",
+   "evidence": "\"The City received confirmation on Feb. 19 that all Flock Safety cameras covered under the City's contract have been physically removed.\"",
+   "verdict": "SUPPORTED"
+  },
+  {
+   "place": "El Cerrito, CA",
+   "records": 40,
+   "removed": "about 2026-08-21",
+   "source": "https://www.ktvu.com/news/el-cerrito-slaying-happened-days-after-last-license-plate-cameras-removed",
+   "confidence": "high",
+   "decision": "apply",
+   "evidence": "KTVU: all 40 cameras offline since June; Flock removed the last of them two days before the shooting of 23 Aug.",
+   "verdict": "SUPPORTED"
+  },
+  {
+   "place": "Santa Cruz, CA",
+   "records": 8,
+   "removed": "by 2026-03-09",
+   "source": "https://santacruzlocal.org/2026/04/19/anti-surveillance-organizers-want-to-engage-leaders-in-watsonville-and-capitola-but-efforts-are-slow-going/",
+   "confidence": "medium",
+   "decision": "apply",
+   "evidence": "Santa Cruz Local: as of 9 March all eight cameras in Santa Cruz were removed.",
+   "note": "The page refused our fetch; verified from its indexed text.",
+   "verdict": "SUPPORTED (follow-up, 2026-10-22)"
+  },
+  {
+   "place": "Moffat County, CO",
+   "records": 10,
+   "removed": "2026-09",
+   "source": "https://cowboystatedaily.com/2026/09/17/done-flocking-around-colorado-sheriff-removes-cameras-after-flock-fails-to-show/",
+   "confidence": "high",
+   "decision": "apply",
+   "evidence": "\"A Colorado sheriff's department took matters into its own hands earlier this month, dismantling 10 Flock license plate reader cameras after it said Flock Safety would not come to remove them as asked.\"",
+   "verdict": "SUPPORTED"
+  },
+  {
+   "place": "Seminole County (sheriff's jurisdiction), FL",
+   "records": 101,
+   "removed": "by 2026-09-30",
+   "source": "https://mynews13.com/fl/orlando/news/2026/09/30/fdot-deadline-arrives-for-removal-of-flock-cameras-from-state-roads",
+   "confidence": "medium",
+   "decision": "apply",
+   "evidence": "\"Seminole County Sheriff's Office officials said all of the department's Flock cameras and attached solar panels have been removed.\"",
+   "verdict": "SUPPORTED"
+  },
+  {
+   "place": "St. Johns County, FL",
+   "records": 65,
+   "removed": "2026-09",
+   "source": "https://www.news4jax.com/news/politics/2026/10/20/in-split-vote-st-johns-county-commissioners-revoke-permits-for-all-license-plate-readers-on-county-roads/",
+   "confidence": "medium",
+   "decision": "partial-apply",
+   "evidence": "\"In September, the St. Johns County Sheriff's Office removed 84 LPRs in accordance with the Florida Department of Transportation's directive to remove LPRs on state rights-of-way.\"",
+   "verdict": "SUPPORTED"
+  },
+  {
+   "place": "Tampa, FL",
+   "records": 3,
+   "removed": "by 2026-09-30",
+   "source": "https://www.tampabay28.com/news/local-news/tampa-metro-west-hillsborough-county/alprs-are-gone-from-florida-state-roads-but-remain-elsewhere-across-tampa-bay",
+   "confidence": "medium",
+   "decision": "partial-apply",
+   "source_also": "https://www.tampa.gov/node/194311",
+   "evidence": "Tampa Police: \"All of our ALPRs located within the right-of-way of a road on the State Highway System have been removed in compliance with FDOT notice\" (17 readers; the city's 1 Sept statement set the 30-day timeline).",
+   "note": "Our 3 records are the in-service readers among the 17 whose registry labels name a state road.",
+   "verdict": "SUPPORTED (follow-up, 2026-10-22)"
+  },
+  {
+   "place": "Evanston, IL",
+   "records": 2,
+   "removed": "2026-03",
+   "source": "https://evanstonroundtable.com/2026/03/27/flock-removes-final-two-license-plate-cameras-from-evanston-after-roundtable-inquiry/",
+   "confidence": "high",
+   "decision": "apply",
+   "evidence": "\"…before swiftly removing them this week after the RoundTable requested comment on their presence.\"",
+   "verdict": "SUPPORTED"
+  },
+  {
+   "place": "Bloomington, IN",
+   "records": 11,
+   "removed": "by 2026-10-07",
+   "source": "https://bloomington.in.gov/onboard/meetingFiles/17585/download#page=26",
+   "confidence": "high",
+   "decision": "apply",
+   "evidence": "City memo dated 2026-10-07: \"all existing ALPRs have already been removed and the ALPR Flock contract canceled\".",
+   "note": "No count or removal date given; the 11 are the city's fixed readers. The memo implies its Flex and trailer units are gone too; we did not drop those.",
+   "verdict": "PARTLY"
+  },
+  {
+   "place": "Erlanger, KY",
+   "records": 4,
+   "removed": "by 2026-08-27",
+   "source": "https://www.fox19.com/2026/08/28/erlanger-ditches-flock-cameras-prioritizes-good-police-work-over-technology/",
+   "confidence": "high",
+   "decision": "apply",
+   "evidence": "\"The city confirms the four cameras near Holly Lane have already been removed.\"",
+   "verdict": "SUPPORTED"
+  },
+  {
+   "place": "Nantucket, MA",
+   "records": 2,
+   "removed": "2026-09-17",
+   "source": "https://nantucketcurrent.com/news/nantucket-to-take-down-flock-cameras",
+   "confidence": "high",
+   "decision": "apply",
+   "evidence": "\"On Thursday morning, deputy police chief Charlie Gibson was spotted removing the cameras in a bucket truck\"",
+   "verdict": "SUPPORTED"
+  },
+  {
+   "place": "Stow, MA",
+   "records": 3,
+   "removed": "by 2026-08-26",
+   "source": "https://www.bostonglobe.com/2026/08/26/metro/stow-officer-resigns-flock-technology/",
+   "confidence": "high",
+   "decision": "apply",
+   "evidence": "\"Stow has also canceled its contract with Flock and removed three cameras that had previously been installed, officials said.\"",
+   "verdict": "SUPPORTED"
+  },
+  {
+   "place": "South Portland, ME",
+   "records": 7,
+   "removed": "by 2026-06-22",
+   "source": "https://www.southportland.gov/m/newsflash/Home/Detail/563",
+   "confidence": "high",
+   "decision": "apply",
+   "evidence": "\"…as of June 22, 2026, Flock confirmed all cameras have been removed and there is no active South Portland account.\"",
+   "verdict": "SUPPORTED"
+  },
+  {
+   "place": "Columbia Heights, MN",
+   "records": 5,
+   "removed": "2026-06",
+   "source": "https://www.mynortheaster.com/news/heights-cancels-contract-with-flock/",
+   "confidence": "high",
+   "decision": "apply",
+   "evidence": "\"…despite ending usage of the tools (removing flexible-location cameras and covering fixed-location cameras with black trash bags)…\"",
+   "verdict": "SUPPORTED"
+  },
+  {
+   "place": "Crystal, MN",
+   "records": 1,
+   "removed": "by 2026-09-09",
+   "source": "https://www.fox9.com/news/crystal-drops-flock-cams-after-community-concerns",
+   "confidence": "high",
+   "decision": "apply",
+   "evidence": "\"All six have been physically removed and are in the process of being returned to Flock Safety.\"",
+   "verdict": "SUPPORTED"
+  },
+  {
+   "place": "Itasca County, MN",
+   "records": 15,
+   "removed": "by 2026-09-10",
+   "source": "https://www.kaxe.org/local-news/2026-09-16/easy-money-to-cut-itasca-county-removes-flock-cameras-cancels-contracts",
+   "confidence": "medium",
+   "decision": "apply",
+   "evidence": "\"All county cameras have been removed as of Thursday, Sept. 10, 2026.\"",
+   "verdict": "SUPPORTED"
+  },
+  {
+   "place": "Winona, MN",
+   "records": 6,
+   "removed": "2026-07-29 to 2026-08-01",
+   "source": "https://www.fox9.com/news/8-flock-cameras-stolen-winona-aug-2026",
+   "confidence": "high",
+   "decision": "apply",
+   "evidence": "FOX 9: all eight of the city's Flock cameras were stolen (poles cut down) and none had been recovered by 4 Aug.",
+   "note": "Stolen, not taken down by the city; no report of replacement by 21 Oct.",
+   "verdict": "PARTLY"
+  },
+  {
+   "place": "Hillsborough, NC",
+   "records": 3,
+   "removed": "by 2025-12-03",
+   "source": "https://www.hillsboroughnc.gov/Home/Components/News/News/856/14",
+   "confidence": "high",
+   "decision": "apply",
+   "evidence": "Town of Hillsborough: as of 3 Dec 2025 all Flock Safety cameras contracted by the town have been removed.",
+   "note": "The page refused our fetch; verified from its indexed text.",
+   "verdict": "SUPPORTED (follow-up, 2026-10-22)"
+  },
+  {
+   "place": "Syracuse, NY",
+   "records": 13,
+   "removed": "by 2026-07-15",
+   "source": "https://centralcurrent.org/flock-safety-removes-its-license-plate-readers-finalizing-eight-month-breakup-with-city-of-syracuse/",
+   "confidence": "medium",
+   "decision": "apply",
+   "note": "13 removed, as reported; a photo shows an East Adams St reader removed on 14 July, and the registry's only in-service one there (#25) is the one we kept, so one of our 13 may be the wrong record.",
+   "evidence": "\"The company on Wednesday confirmed that it had removed all of its 13 license plate readers from city property.\"",
+   "verdict": "SUPPORTED"
+  },
+  {
+   "place": "Hubbard (city), OH",
+   "records": 6,
+   "removed": "2026-08",
+   "source": "https://www.wfmj.com/news/local-news/hubbard/hubbard-shuts-down-flock-cameras-after-string-of-thefts/article_619e0117-6101-43b8-902c-afa43da590e0.html",
+   "confidence": "medium",
+   "decision": "apply",
+   "evidence": "\"…after four out of the city's six cameras were stolen a few weeks ago, the police department took the last two down.\"",
+   "verdict": "SUPPORTED"
+  },
+  {
+   "place": "Liberty Hill, TX",
+   "records": 1,
+   "removed": "2026-09-15",
+   "source": "https://cbsaustin.com/news/local/liberty-hill-removes-flock-cameras-after-city-council-votes-to-end-program",
+   "confidence": "high",
+   "decision": "apply",
+   "evidence": "\"The city announced Thursday that staff removed all cameras under Liberty Hill's Flock program on Tuesday, Sept. 15.\"",
+   "verdict": "SUPPORTED"
+  },
+  {
+   "place": "Arlington County, VA",
+   "records": 27,
+   "removed": "2026-10",
+   "source": "https://www.arlnow.com/2026/10/13/arlington-has-uninstalled-its-flock-cameras-but-some-private-ones-may-remain/",
+   "confidence": "high",
+   "decision": "apply",
+   "evidence": "ARLnow: all county-leased Flock technology removed (26 Falcon plate readers and 15 Condor PTZ cameras).",
+   "note": "27 records against the 26 readers ARLnow counts; one, F#012 just inside Alexandria or LR#031, may not be the county's.",
+   "verdict": "PARTLY"
+  },
+  {
+   "place": "Augusta County (Fishersville), VA",
+   "records": 2,
+   "removed": "2026-09-25",
+   "source": "https://rocktownnow.com/news/218812-two-flock-cameras-removed-in-augusta-county/",
+   "confidence": "high",
+   "decision": "apply",
+   "note": "The sheriff removed them 'while we continue to evaluate', so they could return.",
+   "evidence": "\"Augusta County Sheriff Donald Smith says two were removed on Friday, September 25, that were operating on Jefferson Highway.\"",
+   "verdict": "SUPPORTED"
+  },
+  {
+   "place": "Christiansburg, VA",
+   "records": 5,
+   "removed": "by 2026-09-23",
+   "source": "https://www.yahoo.com/news/articles/town-christiansburg-removes-flock-cameras-211840614.html",
+   "confidence": "high",
+   "decision": "apply",
+   "evidence": "\"The Town of Christiansburg has removed all but one of its Flock cameras, officials announced in a Facebook post Wednesday.\"",
+   "verdict": "SUPPORTED"
+  },
+  {
+   "place": "Harrisonburg, VA",
+   "records": 28,
+   "removed": "2026-08",
+   "source": "https://www.nvdaily.com/nvdaily/harrisonburg-takes-down-flock-cameras/article_511aeadb-cba9-57ea-a456-be888adb4fe4.html",
+   "confidence": "high",
+   "decision": "apply",
+   "evidence": "Northern Virginia Daily: Public Works staff took down the city's Flock readers after the contract ended on 31 July (31 cameras).",
+   "note": "The page rate-limited our fetch; verified from its indexed text.",
+   "verdict": "SUPPORTED (follow-up, 2026-10-22)"
+  },
+  {
+   "place": "Staunton, VA",
+   "records": 5,
+   "removed": "2026-02-11",
+   "source": "https://augustafreepress.com/news/not-so-fast-flock-camera-remains-in-staunton-no-idea-when-it-will-come-down/",
+   "confidence": "medium",
+   "decision": "apply",
+   "evidence": "\"A resident contacted him today and said one camera remains on Commerce Road.\"",
+   "verdict": "SUPPORTED"
+  },
+  {
+   "place": "Ocean Shores (Grays Harbor County Sheriff's Office camera), WA",
+   "records": 1,
+   "removed": "by 2026-07-30",
+   "source": "https://www.thedailyworld.com/2026/07/30/ocean-shores-flock-camera-removed-axon-cameras-installed-but-not-operating/",
+   "confidence": "medium",
+   "decision": "apply",
+   "evidence": "\"A Flock Safety camera installed by the Grays Harbor Sheriff's Office on the Coast Communications readerboard pole has been removed.\"",
+   "verdict": "SUPPORTED"
+  },
+  {
+   "place": "Cudahy (Eagle Sports Range, private business), WI",
+   "records": 3,
+   "removed": "2026-08-04",
+   "source": "https://www.wisn.com/article/cudahy-gun-range-removes-flock-cameras-after-viral-video-raises-privacy-concerns/73384028",
+   "confidence": "high",
+   "decision": "apply",
+   "evidence": "\"Staff at the gun range told 12 News they removed the cameras on Tuesday\"",
+   "verdict": "SUPPORTED"
+  },
+  {
+   "place": "Racine County (Sheriff's Office), WI",
+   "records": 2,
+   "removed": "2026-09-04",
+   "source": "https://www.fox6now.com/news/flock-camera-pushback-fond-du-lac-county-racine-county-ending-use",
+   "confidence": "medium",
+   "decision": "apply",
+   "evidence": "\"On Friday, Sept. 4, Racine County Sheriff Christopher Schmaling shared pictures showing city crews dismantling the poles and cameras that have been tracking vehicle movements across the county.\"",
+   "verdict": "SUPPORTED"
+  },
+  {
+   "place": "Verona (city), WI",
+   "records": 3,
+   "removed": "by 2026-04-20",
+   "source": "https://www.wpr.org/news/dane-county-flock-license-plate-cameras",
+   "confidence": "high",
+   "decision": "apply",
+   "evidence": "\"But officials there said Flock did not remove the cameras until several months after the agreement ended.\"",
+   "verdict": "SUPPORTED"
+  },
+  {
+   "place": "Washington Island (Town of Washington), Door County, WI",
+   "records": 1,
+   "removed": "2026-01",
+   "source": "https://doorcountyknock.org/2026/04/sturgeon-bay-ends-flock-contract-but-drivers-are-still-tracked-beyond-city-limits",
+   "confidence": "medium",
+   "decision": "apply",
+   "evidence": "\"Washington Island had one camera installed at the ferry dock in 2025 … The camera was removed in January.\"",
+   "verdict": "SUPPORTED"
+  }
+ ],
+ "records": {
+  "flock-152321": {
+   "basis": "news",
+   "place": "Mayflower, AR"
+  },
+  "flock-31544": {
+   "basis": "news",
+   "place": "Mayflower, AR"
+  },
+  "flock-163468": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-163448": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-163475": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-163446": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-163460": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-163451": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-163457": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-163455": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-163464": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-163462": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-163458": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-163454": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-163445": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-163456": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-163447": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-163449": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-163461": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-163463": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-163450": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-163453": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-163465": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-163469": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-163473": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-163452": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-163474": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-164584": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-163441": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-163437": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-163440": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-163439": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-163434": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-163485": {
+   "basis": "news",
+   "place": "Flagstaff, AZ"
+  },
+  "flock-2238": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-28505": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-28550": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-28658": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-28834": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-32094": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-34672": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-36996": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-44325": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-44507": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-44921": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-46651": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-46937": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-47083": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-50135": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-50908": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-52949": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-56502": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-56743": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-57316": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-58143": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-59284": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-62158": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-63461": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-64627": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-68262": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-69293": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-69471": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-70751": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-77088": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-78945": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-81080": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-81452": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-81696": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-82001": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-82120": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-83726": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-81673": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-82144": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-55953": {
+   "basis": "news",
+   "place": "El Cerrito, CA"
+  },
+  "flock-129141": {
+   "basis": "news",
+   "place": "Santa Cruz, CA"
+  },
+  "flock-188802": {
+   "basis": "news",
+   "place": "Santa Cruz, CA"
+  },
+  "flock-129140": {
+   "basis": "news",
+   "place": "Santa Cruz, CA"
+  },
+  "flock-129142": {
+   "basis": "news",
+   "place": "Santa Cruz, CA"
+  },
+  "flock-129144": {
+   "basis": "news",
+   "place": "Santa Cruz, CA"
+  },
+  "flock-129143": {
+   "basis": "news",
+   "place": "Santa Cruz, CA"
+  },
+  "flock-303923": {
+   "basis": "news",
+   "place": "Santa Cruz, CA"
+  },
+  "flock-141638": {
+   "basis": "news",
+   "place": "Santa Cruz, CA"
+  },
+  "flock-12412": {
+   "basis": "news",
+   "place": "Moffat County, CO"
+  },
+  "flock-12467": {
+   "basis": "news",
+   "place": "Moffat County, CO"
+  },
+  "flock-12476": {
+   "basis": "news",
+   "place": "Moffat County, CO"
+  },
+  "flock-12723": {
+   "basis": "news",
+   "place": "Moffat County, CO"
+  },
+  "flock-12809": {
+   "basis": "news",
+   "place": "Moffat County, CO"
+  },
+  "flock-12837": {
+   "basis": "news",
+   "place": "Moffat County, CO"
+  },
+  "flock-193587": {
+   "basis": "news",
+   "place": "Moffat County, CO"
+  },
+  "flock-193588": {
+   "basis": "news",
+   "place": "Moffat County, CO"
+  },
+  "flock-29551": {
+   "basis": "news",
+   "place": "Moffat County, CO"
+  },
+  "flock-39798": {
+   "basis": "news",
+   "place": "Moffat County, CO"
+  },
+  "flock-64937": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-68068": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-55287": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-29376": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-55083": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-21997": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-68004": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-21432": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-71226": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-46393": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-23174": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-64641": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-58522": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-31935": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-62193": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-75732": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-56932": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-77586": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-19254": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-23679": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-31378": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120364": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120365": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120366": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120367": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120368": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120369": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120370": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120371": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120372": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120373": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120374": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120375": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120376": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120377": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120378": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120379": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120380": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120381": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120382": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120383": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120384": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120385": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120386": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120387": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120388": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120389": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120390": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120391": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120392": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120393": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120394": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120395": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120396": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120397": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120398": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120399": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120400": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120401": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120402": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120403": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120404": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120405": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120407": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120408": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120409": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120410": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120411": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120412": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120413": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120414": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120415": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120416": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120417": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120418": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120419": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120420": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120421": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120422": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120423": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120424": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120425": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120426": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120427": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120428": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120429": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120430": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120431": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120432": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120433": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120434": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120436": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120437": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-120438": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-171578": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-189754": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-196346": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-196349": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-196347": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-196348": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-196345": {
+   "basis": "news",
+   "place": "Seminole County (sheriff's jurisdiction), FL"
+  },
+  "flock-2553": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-6586": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-14491": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-15184": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-15743": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-18670": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-20509": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-103801": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-125186": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-127050": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-127051": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-155715": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-160534": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-160536": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-160542": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-160548": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-160549": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-161251": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-161252": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-186748": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-186749": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-186750": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-186751": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-200142": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-200146": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-200154": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-203043": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-28279": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-31469": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-33755": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-34263": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-35733": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-37384": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-38761": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-45063": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-46209": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-46489": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-47873": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-49817": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-57252": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-66182": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-70014": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-72535": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-79540": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-79750": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-84397": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-86039": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-86661": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-87398": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-87406": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-88262": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-88585": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-88895": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-90114": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-90136": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-91750": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-92030": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-92986": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-93259": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-95160": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-97117": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-98477": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-98967": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-30039": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-18288": {
+   "basis": "news",
+   "place": "St. Johns County, FL"
+  },
+  "flock-296958": {
+   "basis": "news",
+   "place": "Tampa, FL"
+  },
+  "flock-296966": {
+   "basis": "news",
+   "place": "Tampa, FL"
+  },
+  "flock-296961": {
+   "basis": "news",
+   "place": "Tampa, FL"
+  },
+  "flock-68590": {
+   "basis": "news",
+   "place": "Evanston, IL"
+  },
+  "flock-41664": {
+   "basis": "news",
+   "place": "Evanston, IL"
+  },
+  "flock-129494": {
+   "basis": "news",
+   "place": "Bloomington, IN"
+  },
+  "flock-129502": {
+   "basis": "news",
+   "place": "Bloomington, IN"
+  },
+  "flock-129492": {
+   "basis": "news",
+   "place": "Bloomington, IN"
+  },
+  "flock-129498": {
+   "basis": "news",
+   "place": "Bloomington, IN"
+  },
+  "flock-129497": {
+   "basis": "news",
+   "place": "Bloomington, IN"
+  },
+  "flock-129493": {
+   "basis": "news",
+   "place": "Bloomington, IN"
+  },
+  "flock-129496": {
+   "basis": "news",
+   "place": "Bloomington, IN"
+  },
+  "flock-129501": {
+   "basis": "news",
+   "place": "Bloomington, IN"
+  },
+  "flock-129499": {
+   "basis": "news",
+   "place": "Bloomington, IN"
+  },
+  "flock-129495": {
+   "basis": "news",
+   "place": "Bloomington, IN"
+  },
+  "flock-129500": {
+   "basis": "news",
+   "place": "Bloomington, IN"
+  },
+  "flock-167958": {
+   "basis": "news",
+   "place": "Erlanger, KY"
+  },
+  "flock-167955": {
+   "basis": "news",
+   "place": "Erlanger, KY"
+  },
+  "flock-167957": {
+   "basis": "news",
+   "place": "Erlanger, KY"
+  },
+  "flock-167956": {
+   "basis": "news",
+   "place": "Erlanger, KY"
+  },
+  "flock-70410": {
+   "basis": "news",
+   "place": "Nantucket, MA"
+  },
+  "flock-80704": {
+   "basis": "news",
+   "place": "Nantucket, MA"
+  },
+  "flock-128799": {
+   "basis": "news",
+   "place": "Stow, MA"
+  },
+  "flock-128798": {
+   "basis": "news",
+   "place": "Stow, MA"
+  },
+  "flock-128797": {
+   "basis": "news",
+   "place": "Stow, MA"
+  },
+  "flock-206439": {
+   "basis": "news",
+   "place": "South Portland, ME"
+  },
+  "flock-206441": {
+   "basis": "news",
+   "place": "South Portland, ME"
+  },
+  "flock-206440": {
+   "basis": "news",
+   "place": "South Portland, ME"
+  },
+  "flock-206442": {
+   "basis": "news",
+   "place": "South Portland, ME"
+  },
+  "flock-206443": {
+   "basis": "news",
+   "place": "South Portland, ME"
+  },
+  "flock-206444": {
+   "basis": "news",
+   "place": "South Portland, ME"
+  },
+  "flock-206438": {
+   "basis": "news",
+   "place": "South Portland, ME"
+  },
+  "flock-154809": {
+   "basis": "news",
+   "place": "Columbia Heights, MN"
+  },
+  "flock-154814": {
+   "basis": "news",
+   "place": "Columbia Heights, MN"
+  },
+  "flock-154815": {
+   "basis": "news",
+   "place": "Columbia Heights, MN"
+  },
+  "flock-154816": {
+   "basis": "news",
+   "place": "Columbia Heights, MN"
+  },
+  "flock-154817": {
+   "basis": "news",
+   "place": "Columbia Heights, MN"
+  },
+  "flock-260519": {
+   "basis": "news",
+   "place": "Crystal, MN"
+  },
+  "flock-277098": {
+   "basis": "news",
+   "place": "Itasca County, MN"
+  },
+  "flock-277099": {
+   "basis": "news",
+   "place": "Itasca County, MN"
+  },
+  "flock-277100": {
+   "basis": "news",
+   "place": "Itasca County, MN"
+  },
+  "flock-277101": {
+   "basis": "news",
+   "place": "Itasca County, MN"
+  },
+  "flock-277102": {
+   "basis": "news",
+   "place": "Itasca County, MN"
+  },
+  "flock-277103": {
+   "basis": "news",
+   "place": "Itasca County, MN"
+  },
+  "flock-277104": {
+   "basis": "news",
+   "place": "Itasca County, MN"
+  },
+  "flock-277105": {
+   "basis": "news",
+   "place": "Itasca County, MN"
+  },
+  "flock-277106": {
+   "basis": "news",
+   "place": "Itasca County, MN"
+  },
+  "flock-277107": {
+   "basis": "news",
+   "place": "Itasca County, MN"
+  },
+  "flock-277108": {
+   "basis": "news",
+   "place": "Itasca County, MN"
+  },
+  "flock-277110": {
+   "basis": "news",
+   "place": "Itasca County, MN"
+  },
+  "flock-277111": {
+   "basis": "news",
+   "place": "Itasca County, MN"
+  },
+  "flock-277113": {
+   "basis": "news",
+   "place": "Itasca County, MN"
+  },
+  "flock-277115": {
+   "basis": "news",
+   "place": "Itasca County, MN"
+  },
+  "flock-256313": {
+   "basis": "news",
+   "place": "Winona, MN"
+  },
+  "flock-256312": {
+   "basis": "news",
+   "place": "Winona, MN"
+  },
+  "flock-256316": {
+   "basis": "news",
+   "place": "Winona, MN"
+  },
+  "flock-256315": {
+   "basis": "news",
+   "place": "Winona, MN"
+  },
+  "flock-256310": {
+   "basis": "news",
+   "place": "Winona, MN"
+  },
+  "flock-256311": {
+   "basis": "news",
+   "place": "Winona, MN"
+  },
+  "flock-274092": {
+   "basis": "news",
+   "place": "Hillsborough, NC"
+  },
+  "flock-289522": {
+   "basis": "news",
+   "place": "Hillsborough, NC"
+  },
+  "flock-274098": {
+   "basis": "news",
+   "place": "Hillsborough, NC"
+  },
+  "flock-55168": {
+   "basis": "news",
+   "place": "Syracuse, NY"
+  },
+  "flock-32478": {
+   "basis": "news",
+   "place": "Syracuse, NY"
+  },
+  "flock-188481": {
+   "basis": "news",
+   "place": "Syracuse, NY"
+  },
+  "flock-32451": {
+   "basis": "news",
+   "place": "Syracuse, NY"
+  },
+  "flock-32575": {
+   "basis": "news",
+   "place": "Syracuse, NY"
+  },
+  "flock-32748": {
+   "basis": "news",
+   "place": "Syracuse, NY"
+  },
+  "flock-79166": {
+   "basis": "news",
+   "place": "Syracuse, NY"
+  },
+  "flock-32440": {
+   "basis": "news",
+   "place": "Syracuse, NY"
+  },
+  "flock-32733": {
+   "basis": "news",
+   "place": "Syracuse, NY"
+  },
+  "flock-188490": {
+   "basis": "news",
+   "place": "Syracuse, NY"
+  },
+  "flock-32722": {
+   "basis": "news",
+   "place": "Syracuse, NY"
+  },
+  "flock-32723": {
+   "basis": "news",
+   "place": "Syracuse, NY"
+  },
+  "flock-32629": {
+   "basis": "news",
+   "place": "Syracuse, NY"
+  },
+  "flock-78649": {
+   "basis": "news",
+   "place": "Hubbard (city), OH"
+  },
+  "flock-71648": {
+   "basis": "news",
+   "place": "Hubbard (city), OH"
+  },
+  "flock-36286": {
+   "basis": "news",
+   "place": "Hubbard (city), OH"
+  },
+  "flock-75677": {
+   "basis": "news",
+   "place": "Hubbard (city), OH"
+  },
+  "flock-67391": {
+   "basis": "news",
+   "place": "Hubbard (city), OH"
+  },
+  "flock-60898": {
+   "basis": "news",
+   "place": "Hubbard (city), OH"
+  },
+  "flock-169958": {
+   "basis": "news",
+   "place": "Liberty Hill, TX"
+  },
+  "flock-159468": {
+   "basis": "news",
+   "place": "Arlington County, VA"
+  },
+  "flock-159480": {
+   "basis": "news",
+   "place": "Arlington County, VA"
+  },
+  "flock-159481": {
+   "basis": "news",
+   "place": "Arlington County, VA"
+  },
+  "flock-159484": {
+   "basis": "news",
+   "place": "Arlington County, VA"
+  },
+  "flock-159462": {
+   "basis": "news",
+   "place": "Arlington County, VA"
+  },
+  "flock-159475": {
+   "basis": "news",
+   "place": "Arlington County, VA"
+  },
+  "flock-159463": {
+   "basis": "news",
+   "place": "Arlington County, VA"
+  },
+  "flock-159466": {
+   "basis": "news",
+   "place": "Arlington County, VA"
+  },
+  "flock-159482": {
+   "basis": "news",
+   "place": "Arlington County, VA"
+  },
+  "flock-159461": {
+   "basis": "news",
+   "place": "Arlington County, VA"
+  },
+  "flock-159465": {
+   "basis": "news",
+   "place": "Arlington County, VA"
+  },
+  "flock-159471": {
+   "basis": "news",
+   "place": "Arlington County, VA"
+  },
+  "flock-159473": {
+   "basis": "news",
+   "place": "Arlington County, VA"
+  },
+  "flock-159467": {
+   "basis": "news",
+   "place": "Arlington County, VA"
+  },
+  "flock-159464": {
+   "basis": "news",
+   "place": "Arlington County, VA"
+  },
+  "flock-159479": {
+   "basis": "news",
+   "place": "Arlington County, VA"
+  },
+  "flock-159470": {
+   "basis": "news",
+   "place": "Arlington County, VA"
+  },
+  "flock-159472": {
+   "basis": "news",
+   "place": "Arlington County, VA"
+  },
+  "flock-159474": {
+   "basis": "news",
+   "place": "Arlington County, VA"
+  },
+  "flock-159478": {
+   "basis": "news",
+   "place": "Arlington County, VA"
+  },
+  "flock-159483": {
+   "basis": "news",
+   "place": "Arlington County, VA"
+  },
+  "flock-159477": {
+   "basis": "news",
+   "place": "Arlington County, VA"
+  },
+  "flock-159469": {
+   "basis": "news",
+   "place": "Arlington County, VA"
+  },
+  "flock-175980": {
+   "basis": "news",
+   "place": "Arlington County, VA"
+  },
+  "flock-159476": {
+   "basis": "news",
+   "place": "Arlington County, VA"
+  },
+  "flock-235306": {
+   "basis": "news",
+   "place": "Arlington County, VA"
+  },
+  "flock-235313": {
+   "basis": "news",
+   "place": "Arlington County, VA"
+  },
+  "flock-10500": {
+   "basis": "news",
+   "place": "Augusta County (Fishersville), VA"
+  },
+  "flock-65512": {
+   "basis": "news",
+   "place": "Augusta County (Fishersville), VA"
+  },
+  "flock-6712": {
+   "basis": "news",
+   "place": "Christiansburg, VA"
+  },
+  "flock-7219": {
+   "basis": "news",
+   "place": "Christiansburg, VA"
+  },
+  "flock-7063": {
+   "basis": "news",
+   "place": "Christiansburg, VA"
+  },
+  "flock-7070": {
+   "basis": "news",
+   "place": "Christiansburg, VA"
+  },
+  "flock-7136": {
+   "basis": "news",
+   "place": "Christiansburg, VA"
+  },
+  "flock-85584": {
+   "basis": "news",
+   "place": "Harrisonburg, VA"
+  },
+  "flock-85606": {
+   "basis": "news",
+   "place": "Harrisonburg, VA"
+  },
+  "flock-88730": {
+   "basis": "news",
+   "place": "Harrisonburg, VA"
+  },
+  "flock-67981": {
+   "basis": "news",
+   "place": "Harrisonburg, VA"
+  },
+  "flock-85393": {
+   "basis": "news",
+   "place": "Harrisonburg, VA"
+  },
+  "flock-82368": {
+   "basis": "news",
+   "place": "Harrisonburg, VA"
+  },
+  "flock-82380": {
+   "basis": "news",
+   "place": "Harrisonburg, VA"
+  },
+  "flock-78380": {
+   "basis": "news",
+   "place": "Harrisonburg, VA"
+  },
+  "flock-22585": {
+   "basis": "news",
+   "place": "Harrisonburg, VA"
+  },
+  "flock-116142": {
+   "basis": "news",
+   "place": "Harrisonburg, VA"
+  },
+  "flock-49135": {
+   "basis": "news",
+   "place": "Harrisonburg, VA"
+  },
+  "flock-75341": {
+   "basis": "news",
+   "place": "Harrisonburg, VA"
+  },
+  "flock-49800": {
+   "basis": "news",
+   "place": "Harrisonburg, VA"
+  },
+  "flock-49733": {
+   "basis": "news",
+   "place": "Harrisonburg, VA"
+  },
+  "flock-82035": {
+   "basis": "news",
+   "place": "Harrisonburg, VA"
+  },
+  "flock-13182": {
+   "basis": "news",
+   "place": "Harrisonburg, VA"
+  },
+  "flock-49404": {
+   "basis": "news",
+   "place": "Harrisonburg, VA"
+  },
+  "flock-51109": {
+   "basis": "news",
+   "place": "Harrisonburg, VA"
+  },
+  "flock-49432": {
+   "basis": "news",
+   "place": "Harrisonburg, VA"
+  },
+  "flock-49684": {
+   "basis": "news",
+   "place": "Harrisonburg, VA"
+  },
+  "flock-49583": {
+   "basis": "news",
+   "place": "Harrisonburg, VA"
+  },
+  "flock-49437": {
+   "basis": "news",
+   "place": "Harrisonburg, VA"
+  },
+  "flock-63374": {
+   "basis": "news",
+   "place": "Harrisonburg, VA"
+  },
+  "flock-49268": {
+   "basis": "news",
+   "place": "Harrisonburg, VA"
+  },
+  "flock-49285": {
+   "basis": "news",
+   "place": "Harrisonburg, VA"
+  },
+  "flock-15417": {
+   "basis": "news",
+   "place": "Harrisonburg, VA"
+  },
+  "flock-33647": {
+   "basis": "news",
+   "place": "Harrisonburg, VA"
+  },
+  "flock-13027": {
+   "basis": "news",
+   "place": "Harrisonburg, VA"
+  },
+  "flock-172351": {
+   "basis": "news",
+   "place": "Staunton, VA"
+  },
+  "flock-172352": {
+   "basis": "news",
+   "place": "Staunton, VA"
+  },
+  "flock-172350": {
+   "basis": "news",
+   "place": "Staunton, VA"
+  },
+  "flock-172354": {
+   "basis": "news",
+   "place": "Staunton, VA"
+  },
+  "flock-172353": {
+   "basis": "news",
+   "place": "Staunton, VA"
+  },
+  "flock-152465": {
+   "basis": "news",
+   "place": "Ocean Shores (Grays Harbor County Sheriff's Office camera), WA"
+  },
+  "flock-7228": {
+   "basis": "news",
+   "place": "Cudahy (Eagle Sports Range, private business), WI"
+  },
+  "flock-6735": {
+   "basis": "news",
+   "place": "Cudahy (Eagle Sports Range, private business), WI"
+  },
+  "flock-109347": {
+   "basis": "news",
+   "place": "Cudahy (Eagle Sports Range, private business), WI"
+  },
+  "flock-306620": {
+   "basis": "news",
+   "place": "Racine County (Sheriff's Office), WI"
+  },
+  "flock-306618": {
+   "basis": "news",
+   "place": "Racine County (Sheriff's Office), WI"
+  },
+  "flock-120008": {
+   "basis": "news",
+   "place": "Verona (city), WI"
+  },
+  "flock-120009": {
+   "basis": "news",
+   "place": "Verona (city), WI"
+  },
+  "flock-234798": {
+   "basis": "news",
+   "place": "Verona (city), WI"
+  },
+  "flock-218020": {
+   "basis": "news",
+   "place": "Washington Island (Town of Washington), Door County, WI"
+  },
+  "flock-445": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-11",
+   "osm_node": 13310774101,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190369803"
+  },
+  "flock-476": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-06",
+   "osm_node": 13416685480,
+   "comment": "Delete a surveillance node: Removed per Knox County Commission decision. I have verified it is now gone.",
+   "source": "https://www.openstreetmap.org/changeset/190114509"
+  },
+  "flock-649": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-24",
+   "osm_node": 13429191602,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189476529"
+  },
+  "flock-673": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13127728523,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189943321"
+  },
+  "flock-702": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-30",
+   "osm_node": 14120580303,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189753234"
+  },
+  "flock-742": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-29",
+   "osm_node": 13769554901,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189750879"
+  },
+  "flock-824": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-25",
+   "osm_node": 13384387201,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189523295"
+  },
+  "flock-982": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-30",
+   "osm_node": 14120581201,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189753237"
+  },
+  "flock-1038": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-30",
+   "osm_node": 13817967701,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189753258"
+  },
+  "flock-1212": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-30",
+   "osm_node": 13817969101,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189753257"
+  },
+  "flock-1339": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-14",
+   "osm_node": 12177074192,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190482259"
+  },
+  "flock-2962": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-27",
+   "osm_node": 13811902501,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189613027"
+  },
+  "flock-3036": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-25",
+   "osm_node": 14062960301,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189542671"
+  },
+  "flock-3621": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-20",
+   "osm_node": 12750863792,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190769944"
+  },
+  "flock-5319": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-27",
+   "osm_node": 13311071387,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189651456"
+  },
+  "flock-5449": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-22",
+   "osm_node": 14060954801,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189419479"
+  },
+  "flock-5821": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13072544566,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190669112"
+  },
+  "flock-6595": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13111067736,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189943321"
+  },
+  "flock-6916": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 13067792356,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190224109"
+  },
+  "flock-7803": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-21",
+   "osm_node": 12844669301,
+   "comment": "removed camera",
+   "source": "https://www.openstreetmap.org/changeset/190814433"
+  },
+  "flock-7886": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-05",
+   "osm_node": 13093301188,
+   "comment": "Delete: ALPR camera removed",
+   "source": "https://www.openstreetmap.org/changeset/190014631"
+  },
+  "flock-8636": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-04",
+   "osm_node": 13207308872,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190004123"
+  },
+  "flock-9362": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-28",
+   "osm_node": 14029006501,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189702536"
+  },
+  "flock-10329": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-26",
+   "osm_node": 12697654486,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189584370"
+  },
+  "flock-14644": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13111040677,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189943321"
+  },
+  "flock-16873": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-02",
+   "osm_node": 12511357705,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189904089"
+  },
+  "flock-17353": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-12",
+   "osm_node": 13333051602,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190380057"
+  },
+  "flock-17836": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 13382223102,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190173809"
+  },
+  "flock-19299": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-29",
+   "osm_node": 13653318503,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189749890"
+  },
+  "flock-20019": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-25",
+   "osm_node": 13338767802,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189561260"
+  },
+  "flock-103737": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-27",
+   "osm_node": 12438163621,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189650864"
+  },
+  "flock-103762": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-11",
+   "osm_node": 13546960601,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190362155"
+  },
+  "flock-104438": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-01",
+   "osm_node": 13534391627,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189822101"
+  },
+  "flock-105450": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-14",
+   "osm_node": 12536822159,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190488874"
+  },
+  "flock-105974": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13253152061,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189955102"
+  },
+  "flock-106107": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13370865323,
+   "comment": "This ALPR has been uninstalled and is no longer present at this location.",
+   "source": "https://www.openstreetmap.org/changeset/189937656"
+  },
+  "flock-106110": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-24",
+   "osm_node": 12408446522,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189520008"
+  },
+  "flock-106181": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 12756449445,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190669112"
+  },
+  "flock-106187": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-20",
+   "osm_node": 12756478371,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190769944"
+  },
+  "flock-106188": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-20",
+   "osm_node": 13133094030,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190769944"
+  },
+  "flock-106189": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-20",
+   "osm_node": 13080103037,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190769944"
+  },
+  "flock-106190": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-20",
+   "osm_node": 13133101503,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190769944"
+  },
+  "flock-106191": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-20",
+   "osm_node": 12752038884,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190769944"
+  },
+  "flock-106192": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 12756472079,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190669112"
+  },
+  "flock-106319": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-24",
+   "osm_node": 13072244152,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189476537"
+  },
+  "flock-106825": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-07",
+   "osm_node": 13078866928,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190170113"
+  },
+  "flock-106830": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-14",
+   "osm_node": 13094531198,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190528401"
+  },
+  "flock-106837": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-07",
+   "osm_node": 13873890101,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190170126"
+  },
+  "flock-106844": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-10",
+   "osm_node": 12490532737,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190324447"
+  },
+  "flock-106862": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-05",
+   "osm_node": 13462997601,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190011961"
+  },
+  "flock-106868": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-05",
+   "osm_node": 13462979501,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190011956"
+  },
+  "flock-108372": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-26",
+   "osm_node": 13097061354,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189596484"
+  },
+  "flock-108373": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13352374301,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189938422"
+  },
+  "flock-108485": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-19",
+   "osm_node": 13313688501,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190760667"
+  },
+  "flock-108823": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-19",
+   "osm_node": 13375846702,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190722659"
+  },
+  "flock-108872": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13409496503,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189938067"
+  },
+  "flock-108873": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13111067737,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189943321"
+  },
+  "flock-108875": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-25",
+   "osm_node": 13346779201,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189561879"
+  },
+  "flock-108876": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13969333301,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189938422"
+  },
+  "flock-109553": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-09",
+   "osm_node": 13929609201,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190276849"
+  },
+  "flock-110591": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-19",
+   "osm_node": 13382219001,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190722671"
+  },
+  "flock-110592": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-19",
+   "osm_node": 13382218801,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190722675"
+  },
+  "flock-110650": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-24",
+   "osm_node": 13250906388,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189519805"
+  },
+  "flock-110652": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-24",
+   "osm_node": 13250906387,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189519802"
+  },
+  "flock-110875": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-05",
+   "osm_node": 13839632701,
+   "comment": "Delete a surveillance node: FL SR - Device Removed",
+   "source": "https://www.openstreetmap.org/changeset/190061070"
+  },
+  "flock-110877": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-05",
+   "osm_node": 13839632701,
+   "comment": "Delete a surveillance node: FL SR - Device Removed",
+   "source": "https://www.openstreetmap.org/changeset/190061070"
+  },
+  "flock-111031": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13158563131,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189943321"
+  },
+  "flock-111399": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-09",
+   "osm_node": 14108172001,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190260956"
+  },
+  "flock-111400": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-09",
+   "osm_node": 14108171201,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190260961"
+  },
+  "flock-112340": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-04",
+   "osm_node": 13339208201,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189960386"
+  },
+  "flock-112341": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-04",
+   "osm_node": 13421981704,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189960382"
+  },
+  "flock-112402": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-26",
+   "osm_node": 12437814651,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189580380"
+  },
+  "flock-113116": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-02",
+   "osm_node": 13599417577,
+   "comment": "Flock Safety cameras removed by Alachua County per FDOT order dated 08/31/2026. Visual observation on 10/2/2026",
+   "source": "https://www.openstreetmap.org/changeset/189904048"
+  },
+  "flock-114205": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-09",
+   "osm_node": 14124804744,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190253997"
+  },
+  "flock-114214": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 13952616601,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190225066"
+  },
+  "flock-114215": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 13952617901,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190225072"
+  },
+  "flock-114863": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-23",
+   "osm_node": 12818533469,
+   "comment": "Flock Camera was removed, pole still standing",
+   "source": "https://www.openstreetmap.org/changeset/189425521"
+  },
+  "flock-115278": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 14080390001,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189955294"
+  },
+  "flock-115280": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 14080379701,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189955286"
+  },
+  "flock-115383": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-28",
+   "osm_node": 13384291501,
+   "comment": "Cameras have been taken down",
+   "source": "https://www.openstreetmap.org/changeset/189656652"
+  },
+  "flock-115384": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-28",
+   "osm_node": 13352095983,
+   "comment": "Cameras have been taken down",
+   "source": "https://www.openstreetmap.org/changeset/189656652"
+  },
+  "flock-115385": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-28",
+   "osm_node": 13352095982,
+   "comment": "Cameras have been taken down",
+   "source": "https://www.openstreetmap.org/changeset/189656652"
+  },
+  "flock-116061": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 12955623453,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190638514"
+  },
+  "flock-116065": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13027252128,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190638419"
+  },
+  "flock-116534": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13160028965,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189942833"
+  },
+  "flock-116536": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 14031489001,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189938067"
+  },
+  "flock-116537": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13115303045,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189943321"
+  },
+  "flock-116542": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13346734301,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189943321"
+  },
+  "flock-116549": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13650554501,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189938067"
+  },
+  "flock-116552": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13409505001,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189938067"
+  },
+  "flock-116724": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-30",
+   "osm_node": 13648010327,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189793582"
+  },
+  "flock-116728": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-30",
+   "osm_node": 13614715204,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189793586"
+  },
+  "flock-119198": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-25",
+   "osm_node": 12685489465,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189561328"
+  },
+  "flock-119246": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-01",
+   "osm_node": 13932087801,
+   "comment": "two flock cameras removed at main/ cr 315",
+   "source": "https://www.openstreetmap.org/changeset/189805910"
+  },
+  "flock-119251": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-01",
+   "osm_node": 13932082203,
+   "comment": "two flock cameras removed at main/ cr 315",
+   "source": "https://www.openstreetmap.org/changeset/189805910"
+  },
+  "flock-119570": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-15",
+   "osm_node": 13584861001,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190536248"
+  },
+  "flock-122158": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-12",
+   "osm_node": 13204959361,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190377484"
+  },
+  "flock-122159": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-12",
+   "osm_node": 13204959360,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190377485"
+  },
+  "flock-122195": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13663761101,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190664738"
+  },
+  "flock-122197": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13905765201,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190664735"
+  },
+  "flock-122268": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-24",
+   "osm_node": 12516150184,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189517651"
+  },
+  "flock-122269": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-24",
+   "osm_node": 12515861245,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189517657"
+  },
+  "flock-123707": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-05",
+   "osm_node": 13283187368,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190034252"
+  },
+  "flock-123709": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-05",
+   "osm_node": 13309603901,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190034277"
+  },
+  "flock-124778": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13127322989,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190664766"
+  },
+  "flock-124779": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13403426602,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190664788"
+  },
+  "flock-124780": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13944135801,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190664785"
+  },
+  "flock-125106": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-02",
+   "osm_node": 13599487101,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189902112"
+  },
+  "flock-125232": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-19",
+   "osm_node": 12980560286,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190761387"
+  },
+  "flock-125268": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-05",
+   "osm_node": 13021934115,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190028275"
+  },
+  "flock-125291": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-28",
+   "osm_node": 13878641401,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189702383"
+  },
+  "flock-126313": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-19",
+   "osm_node": 13776790101,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190748734"
+  },
+  "flock-126878": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-26",
+   "osm_node": 12722518912,
+   "comment": "Delete a surveillance node: Pole has been cut down",
+   "source": "https://www.openstreetmap.org/changeset/189603960"
+  },
+  "flock-127329": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-30",
+   "osm_node": 14052266501,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189798163"
+  },
+  "flock-127330": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-30",
+   "osm_node": 13472189601,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189797903"
+  },
+  "flock-127331": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-30",
+   "osm_node": 13472183802,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189797899"
+  },
+  "flock-127332": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-01",
+   "osm_node": 12772766690,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189798406"
+  },
+  "flock-127335": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-30",
+   "osm_node": 14052266201,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189798158"
+  },
+  "flock-127336": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-01",
+   "osm_node": 13102868519,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189798445"
+  },
+  "flock-127337": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-02",
+   "osm_node": 13910641701,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189856407"
+  },
+  "flock-127338": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-30",
+   "osm_node": 12772744437,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189798093"
+  },
+  "flock-127339": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-30",
+   "osm_node": 13102877929,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189797961"
+  },
+  "flock-128328": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-26",
+   "osm_node": 13158561626,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189596477"
+  },
+  "flock-128331": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13346759201,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189938422"
+  },
+  "flock-128569": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-07",
+   "osm_node": 13482042501,
+   "comment": "Delete a surveillance node: They cut this shit down",
+   "source": "https://www.openstreetmap.org/changeset/190138801"
+  },
+  "flock-129580": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-16",
+   "osm_node": 13539252465,
+   "comment": "Flock ALPR is gone.",
+   "source": "https://www.openstreetmap.org/changeset/190586041"
+  },
+  "flock-131542": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 13109131028,
+   "comment": "This was formerly present as shown, but has been removed. This is presumably due to the city's cancellation of their contract with that company. https://patch.com/connecticut/windsor/windsor-keeps-flo",
+   "source": "https://www.openstreetmap.org/changeset/190182036"
+  },
+  "flock-131549": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 13159307344,
+   "comment": "This was formerly present as shown, but has been removed. This is presumably due to the city's cancellation of their contract with that company. https://patch.com/connecticut/windsor/windsor-keeps-flo",
+   "source": "https://www.openstreetmap.org/changeset/190181950"
+  },
+  "flock-131551": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 13175416676,
+   "comment": "This was formerly present as shown, but has been removed. This is presumably due to the city's cancellation of their contract with that company. https://patch.com/connecticut/windsor/windsor-keeps-flo",
+   "source": "https://www.openstreetmap.org/changeset/190181887"
+  },
+  "flock-131552": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 13160890229,
+   "comment": "This was formerly present as shown, but has been removed. This is presumably due to the city's cancellation of their contract with that company. https://patch.com/connecticut/windsor/windsor-keeps-flo",
+   "source": "https://www.openstreetmap.org/changeset/190181850"
+  },
+  "flock-131554": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 13269474098,
+   "comment": "This was formerly present as shown, but has been removed. This is presumably due to the city's cancellation of their contract with that company. https://patch.com/connecticut/windsor/windsor-keeps-flo",
+   "source": "https://www.openstreetmap.org/changeset/190181927"
+  },
+  "flock-131556": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 13160825300,
+   "comment": "This was formerly present as shown, but has been removed. This is presumably due to the city's cancellation of their contract with that company. https://patch.com/connecticut/windsor/windsor-keeps-flo",
+   "source": "https://www.openstreetmap.org/changeset/190182106"
+  },
+  "flock-131561": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 13109131029,
+   "comment": "This was formerly present as shown, but has been removed. This is presumably due to the city's cancellation of their contract with that company. https://patch.com/connecticut/windsor/windsor-keeps-flo",
+   "source": "https://www.openstreetmap.org/changeset/190182054"
+  },
+  "flock-131563": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 13269474097,
+   "comment": "This was formerly present as shown, but has been removed. This is presumably due to the city's cancellation of their contract with that company. https://patch.com/connecticut/windsor/windsor-keeps-flo",
+   "source": "https://www.openstreetmap.org/changeset/190181808"
+  },
+  "flock-134244": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13652225001,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189938067"
+  },
+  "flock-135766": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-26",
+   "osm_node": 13046400919,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189584597"
+  },
+  "flock-135802": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-26",
+   "osm_node": 13046400918,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189584610"
+  },
+  "flock-139992": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-18",
+   "osm_node": 13474304401,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190676218"
+  },
+  "flock-142886": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-10",
+   "osm_node": 13606917701,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190324514"
+  },
+  "flock-142911": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-10",
+   "osm_node": 13606917201,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190324519"
+  },
+  "flock-143539": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-18",
+   "osm_node": 13959006606,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190705841"
+  },
+  "flock-146780": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-05",
+   "osm_node": 14075821902,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190007273"
+  },
+  "flock-148497": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-26",
+   "osm_node": 13076601327,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189596797"
+  },
+  "flock-148531": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-26",
+   "osm_node": 13076601328,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189596790"
+  },
+  "flock-149017": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-15",
+   "osm_node": 13323167401,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190568278"
+  },
+  "flock-150863": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-09",
+   "osm_node": 14123265501,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190249887"
+  },
+  "flock-150868": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-18",
+   "osm_node": 13440724801,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190712345"
+  },
+  "flock-150869": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-18",
+   "osm_node": 13436364101,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190712331"
+  },
+  "flock-154380": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-05",
+   "osm_node": 13948663901,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190057111"
+  },
+  "flock-154384": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-05",
+   "osm_node": 13954861101,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190057044"
+  },
+  "flock-154393": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-29",
+   "osm_node": 13246332571,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189750782"
+  },
+  "flock-154644": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-24",
+   "osm_node": 13947015301,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189511487"
+  },
+  "flock-154673": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-02",
+   "osm_node": 13233446801,
+   "comment": "Flock Safety cameras removed by Alachua County per FDOT order dated 08/31/2026. Visual observation on 10/2/2026",
+   "source": "https://www.openstreetmap.org/changeset/189904312"
+  },
+  "flock-154676": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-02",
+   "osm_node": 13672067767,
+   "comment": "Flock Safety cameras removed by Alachua County per FDOT order dated 08/31/2026. Visual observation on 10/2/2026",
+   "source": "https://www.openstreetmap.org/changeset/189904073"
+  },
+  "flock-155451": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 13269474099,
+   "comment": "This was formerly present as shown, but has been removed. This is presumably due to the city's cancellation of their contract with that company. https://patch.com/connecticut/windsor/windsor-keeps-flo",
+   "source": "https://www.openstreetmap.org/changeset/190181927"
+  },
+  "flock-156424": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13892617901,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189905878"
+  },
+  "flock-159114": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-13",
+   "osm_node": 12760375810,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190455609"
+  },
+  "flock-160554": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-22",
+   "osm_node": 13413501484,
+   "comment": "removed flock cameras",
+   "source": "https://www.openstreetmap.org/changeset/189375700"
+  },
+  "flock-160562": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-26",
+   "osm_node": 13375056874,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189602286"
+  },
+  "flock-160605": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 12577128771,
+   "comment": "Delete a surveillance node: Device removed from state road per FDOT (verified in person)",
+   "source": "https://www.openstreetmap.org/changeset/189926245"
+  },
+  "flock-160625": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 12577128770,
+   "comment": "Delete a surveillance node: Device removed from state road per FDOT rule (verified in person)",
+   "source": "https://www.openstreetmap.org/changeset/189926275"
+  },
+  "flock-160749": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-15",
+   "osm_node": 13341082133,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190565515"
+  },
+  "flock-161032": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-25",
+   "osm_node": 13981130501,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189560875"
+  },
+  "flock-161035": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-19",
+   "osm_node": 14203032201,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190724019"
+  },
+  "flock-161289": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13228334663,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189938422"
+  },
+  "flock-161384": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-01",
+   "osm_node": 13007433073,
+   "comment": "Removed Flock camera node as it's not longer there. Cave Creek canceled their Flock contract (https://www.cavecreekaz.gov/m/newsflash/home/detail/1028) and these cameras have been removed. I can physi",
+   "source": "https://www.openstreetmap.org/changeset/189802591"
+  },
+  "flock-161975": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-04",
+   "osm_node": 13464295101,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190005519"
+  },
+  "flock-161977": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-04",
+   "osm_node": 13464294701,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190005521"
+  },
+  "flock-162727": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-01",
+   "osm_node": 13995576001,
+   "comment": "Delete a surveillance node: Camera removed",
+   "source": "https://www.openstreetmap.org/changeset/189849358"
+  },
+  "flock-162728": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-01",
+   "osm_node": 14069205201,
+   "comment": "Delete a surveillance node: Camera removed",
+   "source": "https://www.openstreetmap.org/changeset/189849374"
+  },
+  "flock-163416": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-28",
+   "osm_node": 13332918202,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189702612"
+  },
+  "flock-164503": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 12681274931,
+   "comment": "Delete a surveillance node: I drive by this one twice a week, it is cut at the base GONE.",
+   "source": "https://www.openstreetmap.org/changeset/190214717"
+  },
+  "flock-164511": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-09",
+   "osm_node": 13726610580,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190260969"
+  },
+  "flock-164837": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-10",
+   "osm_node": 13513932901,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190323177"
+  },
+  "flock-164841": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-10",
+   "osm_node": 13155138942,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190279489"
+  },
+  "flock-164853": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-10",
+   "osm_node": 13475041301,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190279500"
+  },
+  "flock-166414": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-23",
+   "osm_node": 13718965665,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189470105"
+  },
+  "flock-166426": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-21",
+   "osm_node": 13450282101,
+   "comment": "Delete a surveillance node: Camera was damaged and removed. Will re-add if replaced.",
+   "source": "https://www.openstreetmap.org/changeset/190813580"
+  },
+  "flock-167114": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-12",
+   "osm_node": 14112655001,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190412106"
+  },
+  "flock-167118": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-06",
+   "osm_node": 13137188708,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190089726"
+  },
+  "flock-167122": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-12",
+   "osm_node": 13570786157,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190412122"
+  },
+  "flock-168198": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-24",
+   "osm_node": 14031164301,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189516255"
+  },
+  "flock-169653": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-15",
+   "osm_node": 13291155005,
+   "comment": "camera removed",
+   "source": "https://www.openstreetmap.org/changeset/190557752"
+  },
+  "flock-171266": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-27",
+   "osm_node": 13078019493,
+   "comment": "Removed",
+   "source": "https://www.openstreetmap.org/changeset/189609673"
+  },
+  "flock-171268": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-26",
+   "osm_node": 13078019494,
+   "comment": "Removed",
+   "source": "https://www.openstreetmap.org/changeset/189602122"
+  },
+  "flock-171270": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-26",
+   "osm_node": 13043177461,
+   "comment": "Removed",
+   "source": "https://www.openstreetmap.org/changeset/189602122"
+  },
+  "flock-171275": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-16",
+   "osm_node": 13174382353,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190605858"
+  },
+  "flock-171276": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-14",
+   "osm_node": 12716774088,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190482132"
+  },
+  "flock-171286": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-16",
+   "osm_node": 14152688201,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190606026"
+  },
+  "flock-171556": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-26",
+   "osm_node": 13043177460,
+   "comment": "Removed",
+   "source": "https://www.openstreetmap.org/changeset/189602122"
+  },
+  "flock-173494": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-28",
+   "osm_node": 13206714802,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189694267"
+  },
+  "flock-173997": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-26",
+   "osm_node": 13518367201,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189588189"
+  },
+  "flock-174363": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13594244109,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190631904"
+  },
+  "flock-174364": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13594244110,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190631909"
+  },
+  "flock-174365": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13610284437,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190631910"
+  },
+  "flock-174934": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-15",
+   "osm_node": 13198001976,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190565138"
+  },
+  "flock-174935": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-15",
+   "osm_node": 13198001978,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190565169"
+  },
+  "flock-174936": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-15",
+   "osm_node": 13198001977,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190565158"
+  },
+  "flock-174937": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-15",
+   "osm_node": 13198001975,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190565128"
+  },
+  "flock-175007": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-01",
+   "osm_node": 13700098507,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189842297"
+  },
+  "flock-176516": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-20",
+   "osm_node": 13172381416,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190802175"
+  },
+  "flock-177449": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-22",
+   "osm_node": 13477136001,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189419537"
+  },
+  "flock-178307": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-29",
+   "osm_node": 13477340802,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189733091"
+  },
+  "flock-180065": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-07",
+   "osm_node": 14111563301,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190120006"
+  },
+  "flock-180067": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-07",
+   "osm_node": 13315733723,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190120011"
+  },
+  "flock-180068": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-07",
+   "osm_node": 13315732388,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190120013"
+  },
+  "flock-180094": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-04",
+   "osm_node": 13360219401,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189958283"
+  },
+  "flock-180097": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-04",
+   "osm_node": 13391457050,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189958251"
+  },
+  "flock-180162": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-07",
+   "osm_node": 13427487901,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190119653"
+  },
+  "flock-181120": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-24",
+   "osm_node": 13201926475,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189475135"
+  },
+  "flock-181121": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-24",
+   "osm_node": 13201926474,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189475131"
+  },
+  "flock-181124": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-24",
+   "osm_node": 13303003002,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189475123"
+  },
+  "flock-181415": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13340401002,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190638499"
+  },
+  "flock-185719": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-30",
+   "osm_node": 13071558469,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189777081"
+  },
+  "flock-185721": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-24",
+   "osm_node": 13353999707,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189476551"
+  },
+  "flock-185723": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-24",
+   "osm_node": 14127573021,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189476554"
+  },
+  "flock-185728": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-09",
+   "osm_node": 13307164301,
+   "comment": "Flock Safety cameras removed by Alachua County per FDOT order dated 08/31/2026. Visual observation on 10/2/2026",
+   "source": "https://www.openstreetmap.org/changeset/190269951"
+  },
+  "flock-187731": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-04",
+   "osm_node": 13380350041,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189988378"
+  },
+  "flock-189467": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13563381227,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189938067"
+  },
+  "flock-190876": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-16",
+   "osm_node": 12871311828,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190583434"
+  },
+  "flock-191387": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13342969601,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189938067"
+  },
+  "flock-192165": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-04",
+   "osm_node": 13318140001,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190006261"
+  },
+  "flock-193299": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-02",
+   "osm_node": 14129301401,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189891155"
+  },
+  "flock-193300": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-02",
+   "osm_node": 13619249801,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189891141"
+  },
+  "flock-194201": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-14",
+   "osm_node": 14131199003,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190518330"
+  },
+  "flock-199540": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13027252131,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190638433"
+  },
+  "flock-199545": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-20",
+   "osm_node": 13712099701,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190811890"
+  },
+  "flock-202444": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-16",
+   "osm_node": 13952249701,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190603423"
+  },
+  "flock-203783": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-05",
+   "osm_node": 12703471400,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190015105"
+  },
+  "flock-203784": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-05",
+   "osm_node": 12700501004,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190015085"
+  },
+  "flock-203785": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-05",
+   "osm_node": 12704856872,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190015161"
+  },
+  "flock-21271": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-15",
+   "osm_node": 13116723993,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190536240"
+  },
+  "flock-21464": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13502992501,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190630717"
+  },
+  "flock-21755": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-20",
+   "osm_node": 12752090170,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190769944"
+  },
+  "flock-22207": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13357392201,
+   "comment": "These ALPRs have been uninstalled and are no longer present at this location.",
+   "source": "https://www.openstreetmap.org/changeset/189937744"
+  },
+  "flock-22463": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-02",
+   "osm_node": 13294829456,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189898396"
+  },
+  "flock-22677": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-27",
+   "osm_node": 13302186001,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189622187"
+  },
+  "flock-23685": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-15",
+   "osm_node": 13809615041,
+   "comment": "Delete a surveillance node: Cut down",
+   "source": "https://www.openstreetmap.org/changeset/190535951"
+  },
+  "flock-23702": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-01",
+   "osm_node": 13021086817,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189845934"
+  },
+  "flock-24265": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-30",
+   "osm_node": 13817971101,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189753471"
+  },
+  "flock-24293": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-29",
+   "osm_node": 13978737301,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189750870"
+  },
+  "flock-24331": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13120490189,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189938422"
+  },
+  "flock-24653": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13127892580,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190669112"
+  },
+  "flock-24662": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-29",
+   "osm_node": 13657596701,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189749892"
+  },
+  "flock-24688": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-25",
+   "osm_node": 14038480101,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189561724"
+  },
+  "flock-24868": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 12756478372,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190224109"
+  },
+  "flock-24882": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-29",
+   "osm_node": 12484887831,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189703627"
+  },
+  "flock-24916": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-18",
+   "osm_node": 13127885040,
+   "comment": "Camera removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190719143"
+  },
+  "flock-25046": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 12756482642,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190224109"
+  },
+  "flock-25131": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 13127911907,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190224109"
+  },
+  "flock-25177": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 12756507726,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190224109"
+  },
+  "flock-25479": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 13127899740,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190224196"
+  },
+  "flock-26091": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 12648628259,
+   "comment": "Delete a surveillance node: Device removed from state highway per FDOT rule (verified in person)",
+   "source": "https://www.openstreetmap.org/changeset/189926040"
+  },
+  "flock-26535": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-02",
+   "osm_node": 13367054501,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189854901"
+  },
+  "flock-26673": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13075362267,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190638458"
+  },
+  "flock-26921": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13502992301,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190630715"
+  },
+  "flock-27810": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13131897401,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189942833"
+  },
+  "flock-28067": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-13",
+   "osm_node": 12515861322,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190430490"
+  },
+  "flock-28089": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-16",
+   "osm_node": 12615295948,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190625343"
+  },
+  "flock-28300": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-11",
+   "osm_node": 12898453269,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190347743"
+  },
+  "flock-28441": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13127926231,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190669112"
+  },
+  "flock-28696": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13352596301,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190670680"
+  },
+  "flock-29234": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-04",
+   "osm_node": 12996240152,
+   "comment": "Deleted flock cameras that were taken down per FDOT order, Engineering and Operations Memorandum No. 26-01 (EOM26-01), titled “Revocation of General Use Permits for Automated License Plate Readers,” i",
+   "source": "https://www.openstreetmap.org/changeset/189989202"
+  },
+  "flock-29370": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-25",
+   "osm_node": 13507968501,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189561729"
+  },
+  "flock-29662": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-20",
+   "osm_node": 12752122879,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190769944"
+  },
+  "flock-29863": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-11",
+   "osm_node": 12408373294,
+   "comment": "flock alpr removed",
+   "source": "https://www.openstreetmap.org/changeset/190365819"
+  },
+  "flock-30053": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-16",
+   "osm_node": 12615295947,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190625340"
+  },
+  "flock-30117": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13227101316,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189938067"
+  },
+  "flock-30191": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 2526093935,
+   "comment": "delete removed flock cameras (removed due to FLHSMV order), all confirmed locally",
+   "source": "https://www.openstreetmap.org/changeset/190225023"
+  },
+  "flock-30261": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-26",
+   "osm_node": 12615295949,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189607017"
+  },
+  "flock-30560": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-10",
+   "osm_node": 13902741401,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190277630"
+  },
+  "flock-30648": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-30",
+   "osm_node": 13653318501,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189753233"
+  },
+  "flock-30820": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-30",
+   "osm_node": 13817981202,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189753252"
+  },
+  "flock-30847": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-30",
+   "osm_node": 13817981201,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189753323"
+  },
+  "flock-204525": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-27",
+   "osm_node": 13583007301,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189631997"
+  },
+  "flock-204745": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-27",
+   "osm_node": 13850744574,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189650298"
+  },
+  "flock-208030": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-25",
+   "osm_node": 13578284701,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189558516"
+  },
+  "flock-209099": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-23",
+   "osm_node": 13788457503,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189433931"
+  },
+  "flock-209100": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-23",
+   "osm_node": 13788375460,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189433937"
+  },
+  "flock-209101": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-23",
+   "osm_node": 13793027320,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189433945"
+  },
+  "flock-209102": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-23",
+   "osm_node": 13788416260,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189433926"
+  },
+  "flock-209103": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-23",
+   "osm_node": 13793030565,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189433950"
+  },
+  "flock-210734": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-19",
+   "osm_node": 14071299302,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190751895"
+  },
+  "flock-210736": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-19",
+   "osm_node": 14071326701,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190752014"
+  },
+  "flock-211531": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-13",
+   "osm_node": 12851470563,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190472107"
+  },
+  "flock-212332": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-07",
+   "osm_node": 13204051588,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190166953"
+  },
+  "flock-212333": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-06",
+   "osm_node": 13208000570,
+   "comment": "Flock Camera removed in September 2026.",
+   "source": "https://www.openstreetmap.org/changeset/190064120"
+  },
+  "flock-212393": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-04",
+   "osm_node": 13523334676,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189956319"
+  },
+  "flock-212692": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13510867502,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189938848"
+  },
+  "flock-214970": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-11",
+   "osm_node": 13829901301,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190356068"
+  },
+  "flock-216161": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13831419901,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190669867"
+  },
+  "flock-216432": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13932157401,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190669875"
+  },
+  "flock-217081": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-01",
+   "osm_node": 13689014301,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189842281"
+  },
+  "flock-217598": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-10",
+   "osm_node": 13111353862,
+   "comment": "I drove by twice and the camera was not there.",
+   "source": "https://www.openstreetmap.org/changeset/190325542"
+  },
+  "flock-217982": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-28",
+   "osm_node": 13127870991,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189676617"
+  },
+  "flock-218712": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-24",
+   "osm_node": 13246126542,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189503442"
+  },
+  "flock-218716": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-29",
+   "osm_node": 14024714501,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189733616"
+  },
+  "flock-218719": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13244040728,
+   "comment": "This ALPR has been uninstalled and is no longer present at this location.",
+   "source": "https://www.openstreetmap.org/changeset/189937860"
+  },
+  "flock-218726": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-29",
+   "osm_node": 14066724001,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189733512"
+  },
+  "flock-222188": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-14",
+   "osm_node": 13354354754,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190526995"
+  },
+  "flock-223661": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-02",
+   "osm_node": 13369659201,
+   "comment": "Flock Safety cameras removed by Alachua County per FDOT order dated 08/31/2026. Visual observation on 10/2/2026",
+   "source": "https://www.openstreetmap.org/changeset/189904230"
+  },
+  "flock-223669": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-24",
+   "osm_node": 13443110301,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189476540"
+  },
+  "flock-223674": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-02",
+   "osm_node": 13369658701,
+   "comment": "Flock Safety cameras removed by Alachua County per FDOT order dated 08/31/2026. Visual observation on 10/2/2026",
+   "source": "https://www.openstreetmap.org/changeset/189904118"
+  },
+  "flock-228501": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-26",
+   "osm_node": 13205118947,
+   "comment": "Removed Flock camera that no longer exists near Highlands, NC",
+   "source": "https://www.openstreetmap.org/changeset/189597385"
+  },
+  "flock-228502": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-26",
+   "osm_node": 13205118947,
+   "comment": "Removed Flock camera that no longer exists near Highlands, NC",
+   "source": "https://www.openstreetmap.org/changeset/189597385"
+  },
+  "flock-233033": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-05",
+   "osm_node": 13529907987,
+   "comment": "Delete a surveillance node: This flock camera was removed/cut down",
+   "source": "https://www.openstreetmap.org/changeset/190061541"
+  },
+  "flock-234408": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-07",
+   "osm_node": 13300464256,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190135326"
+  },
+  "flock-236578": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 14146003919,
+   "comment": "Delete a surveillance node: Removed",
+   "source": "https://www.openstreetmap.org/changeset/190659230"
+  },
+  "flock-238206": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-07",
+   "osm_node": 13596735301,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190168385"
+  },
+  "flock-238746": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-25",
+   "osm_node": 13099475945,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189560753"
+  },
+  "flock-238795": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-22",
+   "osm_node": 13461004301,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189375510"
+  },
+  "flock-238805": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-25",
+   "osm_node": 13099475946,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189560828"
+  },
+  "flock-238807": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-22",
+   "osm_node": 13482903101,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189375459"
+  },
+  "flock-238814": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-25",
+   "osm_node": 13971084201,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189560837"
+  },
+  "flock-239103": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-13",
+   "osm_node": 13356098301,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190429547"
+  },
+  "flock-239842": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-22",
+   "osm_node": 13710163303,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189399345"
+  },
+  "flock-242138": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-15",
+   "osm_node": 13438051801,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190565101"
+  },
+  "flock-249571": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-14",
+   "osm_node": 13952965001,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190526584"
+  },
+  "flock-251900": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-06",
+   "osm_node": 13574131572,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190088465"
+  },
+  "flock-255577": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-11",
+   "osm_node": 13398512701,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190365945"
+  },
+  "flock-255580": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-13",
+   "osm_node": 13343217125,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190427830"
+  },
+  "flock-255900": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-02",
+   "osm_node": 13434007001,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189857262"
+  },
+  "flock-255933": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-18",
+   "osm_node": 13978103186,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190705837"
+  },
+  "flock-256076": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-13",
+   "osm_node": 13174084954,
+   "comment": "removing Flock cameras from Byrson Manor. They are no longer there.",
+   "source": "https://www.openstreetmap.org/changeset/190430350"
+  },
+  "flock-256077": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-05",
+   "osm_node": 13648198501,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190051427"
+  },
+  "flock-256078": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-13",
+   "osm_node": 13256708181,
+   "comment": "removing Flock cameras from Byrson Manor. They are no longer there.",
+   "source": "https://www.openstreetmap.org/changeset/190430350"
+  },
+  "flock-259169": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-14",
+   "osm_node": 14088732951,
+   "comment": "The City of Oak Point terminated it's contract with Flock in August of 2026. The cameras were removed at the end of September. I have personally physically verified that both of these cameras are gone",
+   "source": "https://www.openstreetmap.org/changeset/190528035"
+  },
+  "flock-259171": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-14",
+   "osm_node": 13452659301,
+   "comment": "The City of Oak Point terminated it's contract with Flock in August of 2026. The cameras were removed at the end of September. I have personally physically verified that both of these cameras are gone",
+   "source": "https://www.openstreetmap.org/changeset/190528035"
+  },
+  "flock-264295": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-14",
+   "osm_node": 13329541501,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190518349"
+  },
+  "flock-268701": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13884151987,
+   "comment": "removed 2 ALPR cameras that were taken down",
+   "source": "https://www.openstreetmap.org/changeset/190654585"
+  },
+  "flock-268702": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13250462854,
+   "comment": "removed 2 ALPR cameras that were taken down",
+   "source": "https://www.openstreetmap.org/changeset/190654585"
+  },
+  "flock-268705": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-10",
+   "osm_node": 13479653901,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190277513"
+  },
+  "flock-268706": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-10",
+   "osm_node": 13483896501,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190277517"
+  },
+  "flock-270710": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-20",
+   "osm_node": 13329431502,
+   "comment": "Delete a surveillance node: Removed",
+   "source": "https://www.openstreetmap.org/changeset/190805224"
+  },
+  "flock-270712": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-20",
+   "osm_node": 13329440701,
+   "comment": "Delete a surveillance node: Removed",
+   "source": "https://www.openstreetmap.org/changeset/190805203"
+  },
+  "flock-275847": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-15",
+   "osm_node": 13265743989,
+   "comment": "Delete a surveillance node: Removed per Knox County Commission decision. I have verified it is now gone. The camera and solar panels have been removed, but the pole is still there at this time.",
+   "source": "https://www.openstreetmap.org/changeset/190580668"
+  },
+  "flock-276673": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-25",
+   "osm_node": 13301614694,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189522286"
+  },
+  "flock-277155": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-10",
+   "osm_node": 13662441001,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190301048"
+  },
+  "flock-278532": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-15",
+   "osm_node": 13543703901,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190580163"
+  },
+  "flock-278534": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-15",
+   "osm_node": 14005466901,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190580137"
+  },
+  "flock-278536": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-15",
+   "osm_node": 13401605501,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190580150"
+  },
+  "flock-278542": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-15",
+   "osm_node": 13396673601,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190580143"
+  },
+  "flock-278543": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-15",
+   "osm_node": 13195857481,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190580145"
+  },
+  "flock-282049": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-19",
+   "osm_node": 13926763503,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190751607"
+  },
+  "flock-282116": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-28",
+   "osm_node": 13357752436,
+   "comment": "Cameras have been taken down",
+   "source": "https://www.openstreetmap.org/changeset/189656652"
+  },
+  "flock-282117": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-28",
+   "osm_node": 13387657867,
+   "comment": "Cameras have been taken down",
+   "source": "https://www.openstreetmap.org/changeset/189656652"
+  },
+  "flock-289244": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13311350078,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190630718"
+  },
+  "flock-294577": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-10",
+   "osm_node": 13453083501,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190279497"
+  },
+  "flock-300187": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-10",
+   "osm_node": 13348438240,
+   "comment": "Surveillance camera is no longer present",
+   "source": "https://www.openstreetmap.org/changeset/190310132"
+  },
+  "flock-302594": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13401890271,
+   "comment": "Deleted Flock camera which was removed upon my previous drive through this area. Mapillary imagery also shows it's no longer present.",
+   "source": "https://www.openstreetmap.org/changeset/189946476"
+  },
+  "flock-303997": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-07",
+   "osm_node": 13807605801,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190172425"
+  },
+  "flock-314884": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-04",
+   "osm_node": 13372194001,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189991942"
+  },
+  "flock-314901": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-11",
+   "osm_node": 13596095185,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190371110"
+  },
+  "flock-314902": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-11",
+   "osm_node": 13758445001,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190373786"
+  },
+  "flock-31147": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13320443401,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189938067"
+  },
+  "flock-31380": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13325685202,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190673206"
+  },
+  "flock-31745": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-25",
+   "osm_node": 13429191802,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189523294"
+  },
+  "flock-31754": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-05",
+   "osm_node": 11153415133,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190040280"
+  },
+  "flock-32224": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-26",
+   "osm_node": 13631329721,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189603616"
+  },
+  "flock-32856": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-25",
+   "osm_node": 14092137302,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189565895"
+  },
+  "flock-33154": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13352596001,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190670669"
+  },
+  "flock-34079": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-04",
+   "osm_node": 12977596422,
+   "comment": "Deleted flock cameras that were taken down per FDOT order, Engineering and Operations Memorandum No. 26-01 (EOM26-01), titled “Revocation of General Use Permits for Automated License Plate Readers,” i",
+   "source": "https://www.openstreetmap.org/changeset/189989202"
+  },
+  "flock-34138": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13341082132,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189951465"
+  },
+  "flock-34318": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-01",
+   "osm_node": 14069202901,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189849387"
+  },
+  "flock-34434": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-15",
+   "osm_node": 13341031101,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190558698"
+  },
+  "flock-34907": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13383541004,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189938067"
+  },
+  "flock-35054": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13357395601,
+   "comment": "These ALPRs have been uninstalled and are no longer present at this location.",
+   "source": "https://www.openstreetmap.org/changeset/189937744"
+  },
+  "flock-35554": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13111088462,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189943321"
+  },
+  "flock-35969": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-20",
+   "osm_node": 12752058055,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190769944"
+  },
+  "flock-36688": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-12",
+   "osm_node": 12409634506,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190418347"
+  },
+  "flock-37914": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-18",
+   "osm_node": 13972432901,
+   "comment": "Flock ALPR cameras removed",
+   "source": "https://www.openstreetmap.org/changeset/190708682"
+  },
+  "flock-38236": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 14021184801,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190214177"
+  },
+  "flock-38320": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-05",
+   "osm_node": 14019187549,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190042519"
+  },
+  "flock-38495": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13269350224,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189955104"
+  },
+  "flock-38779": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-29",
+   "osm_node": 14066722101,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189733504"
+  },
+  "flock-38782": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13790875709,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190664846"
+  },
+  "flock-39772": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-24",
+   "osm_node": 13384042402,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189474076"
+  },
+  "flock-39820": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-02",
+   "osm_node": 11403486584,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189886753"
+  },
+  "flock-40113": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-18",
+   "osm_node": 13464281701,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190675128"
+  },
+  "flock-40178": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-30",
+   "osm_node": 13426993501,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189755421"
+  },
+  "flock-41492": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-11",
+   "osm_node": 12408469701,
+   "comment": "flock alpr removed",
+   "source": "https://www.openstreetmap.org/changeset/190365720"
+  },
+  "flock-41860": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-01",
+   "osm_node": 14069205201,
+   "comment": "Delete a surveillance node: Camera removed",
+   "source": "https://www.openstreetmap.org/changeset/189849374"
+  },
+  "flock-45744": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-01",
+   "osm_node": 13709987101,
+   "comment": "Delete a surveillance node: someone smashed the solar panel and removed the camera lol",
+   "source": "https://www.openstreetmap.org/changeset/189822686"
+  },
+  "flock-45881": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13805318801,
+   "comment": "Delete a surveillance node: Cut down",
+   "source": "https://www.openstreetmap.org/changeset/189943222"
+  },
+  "flock-45955": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-22",
+   "osm_node": 13817941501,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189424048"
+  },
+  "flock-46483": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13452895501,
+   "comment": "Delete a surveillance node: Cut down",
+   "source": "https://www.openstreetmap.org/changeset/189943206"
+  },
+  "flock-46594": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13131835276,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189942833"
+  },
+  "flock-47001": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-06",
+   "osm_node": 12705982241,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190095381"
+  },
+  "flock-47283": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-14",
+   "osm_node": 12751782536,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190514128"
+  },
+  "flock-48081": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-04",
+   "osm_node": 13358197901,
+   "comment": "Delete a surveillance node: Removed in accordance with FDOT ruling. Confirmed gone",
+   "source": "https://www.openstreetmap.org/changeset/189989474"
+  },
+  "flock-48194": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-29",
+   "osm_node": 13858184102,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189745321"
+  },
+  "flock-48201": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-29",
+   "osm_node": 13978733901,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189750864"
+  },
+  "flock-48585": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-27",
+   "osm_node": 12802702100,
+   "comment": "Removed Flock camera",
+   "source": "https://www.openstreetmap.org/changeset/189611083"
+  },
+  "flock-48628": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-01",
+   "osm_node": 13948796801,
+   "comment": "Delete a surveillance node: Camera removed",
+   "source": "https://www.openstreetmap.org/changeset/189849345"
+  },
+  "flock-48736": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13685558701,
+   "comment": "Delete a surveillance node: Cut down",
+   "source": "https://www.openstreetmap.org/changeset/189943176"
+  },
+  "flock-49403": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-29",
+   "osm_node": 13769555501,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189750881"
+  },
+  "flock-49622": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-30",
+   "osm_node": 13653318502,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189753232"
+  },
+  "flock-49658": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-12",
+   "osm_node": 14093999801,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190418908"
+  },
+  "flock-49693": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-30",
+   "osm_node": 13817980301,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189753322"
+  },
+  "flock-49809": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 12756514804,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190224109"
+  },
+  "flock-49839": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 12756489365,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190224109"
+  },
+  "flock-50014": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-30",
+   "osm_node": 13817969102,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189753327"
+  },
+  "flock-50086": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-30",
+   "osm_node": 13817976601,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189753331"
+  },
+  "flock-50220": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-29",
+   "osm_node": 13769560701,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189750888"
+  },
+  "flock-50271": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-06",
+   "osm_node": 13894063101,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190091514"
+  },
+  "flock-50324": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-30",
+   "osm_node": 13817983001,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189753238"
+  },
+  "flock-50522": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-14",
+   "osm_node": 13150217118,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190530455"
+  },
+  "flock-50541": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-30",
+   "osm_node": 13817982802,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189753242"
+  },
+  "flock-50563": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-30",
+   "osm_node": 13817974702,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189753332"
+  },
+  "flock-50585": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-30",
+   "osm_node": 13817974701,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189753466"
+  },
+  "flock-50613": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-30",
+   "osm_node": 13817969601,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189753256"
+  },
+  "flock-50634": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-29",
+   "osm_node": 13817942001,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189749880"
+  },
+  "flock-50928": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-30",
+   "osm_node": 13817976603,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189753247"
+  },
+  "flock-51264": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-24",
+   "osm_node": 13298640797,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189475148"
+  },
+  "flock-51893": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-25",
+   "osm_node": 13952938601,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189561334"
+  },
+  "flock-51944": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-29",
+   "osm_node": 13663703101,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189750975"
+  },
+  "flock-52501": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-15",
+   "osm_node": 13842101801,
+   "comment": "Delete a surveillance node: Removed per Knox County Commission decision. I have verified it is now gone.",
+   "source": "https://www.openstreetmap.org/changeset/190573682"
+  },
+  "flock-52833": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-16",
+   "osm_node": 13963003301,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190624239"
+  },
+  "flock-52864": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-24",
+   "osm_node": 12339462394,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189501853"
+  },
+  "flock-53990": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-30",
+   "osm_node": 13449346865,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189788873"
+  },
+  "flock-54361": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-23",
+   "osm_node": 13760754901,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189472359"
+  },
+  "flock-54423": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-02",
+   "osm_node": 13459374301,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189904094"
+  },
+  "flock-55304": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13309299902,
+   "comment": "Delete a surveillance node: Cut down",
+   "source": "https://www.openstreetmap.org/changeset/189943188"
+  },
+  "flock-55518": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 14054918701,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190214170"
+  },
+  "flock-56081": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-25",
+   "osm_node": 12634778371,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189547931"
+  },
+  "flock-56257": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-02",
+   "osm_node": 13085520472,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189895796"
+  },
+  "flock-57494": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-27",
+   "osm_node": 13908133301,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189651458"
+  },
+  "flock-57965": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-07",
+   "osm_node": 13298534001,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190171709"
+  },
+  "flock-58590": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-02",
+   "osm_node": 13171544163,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189855259"
+  },
+  "flock-58978": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-12",
+   "osm_node": 12740414241,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190417691"
+  },
+  "flock-59579": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-04",
+   "osm_node": 13464286001,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190005504"
+  },
+  "flock-60276": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-28",
+   "osm_node": 12975161554,
+   "comment": "Removed cameras that are no longer up",
+   "source": "https://www.openstreetmap.org/changeset/189656744"
+  },
+  "flock-64081": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-25",
+   "osm_node": 12360555432,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189560460"
+  },
+  "flock-64479": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-04",
+   "osm_node": 14005740801,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190003915"
+  },
+  "flock-64821": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-09",
+   "osm_node": 13477028501,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190260992"
+  },
+  "flock-64972": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-25",
+   "osm_node": 12697632023,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189521366"
+  },
+  "flock-65010": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-01",
+   "osm_node": 14069201601,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189849394"
+  },
+  "flock-66293": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-04",
+   "osm_node": 13389643901,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190004131"
+  },
+  "flock-66932": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-23",
+   "osm_node": 13326982301,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189472346"
+  },
+  "flock-69174": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-20",
+   "osm_node": 13845532501,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190809220"
+  },
+  "flock-70157": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-13",
+   "osm_node": 12530518359,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190477739"
+  },
+  "flock-71437": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-18",
+   "osm_node": 13360670801,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190708509"
+  },
+  "flock-71815": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-18",
+   "osm_node": 13360670901,
+   "comment": "Delete a surveillance node: Device removed. Pole still present",
+   "source": "https://www.openstreetmap.org/changeset/190695863"
+  },
+  "flock-72039": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-06",
+   "osm_node": 13346704301,
+   "comment": "Delete a surveillance node: Removed per Knox County Commission decision. I have verified it is now gone.",
+   "source": "https://www.openstreetmap.org/changeset/190101946"
+  },
+  "flock-72700": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 12466253575,
+   "comment": "Delete a surveillance node: Device removed(verified in person)",
+   "source": "https://www.openstreetmap.org/changeset/189926132"
+  },
+  "flock-72702": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-02",
+   "osm_node": 11153464561,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189886585"
+  },
+  "flock-72842": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 13418802401,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190173783"
+  },
+  "flock-73855": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-25",
+   "osm_node": 12685463398,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189561248"
+  },
+  "flock-74630": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13409513302,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189938067"
+  },
+  "flock-74675": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-02",
+   "osm_node": 13105098971,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189895789"
+  },
+  "flock-74699": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 12485419811,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190664827"
+  },
+  "flock-74879": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-11",
+   "osm_node": 14201793101,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190361387"
+  },
+  "flock-75097": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 12466253574,
+   "comment": "Delete a surveillance node: Device removed (verified in person)",
+   "source": "https://www.openstreetmap.org/changeset/189926057"
+  },
+  "flock-75130": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 13913396301,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190173775"
+  },
+  "flock-75501": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 12756473883,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190224109"
+  },
+  "flock-75768": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-10",
+   "osm_node": 12362615569,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190324518"
+  },
+  "flock-76472": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 12634772728,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190173837"
+  },
+  "flock-76594": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13127947561,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190669112"
+  },
+  "flock-76664": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 12685761894,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189938067"
+  },
+  "flock-76714": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-22",
+   "osm_node": 13105098974,
+   "comment": "Delete a surveillance node: Was cut down",
+   "source": "https://www.openstreetmap.org/changeset/189419235"
+  },
+  "flock-77104": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 13544713001,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190173753"
+  },
+  "flock-77563": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 13382223101,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190173744"
+  },
+  "flock-77751": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-18",
+   "osm_node": 14088369095,
+   "comment": "Removed 3 flock cameras (see news article https://www.wfmj.com/news/local-news/cortland/cortland-will-not-renew-its-flock-camera-contract/article_367ccf37-d02f-404f-95f4-bd62d06dff57.html)",
+   "source": "https://www.openstreetmap.org/changeset/190713721"
+  },
+  "flock-77788": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-18",
+   "osm_node": 13294937012,
+   "comment": "Removed 3 flock cameras (see news article https://www.wfmj.com/news/local-news/cortland/cortland-will-not-renew-its-flock-camera-contract/article_367ccf37-d02f-404f-95f4-bd62d06dff57.html)",
+   "source": "https://www.openstreetmap.org/changeset/190713721"
+  },
+  "flock-77811": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-18",
+   "osm_node": 13891767301,
+   "comment": "Removed 3 flock cameras (see news article https://www.wfmj.com/news/local-news/cortland/cortland-will-not-renew-its-flock-camera-contract/article_367ccf37-d02f-404f-95f4-bd62d06dff57.html)",
+   "source": "https://www.openstreetmap.org/changeset/190713721"
+  },
+  "flock-77914": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-25",
+   "osm_node": 13346776101,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189561876"
+  },
+  "flock-78210": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13227099178,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189938422"
+  },
+  "flock-78252": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-05",
+   "osm_node": 13314192791,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190007275"
+  },
+  "flock-78593": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-24",
+   "osm_node": 13395706408,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189474079"
+  },
+  "flock-79037": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-15",
+   "osm_node": 12790253991,
+   "comment": "Delete a surveillance node: Removed per Knox County Commission decision. I have verified it is now gone.",
+   "source": "https://www.openstreetmap.org/changeset/190580527"
+  },
+  "flock-79773": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-01",
+   "osm_node": 13722539802,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189850407"
+  },
+  "flock-80100": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-29",
+   "osm_node": 12624092546,
+   "comment": "Removed ALPR that no longer exists",
+   "source": "https://www.openstreetmap.org/changeset/189704980"
+  },
+  "flock-80269": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-06",
+   "osm_node": 12610766156,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190091926"
+  },
+  "flock-80676": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 14068956501,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189942833"
+  },
+  "flock-80723": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-06",
+   "osm_node": 12705969422,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190095392"
+  },
+  "flock-81281": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-02",
+   "osm_node": 11154326143,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189886743"
+  },
+  "flock-81376": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-20",
+   "osm_node": 13127949435,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190769944"
+  },
+  "flock-81660": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13127948201,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190669112"
+  },
+  "flock-81697": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-24",
+   "osm_node": 13421981402,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189476585"
+  },
+  "flock-81783": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-18",
+   "osm_node": 14133933101,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190707511"
+  },
+  "flock-81816": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-18",
+   "osm_node": 13357727801,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190707696"
+  },
+  "flock-82081": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-11",
+   "osm_node": 13483188002,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190372443"
+  },
+  "flock-82124": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-11",
+   "osm_node": 13483196901,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190372466"
+  },
+  "flock-82183": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-11",
+   "osm_node": 12410358406,
+   "comment": "flock alpr removed",
+   "source": "https://www.openstreetmap.org/changeset/190373018"
+  },
+  "flock-82232": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-19",
+   "osm_node": 13426866401,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190722736"
+  },
+  "flock-82233": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13341029132,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189951478"
+  },
+  "flock-82268": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-02",
+   "osm_node": 13431128601,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189876941"
+  },
+  "flock-82337": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-20",
+   "osm_node": 12752109028,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190769944"
+  },
+  "flock-82589": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-09",
+   "osm_node": 13389786001,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190260951"
+  },
+  "flock-82729": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-20",
+   "osm_node": 12731641825,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190769944"
+  },
+  "flock-83457": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13072544565,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190669112"
+  },
+  "flock-84203": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 12756516604,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190224109"
+  },
+  "flock-84936": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13160976368,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189938422"
+  },
+  "flock-85230": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-20",
+   "osm_node": 13310761601,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190768917"
+  },
+  "flock-85263": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-06",
+   "osm_node": 12457033792,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190067070"
+  },
+  "flock-85319": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13347891801,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189955284"
+  },
+  "flock-85573": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 11153415134,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189934461"
+  },
+  "flock-85602": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-29",
+   "osm_node": 13796042811,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189734239"
+  },
+  "flock-85662": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-07",
+   "osm_node": 13947860701,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190118960"
+  },
+  "flock-85941": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-26",
+   "osm_node": 12766003071,
+   "comment": "ALPR Removed",
+   "source": "https://www.openstreetmap.org/changeset/189588890"
+  },
+  "flock-86232": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13160034996,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189942833"
+  },
+  "flock-86355": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-26",
+   "osm_node": 13631329721,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189603616"
+  },
+  "flock-86548": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13884759901,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189938067"
+  },
+  "flock-87147": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-25",
+   "osm_node": 13593385201,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189540475"
+  },
+  "flock-87331": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-30",
+   "osm_node": 13328971484,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189753628"
+  },
+  "flock-87712": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 11153441234,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189934607"
+  },
+  "flock-87970": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13341029132,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189951478"
+  },
+  "flock-88009": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-20",
+   "osm_node": 12731668323,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190769944"
+  },
+  "flock-88350": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 11153441233,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189934628"
+  },
+  "flock-88433": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-02",
+   "osm_node": 13021054448,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189898553"
+  },
+  "flock-88473": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13116789454,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189943321"
+  },
+  "flock-88530": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13956085801,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189942833"
+  },
+  "flock-88824": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-07",
+   "osm_node": 13468869901,
+   "comment": "removed due to DeSantis",
+   "source": "https://www.openstreetmap.org/changeset/190163419"
+  },
+  "flock-88852": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 13269474100,
+   "comment": "This was formerly present as shown, but has been removed. This is presumably due to the city's cancellation of their contract with that company. https://patch.com/connecticut/windsor/windsor-keeps-flo",
+   "source": "https://www.openstreetmap.org/changeset/190181909"
+  },
+  "flock-89074": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 13160890230,
+   "comment": "This was formerly present as shown, but has been removed. This is presumably due to the city's cancellation of their contract with that company. https://patch.com/connecticut/windsor/windsor-keeps-flo",
+   "source": "https://www.openstreetmap.org/changeset/190181869"
+  },
+  "flock-89923": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-24",
+   "osm_node": 13395711802,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189474099"
+  },
+  "flock-89996": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-29",
+   "osm_node": 13308205163,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189749118"
+  },
+  "flock-90094": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-16",
+   "osm_node": 12863461990,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190592931"
+  },
+  "flock-90437": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13241696472,
+   "comment": "Delete a surveillance node: Camera was removed due to falling down in bad weather.",
+   "source": "https://www.openstreetmap.org/changeset/190632742"
+  },
+  "flock-90583": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-02",
+   "osm_node": 13621010901,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189901660"
+  },
+  "flock-90951": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-01",
+   "osm_node": 13327326150,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189849159"
+  },
+  "flock-91086": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-23",
+   "osm_node": 13568275101,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189453072"
+  },
+  "flock-91150": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-01",
+   "osm_node": 14069214402,
+   "comment": "Delete a surveillance node: Camera removed.",
+   "source": "https://www.openstreetmap.org/changeset/189849326"
+  },
+  "flock-91220": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-02",
+   "osm_node": 12734199700,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189889435"
+  },
+  "flock-91336": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-28",
+   "osm_node": 12945256152,
+   "comment": "Removed cameras that are no longer up",
+   "source": "https://www.openstreetmap.org/changeset/189656744"
+  },
+  "flock-91554": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 14137876301,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189938067"
+  },
+  "flock-91839": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13116776844,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189943321"
+  },
+  "flock-92282": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 11275587131,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189955301"
+  },
+  "flock-92296": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 13158892004,
+   "comment": "This was formerly present as shown, but has been removed. This is presumably due to the city's cancellation of their contract with that company. https://patch.com/connecticut/windsor/windsor-keeps-flo",
+   "source": "https://www.openstreetmap.org/changeset/190181974"
+  },
+  "flock-92551": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-01",
+   "osm_node": 13322417601,
+   "comment": "flock camera removed at sr20 and motes rd",
+   "source": "https://www.openstreetmap.org/changeset/189806079"
+  },
+  "flock-92787": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-24",
+   "osm_node": 13395710201,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189474102"
+  },
+  "flock-92798": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-29",
+   "osm_node": 13796010764,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189734255"
+  },
+  "flock-92904": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-29",
+   "osm_node": 13308221014,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189749120"
+  },
+  "flock-92949": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-15",
+   "osm_node": 13422337522,
+   "comment": "Delete a surveillance node: This camera was recently removed",
+   "source": "https://www.openstreetmap.org/changeset/190576992"
+  },
+  "flock-93000": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-02",
+   "osm_node": 13120490193,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189857271"
+  },
+  "flock-93106": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-29",
+   "osm_node": 13858184101,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189745307"
+  },
+  "flock-93125": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-07",
+   "osm_node": 13307033801,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190170110"
+  },
+  "flock-93267": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 13666666501,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190173735"
+  },
+  "flock-93738": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-20",
+   "osm_node": 12731653439,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190769944"
+  },
+  "flock-93818": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 12882767372,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190632633"
+  },
+  "flock-94233": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-05",
+   "osm_node": 13658543101,
+   "comment": "Delete a surveillance node: FL SR - Device Removed",
+   "source": "https://www.openstreetmap.org/changeset/190061079"
+  },
+  "flock-94295": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-15",
+   "osm_node": 13256051094,
+   "comment": "Delete a surveillance node: Removed per Knox County Commission decision. I have verified it is now gone.",
+   "source": "https://www.openstreetmap.org/changeset/190573627"
+  },
+  "flock-94354": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-12",
+   "osm_node": 13785818301,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190374454"
+  },
+  "flock-94355": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-11",
+   "osm_node": 12420859888,
+   "comment": "flock alpr removed",
+   "source": "https://www.openstreetmap.org/changeset/190365819"
+  },
+  "flock-94595": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-25",
+   "osm_node": 13650654502,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189562233"
+  },
+  "flock-94616": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-01",
+   "osm_node": 13626183301,
+   "comment": "Flock cameras confirmed to be removed after FDOTs ban",
+   "source": "https://www.openstreetmap.org/changeset/189799014"
+  },
+  "flock-94868": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13265733180,
+   "comment": "Delete a surveillance node: Removed per Knox County Commission decision. I have verified it is now gone.",
+   "source": "https://www.openstreetmap.org/changeset/190662362"
+  },
+  "flock-95518": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13529604501,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189955281"
+  },
+  "flock-95543": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-25",
+   "osm_node": 12634778372,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189547911"
+  },
+  "flock-95547": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-15",
+   "osm_node": 13809615042,
+   "comment": "Delete a surveillance node: Cut down",
+   "source": "https://www.openstreetmap.org/changeset/190535949"
+  },
+  "flock-95848": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-12",
+   "osm_node": 13673524901,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190374447"
+  },
+  "flock-96218": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-02",
+   "osm_node": 13470922518,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189855256"
+  },
+  "flock-96266": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 13167395137,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190224196"
+  },
+  "flock-97092": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13422230601,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189938067"
+  },
+  "flock-97457": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-16",
+   "osm_node": 13842538101,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190626332"
+  },
+  "flock-97515": {
+   "basis": "osm_deletion",
+   "removed": "2026-09-22",
+   "osm_node": 12497476185,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/189421281"
+  },
+  "flock-97621": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13127921368,
+   "comment": "Camera removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190669188"
+  },
+  "flock-97697": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13383514501,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189938067"
+  },
+  "flock-97747": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-09",
+   "osm_node": 13362145773,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190271456"
+  },
+  "flock-98579": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13301767402,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189938422"
+  },
+  "flock-98662": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-16",
+   "osm_node": 14052626602,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190615146"
+  },
+  "flock-98974": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13111094237,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189943321"
+  },
+  "flock-99524": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-12",
+   "osm_node": 14093892101,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190418915"
+  },
+  "flock-99549": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 13167411115,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190224196"
+  },
+  "flock-99593": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-08",
+   "osm_node": 13167406140,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190224196"
+  },
+  "flock-99607": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-12",
+   "osm_node": 13333051601,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190380054"
+  },
+  "flock-99614": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13066261982,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190669112"
+  },
+  "flock-99628": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-17",
+   "osm_node": 13167373753,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190632633"
+  },
+  "flock-99796": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-03",
+   "osm_node": 13111119302,
+   "comment": "FDOT-ordered Flock camera removal, 30 days has passed since ALPR permits revoked on state right of ways",
+   "source": "https://www.openstreetmap.org/changeset/189943321"
+  },
+  "flock-100020": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-19",
+   "osm_node": 12505075730,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190758707"
+  },
+  "flock-100108": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-12",
+   "osm_node": 13383587701,
+   "comment": "Delete a surveillance node: device removed",
+   "source": "https://www.openstreetmap.org/changeset/190409767"
+  },
+  "flock-100802": {
+   "basis": "osm_deletion",
+   "removed": "2026-10-20",
+   "osm_node": 12750901711,
+   "comment": "Cameras removed by vendor",
+   "source": "https://www.openstreetmap.org/changeset/190769944"
+  }
+ }
+}

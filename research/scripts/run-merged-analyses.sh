@@ -9,7 +9,8 @@ cd "$(dirname "$0")/.."
 PY=/home/kara/Projects/TRAMES/server/.venv/bin/python
 DESIGN=(--frame out/sampling_frame.json --draws out/sample_draws.csv)
 [ -s out/merged/results.csv ] || { echo "no out/merged/results.csv" >&2; exit 1; }
-n=$(($(wc -l < out/merged/results.csv) - 1)); [ "$n" -eq 56131 ] || { echo "merged results hold $n of 56131 commutes" >&2; exit 1; }
+n=$(($(wc -l < out/merged/results.csv) - 1)); N=$(($(wc -l < out/results.csv) - 1))
+[ "$n" -eq "$N" ] || { echo "merged results hold $n of the $N routed commutes" >&2; exit 1; }
 log() { echo "$(date -u +%H:%M:%SZ) $*"; }
 
 log "headline analysis on the merged map"
@@ -29,7 +30,14 @@ log "exposure three ways, with the avoiding routes"
     -o out/merged/exposure.csv --report out/analysis_merged_exposure.txt > /dev/null
 
 log "the figures the paper quotes that no other report prints"
-"$PY" scripts/paper_numbers.py -o out/analysis_paper_numbers.txt > /dev/null
+# the main run's server log; its two passes each logged a refusal for every commute that never routed
+"$PY" scripts/paper_numbers.py --server-log ../server/graphhopper/logs/main-server-1021.log --server-log-passes 2 \
+    -o out/analysis_paper_numbers.txt > /dev/null
+# the study's map, from the tiles as fetched (their true time range), with its cones and vendor sets
+(cd scripts && "$PY" snapshot_stats.py --cache ../../server/alpr/region_cache.2026-10-21 \
+    --cones ../../server/graphhopper/custom_areas/alpr.geojson --set flock=../../server/alpr/variants/alpr_flock.geojson \
+    --set other=../../server/alpr/variants/alpr_other.geojson --set untagged=../../server/alpr/variants/alpr_untagged.geojson \
+    > ../out/snapshot_stats.txt)
 (cd scripts && "$PY" snapshot_stats.py --cache ../../server/alpr/region_cache.2026-07-24 > ../out/snapshot_stats_2026-07-24.txt)
 
 log "figures (merged map; the map-alone versions as fig_*_osm), then tables"

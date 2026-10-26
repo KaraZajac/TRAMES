@@ -137,16 +137,19 @@ def inputs(osm_only):
                 cameras_by_state=os.path.join(M, "cameras_by_state.csv"),
                 routes=os.path.join(OUT, "routes.jsonl.gz"), avoid_routes=os.path.join(M, "routes.jsonl.gz"),
                 cones=os.path.join(GH, "custom_areas_merged", "alpr_merged.geojson"),
-                discs=os.path.join(M, "registry_discs.json"))
+                discs=os.path.join(M, "registry_discs.json"),
+                dropped=os.path.join(M, "dropped_osm_nodes.json"))
 
 
-def load_cameras(discs=None):
+def load_cameras(discs=None, dropped=None):
     """(lon, lat, vendor_class, has_cone, state) for every mapped ALPR node in the 50 states + DC
     and, given the registry discs of cones_from_supermap.py, every in-service plate reader Flock's
     registry holds that the map does not (class "registry"; each has a disc, so has_cone). The
     Overpass regions overlap Canada and Mexico; the paper is about American commutes, so only
     installations inside a state are drawn and counted. has_cone marks a camera with a bearing
-    build_cones.py can parse: only those can contribute exposure."""
+    build_cones.py can parse: only those can contribute exposure. `dropped`, a JSON list of node
+    ids, leaves out the mapped nodes the merged map does: those standing on a registry reader
+    confirmed removed (written by the merged map's build, out/merged/dropped_osm_nodes.json)."""
     from build_cones import DIRECTION_KEYS, parse_directions
     keys = ("manufacturer", "surveillance:manufacturer", "brand", "surveillance:brand")
     seen = {}
@@ -158,6 +161,9 @@ def load_cameras(discs=None):
         for el in d.get("elements", []):
             if el.get("type") == "node" and el.get("lat") is not None:
                 seen[el["id"]] = el
+    if dropped and os.path.exists(dropped):
+        for i in json.load(open(dropped)):
+            seen.pop(i, None)
     locate = state_locator()
     lon, lat, cls, cone, st = [], [], [], [], []
     for el in seen.values():
@@ -171,8 +177,7 @@ def load_cameras(discs=None):
         raw = next((t[k] for k in DIRECTION_KEYS if t.get(k)), None)
         cone.append(bool(raw and parse_directions(raw)))
     if discs:
-        # a registry reader carries the state of the census tract the device map placed it in,
-        # which the simplified outlines can miss (a reader on Islamorada, in the Florida Keys)
+        # a registry reader carries the state of the census tract the device map placed it in
         from trend import FIPS
         for m in json.load(open(discs))["discs"]:
             s = (m.get("state") or "").lower()
@@ -594,6 +599,11 @@ def fig_route_example(lon, lat, rows):
     Two panels because one cannot show both facts at once: at metro scale the detour is
     legible but a 60 m cone is smaller than a line width, and at street scale the cones
     are legible but the route is off-screen. The inset marks where it is drawn from.
+
+    The commute: of those whose avoiding route passes no camera, whose unavoided route passes
+    at least 10 and spans 0.06-0.30 degrees, the one whose unavoided route passes the most
+    cameras (ties to the lowest key). It used to be the first in file order with 30 or more,
+    which a resumed or parallel run, writing the routes in another order, changed.
     """
     try:
         from routes_io import read_routes
@@ -608,21 +618,21 @@ def fig_route_example(lon, lat, rows):
 
     best = None
     for rec in read_routes(INPUTS["routes"]):
-        res = index.get((rec["state"], rec["h_tract"], rec["w_tract"]))
+        key = (rec["state"], rec["h_tract"], rec["w_tract"])
+        res = index.get(key)
         if res is None or res["avoid_cameras"] != 0 or res["base_cameras"] < 10:
             continue
         b = np.asarray(rec["base"])
         span = max(np.ptp(b[:, 0]), np.ptp(b[:, 1]))
         if not (0.06 < span < 0.30):
             continue
-        if best is None or res["base_cameras"] > best[1]["base_cameras"]:
-            best = (rec, res)
-        if best[1]["base_cameras"] >= 30:
-            break
+        if best is None or (-res["base_cameras"], key) < (-best[1]["base_cameras"], best[2]):
+            best = (rec, res, key)
     if not best:
         print("  (no suitable example route found)")
         return
-    rec, res = best
+    rec, res, _ = best
+    print(f"  route example: {' '.join(best[2])}, {res['base_cameras']} cameras")
     if INPUTS["avoid_routes"]:
         # the merged run keeps its avoiding routes in a sidecar of their own
         key = (rec["state"], rec["h_tract"], rec["w_tract"])
@@ -1010,7 +1020,7 @@ def main():
     global MERGED, SFX, INPUTS
     MERGED, SFX, INPUTS = not args.osm_only, "_osm" if args.osm_only else "", inputs(args.osm_only)
     print("loading cameras (50 states + DC)..." + ("" if MERGED else " map only"))
-    lon, lat, cls, cone, state = load_cameras(INPUTS["discs"])
+    lon, lat, cls, cone, state = load_cameras(INPUTS["discs"], INPUTS.get("dropped"))
     # reach per unit deployed is per camera that can be passed: those with a cone
     counts = {v: int(((cls == v) & cone).sum()) for v in ("flock", "other", "untagged")}
     print(f"  {len(lon):,} cameras, {int(cone.sum()):,} with a cone {counts}, "

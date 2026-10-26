@@ -5,20 +5,20 @@ Figures the paper quotes that no other report prints, recomputed from their sour
     ../server/.venv/bin/python scripts/paper_numbers.py -o out/analysis_paper_numbers.txt
 
 Each section names the claim it backs. Inputs built by the pipeline and not redistributed: the
-Overpass tiles of 2026-09-22 (server/alpr/region_cache) and 2026-07-24
-(server/alpr/region_cache.2026-07-24), the monthly maps rebuilt from the edit history
+current Overpass tiles (server/alpr/region_cache; their date is read from the answers) and those of
+2026-07-24 (server/alpr/region_cache.2026-07-24), the monthly maps rebuilt from the edit history
 (server/alpr/history_monthly) and the version list extracted from it
 (server/alpr/osm-history/node_versions.jsonl), the registry's discs
 (out/merged/registry_discs.json), the merged device list (out/supermap/alpr_supermap.json), the
 map-alone graph's cone set (server/graphhopper/custom_areas/alpr.geojson), the stored routes
-(out/routes.jsonl.gz) and the routing server's log of the main run
-(server/graphhopper/logs/server-run.log). Tracked inputs: out/commutes.csv, sample_draws.csv,
+(out/routes.jsonl.gz) and the routing server's log of the main run (--server-log; a run that made
+several passes over its failed commutes logs each refusal once a pass, --server-log-passes). Tracked inputs: out/commutes.csv, sample_draws.csv,
 sampling_frame.json, results.csv, merged/results.csv, vendor.csv, trend_by_state.csv and
 by_state.csv. A section whose input is missing says so and is skipped.
 
-Installations are placed in the 50 states and DC by the outline test the figures use
-(trend.state_locator); a registry device by the state of the census tract the device list put
-it in.
+Installations are placed in the 50 states and DC by the census tract that holds them, as the
+figures place them (trend.state_locator); a registry device by the state of the census tract the
+device list put it in.
 """
 import argparse
 import csv
@@ -63,6 +63,24 @@ def heads(tags):
     """The bearings build_cones.py can parse: one cone per head; none means no cone."""
     raw = next((tags[k] for k in DIRECTION_KEYS if tags.get(k)), None)
     return len(parse_directions(raw)) if raw else 0
+
+
+def snapshot_date(tile_dir):
+    """The day a directory of Overpass answers was taken, from the earliest database timestamp."""
+    ts = []
+    for p in glob.glob(os.path.join(tile_dir, "*.json")):
+        try:
+            t = (json.load(open(p)).get("osm3s") or {}).get("timestamp_osm_base")
+        except ValueError:
+            continue
+        if t:
+            ts.append(t)
+    return min(ts)[:10] if ts else os.path.basename(os.path.normpath(tile_dir))
+
+
+def month(day):
+    return ("January February March April May June July August September October November "
+            "December").split()[int(day[5:7]) - 1]
 
 
 def nodes(tile_dir):
@@ -136,11 +154,15 @@ def main():
     ap.add_argument("--versions", default=os.path.join(ALPR, "osm-history", "node_versions.jsonl"))
     ap.add_argument("--discs", default=os.path.join(OUT, "merged", "registry_discs.json"))
     ap.add_argument("--supermap", default=os.path.join(OUT, "supermap", "alpr_supermap.json"))
+    ap.add_argument("--dropped", default=os.path.join(OUT, "merged", "dropped_osm_nodes.json"),
+                    help="mapped nodes the merged map leaves out (standing on registry readers confirmed removed)")
     ap.add_argument("--cones", default=os.path.join(SERVER, "graphhopper", "custom_areas", "alpr.geojson"),
                     help="the cone set the map-alone graph was imported with")
     ap.add_argument("--routes", default=os.path.join(OUT, "routes.jsonl.gz"))
     ap.add_argument("--server-log", default=os.path.join(SERVER, "graphhopper", "logs", "server-run.log"),
                     help="the routing server's log of the main run, for why commutes failed")
+    ap.add_argument("--server-log-passes", type=int, default=1,
+                    help="passes the main run made over its failed commutes (each logs its refusal once a pass)")
     ap.add_argument("-o", "--out", default=os.path.join(OUT, "analysis_paper_numbers.txt"))
     args = ap.parse_args()
 
@@ -162,13 +184,14 @@ def main():
 
     # ------------------------------------------------------------------ the map today, by vendor
     now = nodes(args.now)
+    now_day = snapshot_date(args.now)
     us = {i: e for i, e in now.items() if loc(e)}
     cls = {i: vendor(e.get("tags") or {}) for i, e in us.items()}
     hd = {i: heads(e.get("tags") or {}) for i, e in us.items()}
     allc = Counter(cls.values())
     cone = Counter(c for i, c in cls.items() if hd[i] > 0)
     n_all, n_cone = sum(allc.values()), sum(cone.values())
-    P(f"\nTHE MAP ON 2026-09-22, BY VENDOR  ({len(now):,} nodes in the Overpass regions; "
+    P(f"\nTHE MAP ON {now_day}, BY VENDOR  ({len(now):,} nodes in the Overpass regions; "
       f"{n_all:,} in the 50 states and DC)")
     for c in CLASSES:
         P(f"  {c:9s} all nodes {allc[c]:7,} ({pct(allc[c], n_all):4.1f}%)   "
@@ -178,9 +201,19 @@ def main():
         discs = json.load(open(args.discs))["discs"]
         reg = sum(1 for m in discs if (m.get("state") or "").lower() in FIPS)
         named = sum(1 for m in discs if m.get("watches"))
+        # the merged map leaves out the mapped nodes that stand on a registry reader confirmed removed
+        gone = set(json.load(open(args.dropped))) if os.path.exists(args.dropped) else set()
+        gone_us = [i for i in us if i in gone]
+        m_all = n_all - len(gone_us)
+        m_flock = allc["flock"] - sum(1 for i in gone_us if cls[i] == "flock")
+        m_cone = n_cone - sum(1 for i in gone_us if hd[i] > 0)
+        m_cflock = cone["flock"] - sum(1 for i in gone_us if hd[i] > 0 and cls[i] == "flock")
+        if gone:
+            P(f"  the merged map leaves out {len(gone_us):,} of these nodes (of {len(gone):,} listed), which stand on "
+              f"registry readers confirmed removed ({os.path.relpath(args.dropped, ROOT)})")
         P(f"  with the registry's {reg:,} readers in the 50 states and DC (of {len(discs):,} discs), Flock holds "
-          f"{pct(allc['flock'] + reg, n_all + reg):.1f}% of all {n_all + reg:,} installations "
-          f"({pct(cone['flock'] + reg, n_cone + reg):.1f}% of those that contribute a cone or disc)")
+          f"{pct(m_flock + reg, m_all + reg):.1f}% of all {m_all + reg:,} installations "
+          f"({pct(m_cflock + reg, m_cone + reg):.1f}% of those that contribute a cone or disc)")
         P(f"  discs whose label names the traffic watched: {named:,} of {len(discs):,}")
 
     P("\nMULTI-HEAD UNITS  (more than one parseable bearing, among nodes with a usable bearing)")
@@ -210,16 +243,19 @@ def main():
             n = sum(c.values())
             P(f"  {os.path.basename(dd)}  {n:7,}   flock {pct(c['flock'], n):4.1f}%   other {pct(c['other'], n):4.1f}%"
               f"   untagged {pct(c['untagged'], n):4.1f}%")
-        P(f"  2026-09-22  {n_all:7,}   flock {pct(allc['flock'], n_all):4.1f}%   other {pct(allc['other'], n_all):4.1f}%"
+        P(f"  {now_day}  {n_all:7,}   flock {pct(allc['flock'], n_all):4.1f}%   other {pct(allc['other'], n_all):4.1f}%"
           f"   untagged {pct(allc['untagged'], n_all):4.1f}%")
 
     if have(args.july, "cameras that left the map"):
         july = nodes(args.july)
-        P("\nCAMERAS THAT LEFT THE MAP BETWEEN 2026-07-24 AND 2026-09-22  (a July node no longer an ALPR node)")
+        july_day = snapshot_date(args.july)
+        P(f"\nCAMERAS THAT LEFT THE MAP BETWEEN {july_day} AND {now_day}  "
+          f"(a {month(july_day)} node no longer an ALPR node)")
         for s in ("wi", "ia"):
             jn = {i for i, e in july.items() if loc(e) == s}
             sn = {i for i, e in us.items() if loc(e) == s}
-            P(f"  {s.upper()}: {len(jn):,} in July, {len(sn):,} in September (net {len(sn) - len(jn):+,}); "
+            P(f"  {s.upper()}: {len(jn):,} in {month(july_day)}, {len(sn):,} in {month(now_day)} "
+              f"(net {len(sn) - len(jn):+,}); "
               f"{len(jn - sn):,} of July's left the map, {len(sn - jn):,} were added")
 
     dated_all = sum(1 for e in now.values() if (e.get("tags") or {}).get("start_date"))
@@ -235,7 +271,7 @@ def main():
 
     T = rows(os.path.join(OUT, "trend_by_state.csv"))
     today = {r["state"]: float(r["mean_cameras"]) for r in rows(os.path.join(OUT, "by_state.csv"))}
-    P("\nSTATE RANKS: MEAN EXPOSURE ON AN EARLIER MAP AGAINST 2026-09-22's  (Spearman, tied ranks averaged)")
+    P(f"\nSTATE RANKS: MEAN EXPOSURE ON AN EARLIER MAP AGAINST {now_day}'s  (Spearman, tied ranks averaged)")
     for d in ("2024-01-01", "2025-01-01", "2026-01-01"):
         then = {r["state"]: float(r["mean_cameras"]) for r in T if r["date"] == d}
         S = sorted(set(then) & set(today))
@@ -322,9 +358,13 @@ def main():
                 why["cannot snap a point to any road" if "Cannot find point" in ln else
                     "no connection between the points" if "Connection between locations not found" in ln else
                     "other"] += 1
+        k_ = args.server_log_passes
+        if any(v % k_ for v in why.values()):
+            P(f"  (refusals do not divide evenly over {k_} passes: {dict(why)})")
+        why = Counter({k: v // k_ for k, v in why.items()})
         n = sum(why.values())
-        P(f"  the routing server's refusals in the main run: {n:,}; " +
-          "; ".join(f"{k} {v:,} ({pct(v, n):.0f}%)" for k, v in why.most_common()))
+        P(f"  the routing server's refusals in the main run: {n:,}" + (f" (each logged once in each of {k_} passes)" if k_ > 1 else "")
+          + "; " + "; ".join(f"{k} {v:,} ({pct(v, n):.0f}%)" for k, v in why.most_common()))
 
     wide, default = (os.path.join(os.path.dirname(args.server_log), f) for f in ("server-reroute.log", "server-check.log"))
     if have(wide, "the wider road search test") and have(default, "the wider road search test"):

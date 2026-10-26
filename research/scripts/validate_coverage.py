@@ -4,7 +4,7 @@ How complete is the crowdsourced camera map? An external check against Flock Saf
 transparency portals, which many police departments publish and which state how many cameras the
 department operates.
 
-    python validate_coverage.py --portals data/validation/transparency_portals_2026-09-24.json \\
+    python validate_coverage.py --portals data/validation/transparency_portals_2026-10-21.json \\
         --tiles ../server/alpr/region_cache -o out/analysis_coverage.txt --csv out/siting/coverage.csv
 
 For each municipal police department (portal type PD) whose city matches exactly one incorporated

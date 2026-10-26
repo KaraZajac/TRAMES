@@ -4,17 +4,17 @@ SUPPORTING CHECKS FOR THE SITING SECTION
 
 A. MAJORITY TRACTS, WITHIN COUNTY (Mantel-Haenszel over counties that have both kinds;
    cameras per road point of the same class; 95% CI resampling counties within states)
-  majority-Black vs majority-white tracts, all classes      1.20x [1.03-1.41]  *  (542 counties; cameras 10,138 vs 39,403)
-  majority-Black vs majority-white tracts, arterial         1.17x [1.00-1.37]  *  (542 counties; cameras 8,260 vs 31,323)
-  majority-Black vs majority-white tracts, residential      1.12x [0.90-1.46]  (542 counties; cameras 1,416 vs 5,537)
-  majority-Hispanic vs majority-white tracts, all classes   1.33x [1.12-1.66]  *  (355 counties; cameras 13,781 vs 36,730)
-  majority-Hispanic vs majority-white tracts, arterial      1.31x [1.10-1.65]  *  (355 counties; cameras 11,445 vs 29,249)
-  majority-Hispanic vs majority-white tracts, residential   1.33x [0.99-1.96]  (355 counties; cameras 1,511 vs 4,920)
+  majority-Black vs majority-white tracts, all classes      1.22x [1.06-1.43]  *  (542 counties; cameras 10,465 vs 39,955)
+  majority-Black vs majority-white tracts, arterial         1.18x [1.02-1.38]  *  (542 counties; cameras 8,461 vs 31,603)
+  majority-Black vs majority-white tracts, residential      1.15x [0.92-1.48]  (542 counties; cameras 1,511 vs 5,746)
+  majority-Hispanic vs majority-white tracts, all classes   1.35x [1.14-1.69]  *  (355 counties; cameras 14,181 vs 37,004)
+  majority-Hispanic vs majority-white tracts, arterial      1.33x [1.11-1.68]  *  (355 counties; cameras 11,731 vs 29,458)
+  majority-Hispanic vs majority-white tracts, residential   1.37x [1.02-2.00]  *  (355 counties; cameras 1,598 vs 4,956)
 
 B. HAMPTON ROADS (17 Virginia localities)
-  478 tracts; 1,331 mapped ALPRs inside, 1,178 of them Flock  (the court list: 614 Flock)
-  Flock    per tract: majority-Black 3.62 (101 tracts), majority-white 1.99 (275 tracts), ratio 1.82
-  all ALPR per tract: majority-Black 4.09 (101 tracts), majority-white 2.25 (275 tracts), ratio 1.81
+  478 tracts; 1,348 mapped ALPRs inside, 1,182 of them Flock  (the court list: 614 Flock)
+  Flock    per tract: majority-Black 3.64 (101 tracts), majority-white 1.96 (275 tracts), ratio 1.86
+  all ALPR per tract: majority-Black 4.12 (101 tracts), majority-white 2.27 (275 tracts), ratio 1.82
 
 C. FREEWAYS ON THE COUNTED NETWORK (HPMS functional system 1-2), Q4 over Q1, Mantel-Haenszel
    over strata: ratio of the freeway share of counted road length, and of counted traffic
@@ -26,42 +26,42 @@ C. FREEWAYS ON THE COUNTED NETWORK (HPMS functional system 1-2), Q4 over Q1, Man
   median household income  county x density length  0.82x [0.78-0.86]  *   traffic  0.87x [0.84-0.91]  *   (Q1 12.7% of km, 46.9% of traffic; Q4 10.2% of km, 40.6% of traffic)
 
 D. OPERATORS AND ROADS BY VENDOR (cameras in the 50 states + DC)
-  flock: 114,352 cameras; operator identifiable for 14,964 (13.1%): police 67.2%, business 20.5%, other named 7.2%, municipal 3.2%, HOA 1.0%, school 0.7%, transport 0.2%
-      OSM road watched: motorway 5.1%, trunk 6.8%, primary 22.0%, secondary 26.3%, tertiary 18.6%; within 30 m of an HPMS freeway (F1-2) 3.7%, of a freeway or principal arterial (F1-3) 25.9%
-  other: 21,198 cameras; operator identifiable for 5,232 (24.7%): police 64.4%, transport 14.8%, other named 10.6%, municipal 4.6%, business 3.3%, school 2.2%, HOA 0.0%
-      OSM road watched: motorway 10.4%, trunk 7.5%, primary 29.9%, secondary 24.9%, tertiary 11.1%; within 30 m of an HPMS freeway (F1-2) 8.4%, of a freeway or principal arterial (F1-3) 42.3%
-  untagged: 6,705 cameras; operator identifiable for 1,042 (15.5%): police 46.8%, other named 21.5%, transport 14.6%, municipal 10.4%, school 4.4%, business 1.8%, HOA 0.5%
-      OSM road watched: motorway 16.7%, trunk 8.3%, primary 26.2%, secondary 22.2%, tertiary 12.7%; within 30 m of an HPMS freeway (F1-2) 12.9%, of a freeway or principal arterial (F1-3) 42.2%
-  other vendors, by name: motorola solutions 7,351, genetec 3,505, axis communications 3,201, leonardo 1,206, rekor 736, platesmart/cyclopstchnlgs 718, axon enterprise 635, ubicquia, inc. 568
+  flock: 115,812 cameras; operator identifiable for 15,154 (13.1%): police 67.0%, business 20.8%, other named 7.3%, municipal 3.0%, HOA 1.0%, school 0.7%, transport 0.2%
+      OSM road watched: motorway 5.1%, trunk 6.7%, primary 22.1%, secondary 26.2%, tertiary 18.6%; within 30 m of an HPMS freeway (F1-2) 3.7%, of a freeway or principal arterial (F1-3) 25.6%
+  other: 21,116 cameras; operator identifiable for 5,352 (25.3%): police 63.6%, transport 14.7%, other named 10.7%, municipal 4.7%, business 3.5%, school 2.9%, HOA 0.0%
+      OSM road watched: motorway 10.7%, trunk 7.9%, primary 31.5%, secondary 25.0%, tertiary 11.8%; within 30 m of an HPMS freeway (F1-2) 8.6%, of a freeway or principal arterial (F1-3) 43.6%
+  untagged: 6,793 cameras; operator identifiable for 1,022 (15.0%): police 45.9%, other named 22.6%, transport 15.1%, municipal 10.8%, school 2.9%, business 2.3%, HOA 0.5%
+      OSM road watched: motorway 16.6%, trunk 8.3%, primary 26.0%, secondary 22.1%, tertiary 12.6%; within 30 m of an HPMS freeway (F1-2) 12.8%, of a freeway or principal arterial (F1-3) 41.9%
+  other vendors, by name: motorola solutions 7,629, genetec 3,661, axis communications 2,182, leonardo 1,296, rekor 850, axon enterprise 747, platesmart/cyclopstchnlgs 746, neology, inc. 578
 
 E. BUSINESS-OPERATED CAMERAS
-  3,268 cameras; operators: lowes 1,737, home depot 1,134, simon property group 128, walmart 60, station casinos 34, lowes home improvement 19
-  surveillance:zone tags: traffic 2,340, (none) 651, parking 129, entrance 81, parking_entrance 18
+  3,359 cameras; operators: lowes 1,762, home depot 1,171, simon property group 137, walmart 65, station casinos 34, kroger 19
+  surveillance:zone tags: traffic 2,421, (none) 650, parking 136, entrance 82, parking_entrance 20
 
 F. HOW FAR FROM PARITY: share of the 2,000 county-bootstrap replicates of each headline
    siting contrast (Q4/Q1, tracts) that fall on the far side of 1; 0 means p < 0.001
   contrast                                                       scheme            ratio   beyond 1
-  arterial cameras per km of arterial, % Black                   within county      1.74      0.00%
-  arterial cameras per km of arterial, % Black                   county x density   1.27      0.00%
-  arterial cameras per km of arterial, % Hispanic                within county      1.49      0.00%
-  arterial cameras per km of arterial, % Hispanic                county x density   1.16      0.00%
-  arterial cameras per km of arterial, income                    within county      0.65      0.00%
-  arterial cameras per km of arterial, income                    county x density   0.86      0.00%
-  residential cameras per km of residential street, % Black      within county      1.88      0.00%
-  residential cameras per km of residential street, % Black      county x density   1.59      0.00%
+  arterial cameras per km of arterial, % Black                   within county      1.75      0.00%
+  arterial cameras per km of arterial, % Black                   county x density   1.28      0.00%
+  arterial cameras per km of arterial, % Hispanic                within county      1.50      0.00%
+  arterial cameras per km of arterial, % Hispanic                county x density   1.17      0.00%
+  arterial cameras per km of arterial, income                    within county      0.64      0.00%
+  arterial cameras per km of arterial, income                    county x density   0.85      0.00%
+  residential cameras per km of residential street, % Black      within county      1.91      0.00%
+  residential cameras per km of residential street, % Black      county x density   1.61      0.00%
   residential cameras per km of residential street, % Hispanic   within county      1.47      0.00%
-  residential cameras per km of residential street, % Hispanic   county x density   1.27      0.00%
+  residential cameras per km of residential street, % Hispanic   county x density   1.26      0.00%
   residential cameras per km of residential street, income       within county      0.64      0.00%
   residential cameras per km of residential street, income       county x density   0.76      0.00%
-  police-operated cameras per km of road, % Black                within county      2.71      0.00%
+  police-operated cameras per km of road, % Black                within county      2.69      0.00%
   police-operated cameras per km of road, % Black                county x density   1.87      0.00%
   police-operated cameras per km of road, % Hispanic             within county      1.73      0.00%
-  police-operated cameras per km of road, % Hispanic             county x density   1.22      0.75%
+  police-operated cameras per km of road, % Hispanic             county x density   1.22      0.60%
   police-operated cameras per km of road, income                 within county      0.40      0.00%
   police-operated cameras per km of road, income                 county x density   0.57      0.00%
   counted roads, per vehicle-km, by class, % Black               within county      1.41      0.00%
-  counted roads, per vehicle-km, by class, % Black               county x density   1.20      0.00%
-  counted roads, per vehicle-km, by class, % Hispanic            within county      1.25      0.00%
-  counted roads, per vehicle-km, by class, % Hispanic            county x density   1.10      0.15%
-  counted roads, per vehicle-km, by class, income                within county      0.69      0.00%
-  counted roads, per vehicle-km, by class, income                county x density   0.82      0.00%
+  counted roads, per vehicle-km, by class, % Black               county x density   1.21      0.00%
+  counted roads, per vehicle-km, by class, % Hispanic            within county      1.27      0.00%
+  counted roads, per vehicle-km, by class, % Hispanic            county x density   1.12      0.00%
+  counted roads, per vehicle-km, by class, income                within county      0.68      0.00%
+  counted roads, per vehicle-km, by class, income                county x density   0.81      0.00%

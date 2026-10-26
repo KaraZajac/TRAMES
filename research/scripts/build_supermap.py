@@ -17,8 +17,9 @@ Four sources, none of them complete on its own:
               status and coordinates: the planned and the decommissioned as well as the
               running, and the companion products — audio detectors, PTZ cameras,
               speakers — that an ALPR query never sees. No bearings.
-  portals     Agency transparency portals as aggregated by eyesonflock.com (2026-09-24):
-              1,528 agencies, the camera count each publishes, and its retention.
+  portals     Agency transparency portals as aggregated by eyesonflock.com (retrieved 2026-10-21,
+              their aggregation of 14 Oct: 1,603 agencies; 2026-09-24: 1,528), the camera count
+              each publishes, and its retention.
 
 DEDUPLICATION. The two per-device sources overlap heavily but disagree about where a
 camera is: Flock's coordinates come from its own provisioning, OSM's from a volunteer with
@@ -537,8 +538,9 @@ def main():
     ap.add_argument("--osm", default=os.path.join(ROOT, "server", "alpr", "region_cache"))
     ap.add_argument("--history", default=os.path.join(ROOT, "server", "alpr", "history"))
     ap.add_argument("--inventory", default=os.path.join(ROOT, "research", "data", "flocksurveillance", "cameras.tsv"))
-    ap.add_argument("--portals", default=os.path.join(ROOT, "research", "data", "validation", "eyesonflock_portals.json"))
-    ap.add_argument("--portals-slim", default=os.path.join(ROOT, "research", "data", "validation", "transparency_portals_2026-09-24.json"))
+    ap.add_argument("--portals", default=os.path.join(ROOT, "research", "data", "validation", "eyesonflock_portals_2026-10-21.json"),
+                    help="eyesonflock.com's full portal file; its retrieval date is read from the name")
+    ap.add_argument("--portals-slim", default=os.path.join(ROOT, "research", "data", "validation", "transparency_portals_2026-10-21.json"))
     ap.add_argument("--cache", default=None, help="directory for the point-to-unit assignment cache")
     ap.add_argument("--extra-snapshot", action="append", default=None, metavar="DATE=TILE_DIR",
                     help="further dated Overpass caches for first_seen (default: the July 2026 cache, if present)")
@@ -550,6 +552,9 @@ def main():
                     help="node_dates.py output: exact dates per OSM node (used if present)")
     ap.add_argument("--roads-watched", default=os.path.join(ROOT, "research", "out", "supermap", "roads_watched.json"),
                     help="roads_watched.py output: the ways each device's cone or circle touches (used if present)")
+    ap.add_argument("--removals", default=None, metavar="JSON",
+                    help="registry records confirmed gone, published with status \"removed\": "
+                         "research/data/registry_removals_2026-10.json, or {\"flock-<OBJECTID>\": {basis, source, ...}}")
     ap.add_argument("-o", "--out", required=True)
     ap.add_argument("--report", required=True)
     ap.add_argument("--gzip", action="store_true", help="also write <out>.gz")
@@ -626,8 +631,8 @@ def main():
     drop = Counter()
     for i in np.flatnonzero(~in_us):
         drop["osm" if i < n_o else "flock"] += 1
-    log(L, f"             excluded as outside the US: {drop['osm']:,} OSM nodes (Canada and Mexico, "
-           f"which the Overpass boxes cover on purpose), {drop['flock']:,} registry records")
+    log(L, f"             excluded as outside the US: {drop['osm']:,} OSM nodes (in Canada, Mexico and Central "
+           f"America, where the Overpass boxes reach past the border), {drop['flock']:,} registry records")
 
     us_o, us_f = in_us[:n_o], in_us[n_o:]
 
@@ -656,7 +661,40 @@ def main():
         k, p, _ = classify(r["type"], r["features"])
         fkind.append(k); fplates.append(p)
     fplates_arr = np.array([p is True for p in fplates])
-    fstatus = np.array([STATUS.get(r["status"], "unknown") for r in rows])
+    fstatus = np.array([STATUS.get(r["status"], "unknown") for r in rows], dtype=object)
+    # Cameras confirmed gone since the registry's December 2025 records: by the agency or the
+    # press (each with its source), or by OSM's mappers deleting the node the record paired
+    # with as removed. They pair as an off-service record would and are published, with
+    # their evidence, as status "removed".
+    removed_by_obj = {}
+    if args.removals:
+        R = json.load(open(args.removals))
+        if "records" in R:
+            # the published list (research/data/registry_removals_*.json): a news record names its
+            # place, and the place carries the source and the date
+            places = {p["place"]: p for p in R.get("places", ())}
+            items = {}
+            for k, v in R["records"].items():
+                v = dict(v)
+                pl = places.get(v.get("place"))
+                if pl:
+                    v.setdefault("removal_date", pl.get("removed"))
+                    v.setdefault("source", pl.get("source"))
+                elif "removed" in v:
+                    v.setdefault("removal_date", v["removed"])
+                items[k] = v
+        else:
+            items = R
+        for k, v in items.items():
+            removed_by_obj[int(k.split("-", 1)[1])] = v
+        hit = 0
+        for i, r in enumerate(rows):
+            if int(r["OBJECTID"]) in removed_by_obj:
+                fstatus[i] = "removed"
+                hit += 1
+        log(L, f"removals     {hit:,} registry records marked removed ({len(removed_by_obj):,} listed in "
+               f"{os.path.basename(args.removals)}): "
+               + ", ".join(f"{b} {n:,}" for b, n in Counter(v.get('basis') for v in removed_by_obj.values()).most_common()))
 
     o_elig = us_o & (is_flock_osm | no_vendor_osm)
     f_elig = us_f & fplates_arr
@@ -684,7 +722,7 @@ def main():
     log(L, "  share of eligible registry plate readers that a mapped node stands on, by status —")
     log(L, "  a planned camera is one nobody can photograph yet, and a decommissioned one is a pole "
            "the map may not\n  have caught up with:")
-    for stt in ("in_service", "planned", "decommissioned", "unknown"):
+    for stt in ("in_service", "planned", "decommissioned", "removed", "unknown"):
         m = f_elig & (fstatus == stt)
         if m.sum():
             log(L, f"    {stt:16s} {int(m.sum()):8,d} eligible   {100 * got[m].mean():5.1f}% paired")
@@ -932,7 +970,10 @@ def main():
                               "no bearings, and rotationAngle is not one"},
             "portals": {"name": "Flock agency transparency portals",
                         "aggregated_by": "eyesonflock.com",
-                        "retrieved": "2026-09-24", "agencies": len(agencies),
+                        "retrieved": (re.search(r"\d{4}-\d{2}-\d{2}", os.path.basename(args.portals)) or
+                                      re.search(r"\d{4}-\d{2}-\d{2}", os.path.basename(args.portals_slim)) or
+                                      re.match("", "")).group() or None,
+                        "agencies": len(agencies),
                         "note": "agency-level only: what each agency publishes it runs. " +
                                 ("Each agency's sharing list is embedded." if args.with_sharing else
                                  "Sharing lists stay in the source file (--with-sharing embeds them)."),
@@ -983,8 +1024,12 @@ def main():
                      "mobile_platform, infrastructure, external_integration, unknown",
             "reads_plates": "true, false, or absent where neither the features list nor the device "
                             "type settles it",
-            "status": "in_service, planned, decommissioned or unknown from the registry; absent for "
+            "status": "in_service, planned, decommissioned or unknown from the registry, or removed: "
+                      "confirmed gone since the registry's records (see removal); absent for "
                       "an OSM-only device, which OSM gives no status",
+            "removal": "for a removed record: basis (news: an agency or press report, each with its "
+                       "source; osm_deletion: OSM's mappers deleted the node it paired with as removed), "
+                       "reason and source",
             "bearings": "degrees from north, one per camera head, from OSM only. cone_spans_deg "
                         f"pairs with it; a bearing given without an arc is taken to span "
                         f"{DEFAULT_SPAN_DEG:.0f} degrees, and an omnidirectional camera is bearing 0 "
@@ -1113,6 +1158,8 @@ def main():
                           "rotation_angle": None if not r["rotationAngle"].strip() else float(r["rotationAngle"])},
                 "sources": ["flock"],
             }
+            if int(r["OBJECTID"]) in removed_by_obj:
+                rec["removal"] = removed_by_obj[int(r["OBJECTID"])]
             if oi >= 0:
                 op = osm_payload(oi)
                 rec["osm"] = op

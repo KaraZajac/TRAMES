@@ -46,10 +46,15 @@ server/alpr/history-planet/
 # (the acquisition script itself is tracked — the paper tells readers to run it)
 research/data/*
 !research/data/fetch.sh
-# the transparency-portal snapshot validate_coverage.py reads: a live API, so the dated copy is kept
+# the OSM nodes found to be errors and left out of the maps they were on (run-analyses.sh), and
+# the registry records confirmed removed, each with its source (build_supermap.py --removals)
+!research/data/osm_corrections_2026-10.json
+!research/data/registry_removals_2026-10.json
+# the transparency-portal snapshots validate_coverage.py reads: a live API, so the dated copies are kept
 !research/data/validation/
 research/data/validation/*
 !research/data/validation/transparency_portals_2026-09-24.json
+!research/data/validation/transparency_portals_2026-10-21.json
 # ~82 MB of route polylines. Regenerable, but only by re-running the
 # full 7-hour experiment — kept out of git because it is over GitHub's
 # comfortable file size, not because it is cheap.

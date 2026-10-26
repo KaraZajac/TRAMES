@@ -42,7 +42,7 @@ echo "== cone-radius sensitivity"
 "$PY" scripts/analyze_radius.py --sweep out/radius_sweep.csv --results out/results.csv "${DESIGN[@]}" \
     -o out/analysis_radius.txt > /dev/null
 
-echo "== trend across camera-map dates: every monthly map, plus the two 2026 Overpass snapshots"
+echo "== trend across camera-map dates: every monthly map, plus the three 2026 Overpass snapshots"
 # server/alpr/history_monthly/<date>/ is built by server/alpr/snapshot_from_versions.py from the
 # edit history (node_dates.py); avoidance comes from out/history/<date>/results.csv where
 # run-history.sh has routed that date (the first of every quarter).
@@ -50,8 +50,13 @@ SNAPS=()
 for d in ../server/alpr/history_monthly/*/; do
   [ -s "$d/alpr.geojson" ] && SNAPS+=(--snapshot "$(basename "$d")=${d%/}")
 done
-SNAPS+=(--snapshot 2026-07-24=../server/alpr/region_cache.2026-07-24:../server/graphhopper/custom_areas.2026-07-24/alpr.geojson)
-SNAPS+=(--snapshot 2026-09-22=../server/alpr/region_cache:"$A")
+# Each Overpass snapshot's cones are rebuilt with today's build_cones.py into its own folder.
+# 22 Sept 2026 is shown without the 1,181 nodes one mapper added in error on 18-20 Sept (airport
+# surveillance, deleted by DeFlock's reviewers by 19 Oct; research/data/osm_corrections_2026-10.json).
+# The study's own map comes last: trend.py reads the last date's avoidance from out/results.csv.
+SNAPS+=(--snapshot 2026-07-24=../server/alpr/region_cache.2026-07-24)
+SNAPS+=(--snapshot 2026-09-22=../server/alpr/region_cache.2026-09-22-corrected)
+SNAPS+=(--snapshot 2026-10-21=../server/alpr/region_cache:"$A")
 "$PY" scripts/trend.py --results out/results.csv --routes out/routes.jsonl.gz "${DESIGN[@]}" "${SNAPS[@]}" \
     -o out/trend.csv --by-state out/trend_by_state.csv --cameras-by-state out/cameras_by_state.csv \
     --report out/analysis_trend.txt > /dev/null

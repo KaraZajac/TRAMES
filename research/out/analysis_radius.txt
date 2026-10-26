@@ -2,31 +2,31 @@
 CONE RADIUS SENSITIVITY  (paper section 7.3)
 ==============================================================================
 
-56131 routes re-scored at radii [30, 45, 60, 90] m (commuter-weighted).
+56133 routes re-scored at radii [30, 45, 60, 90] m (commuter-weighted).
 Routes were PLANNED against 60 m cones; only exposure is recomputed.
 
 --- 1. EXPOSURE on the unavoided route ---
    radius     mean  median   >=1 cam   >=5 cam   vs 60 m
-     30 m     3.82     2.0     71.2%     28.9%     0.74x
-     45 m     4.62     2.0     74.0%     34.0%     0.90x
-     60 m     5.14     3.0     75.3%     36.5% --
-     90 m     5.88     3.0     76.8%     39.5%     1.14x
+     30 m     3.84     2.0     71.5%     29.2%     0.74x
+     45 m     4.64     3.0     74.3%     34.3%     0.90x
+     60 m     5.17     3.0     75.6%     36.9% --
+     90 m     5.92     3.0     77.2%     39.8%     1.14x
 
 --- 2. AVOIDANCE ROBUSTNESS ---
   Share of the SAME routes (planned at 60 m) that still cross no cone
   when scored at each radius:
    radius     clean  mean exp   residual vs baseline
-     30 m     87.4%      0.21                   5.4%
-     45 m     85.6%      0.24                   5.2%
-     60 m     83.7%      0.27                   5.3%
-     90 m     55.1%      1.28                  21.7%
+     30 m     87.0%      0.21                   5.5%
+     45 m     85.5%      0.25                   5.3%
+     60 m     83.7%      0.28                   5.4%
+     90 m     54.7%      1.29                  21.8%
 
 --- 3. DOES THE HEADLINE SURVIVE? ---
   at the assumed 60 m:      83.7% of commutes reach zero exposure
-  at 90 m (50% wider):    55.1%
-  absolute change:          -28.7 points
-  95% CI on the change:     [-29.3, -28.1] points
-  at 30 m (half):        87.4%
+  at 90 m (50% wider):    54.7%
+  absolute change:          -29.0 points
+  95% CI on the change:     [-29.6, -28.4] points
+  at 30 m (half):        87.0%
 
   Interpretation: routes planned against 60 m cones are re-scored here without
   re-planning. A router given wider cones would find different clean routes, so
