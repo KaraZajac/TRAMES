@@ -36,11 +36,15 @@ wall. That is precisely the offline twin of the server's per-request
 | MAXIMUM | 0.01 | 0.01 |
 
 Same numbers as the online engine used and the study's routing server still uses, same
-60 m / 45° cone geometry (`TramesGeometry` / `build_cones.py`). What a number is applied to
-differs: GraphHopper applies it to each edge, junction to junction, that a cone touches;
-`tag_ways.py` tags the whole OSM way, which can run past several junctions, so the penalty
-covers more road than the cone does; and OsmAnd's router, speeds and turn costs are its own.
-The app's detours are therefore not the study's.
+60 m / 45° cone geometry (`TramesGeometry` / `build_cones.py`), applied to nearly the same
+road: GraphHopper applies a number to each edge, junction to junction, that a cone touches,
+and since v1.2.7's maps `tag_ways.py` tags those stretches, splitting an OSM way where its
+watched and unwatched stretches meet. It tags a little more road, never less, where a cut
+would change routes even with avoidance off (on a bend, at a turn restriction's via node)
+and on roundabouts and closed ways, which stay whole. (Before, it tagged the whole way,
+which can run past several junctions, so the penalty covered more road than the cone did.)
+OsmAnd's router, speeds and turn costs are its own, so the app's detours are still not the
+study's.
 
 ## The pipeline
 
@@ -48,11 +52,11 @@ The app's detours are therefore not the study's.
 cameras.json (the served snapshot, ../cameras/)
         │
         ▼  cones_from_cameras.py  ── same parse/geometry as the online build_cones.py
-us-alpr.geojson (114,172 cone parts, ~34 s)
+us-alpr.geojson (138,046 cone parts from the 2026-10-21 snapshot, ~1 min)
         +
 region .osm.pbf (Geofabrik)
         │
-        ▼  tag_ways.py   ── snap cones to ways, write alpr=yes onto watched ways
+        ▼  tag_ways.py   ── split watched ways at junctions, alpr=yes on the watched stretches
 region-alpr.osm.pbf
         │
         ▼  OsmAndMapCreator (jars patched with the two rendering_types lines)
@@ -95,7 +99,8 @@ the server venv, which carries only `shapely`).
 
 - **The routing rules.** Five mutually exclusive levels (`alpr_off` … `alpr_max`) in the
   `car`, `bicycle` and `pedestrian` profiles, sharing an `alpr_avoidance` group so OsmAnd
-  renders them as one picker with no fork UI code. Default **Strong** (0.05). Applied to
+  renders them as one picker with no fork UI code. Default **Maximum** (0.01) since
+  v1.2.7, **Strong** (0.05) before; a level the user has chosen is kept. Applied to
   `routing.xml` at build time by `trames-patch-resources.sh` — that file is upstream's
   and overwritten on every build; the script is the tracked home of the delta and fails
   loudly if upstream moves. Rule *placement* is load-bearing (first in each priority
@@ -106,13 +111,13 @@ the server venv, which carries only `shapely`).
   offers it on first start, in place of OsmAnd's welcome screen, and asks before fetching
   anything.
 - **The camera pack.** `build_camera_pack.py` slims the served snapshot to position +
-  direction (~1.4 MB gzipped for the 142,991 North American cameras of the 2026-09-22
+  direction (~1.4 MB gzipped for the 144,692 North American cameras of the 2026-10-21
   snapshot; 1.1 MB for July's 120,838); it rides along with every map download (since
   v1.2.4, also when one is already installed), so the map draws the cameras the router
   avoids. The app reads each camera's `direction` with the same rules as the cone builder
   since v1.2.5, which added compass points (`N`, `WSW`): before that, 401 cameras the
-  router avoided were drawn without a wedge. The 2,948 with no usable facing get no cone
-  and are not avoided; they show as plain pins.
+  router avoided were drawn without a wedge. The 2,032 with no usable facing (2,948 in
+  September's snapshot) get no cone and are not avoided; they show as plain pins.
 - **The default, and since v1.2.4 the only routing.** `TramesDefaults` points the car
   profile at OsmAnd's offline engine, and removes the TRAMES online engine earlier
   versions saved, moving any profile on it to offline routing. Sending a server your
@@ -126,10 +131,12 @@ the server venv, which carries only `shapely`).
 ## Hosted maps
 
 All 50 states + DC are published at **https://maps.blackflagintel.com** — 51 full maps
-(rendering + POI + routing), ~22 GB, built 2026-09-22 → 23 from the 142,991-camera
-snapshot on fresh Geofabrik extracts (the first set, 2026-07-29 → 31, was built from the
-120,838-camera snapshot). `manifest.json` is `{version, maps: [{name, file, size, date},
-…]}`; the `date` is the map file's modification date on the host. The app parses it but
+(rendering + POI + routing), ~23 GB, built 2026-10-25 → 26 from the 144,692-camera
+snapshot of 2026-10-21 on Geofabrik extracts of 2026-10-20, tagged on the watched stretch
+only (v1.2.7, above). The September set (2026-09-22 → 23) came from the 142,991-camera
+snapshot and the first (2026-07-29 → 31) from the 120,838-camera one, both tagging whole
+ways. `manifest.json` is `{version, maps: [{name, file, size, date}, …]}`; the `date` is
+the map file's modification date on the host. The app parses it but
 its catalogue shows only each map's name, size and whether it is installed, so a user
 cannot yet see how old a map is. Re-downloading a map is how a user picks up newly mapped
 cameras.
@@ -149,6 +156,11 @@ sibling beside it filled swap and stalled both for an hour before it was killed.
   a half hours. `--roads-only` is far cheaper if you only need routing and not map display.
   Never run a second builder while one of them is building: the JVM does not fail when
   memory runs out, it swaps, and everything on the box slows to a crawl.
+- **MapCreator's temporary files go to `/tmp`.** Its R-tree pack file (2.7 GB for
+  California) is written to `java.io.tmpdir`; where `/tmp` is RAM, that file is memory
+  too, and under a memory cap it counts against the build: California's October build was
+  killed at its 50 GB cap an hour from done, its heap 46 GB of that. Put the temporary
+  files on disk: `TRAMES_JAVA_OPTS="-Xms1G -Xmx46G -Djava.io.tmpdir=/some/disk/dir"`.
 - **Refreshing means rebuilding.** `build_maps.py` skips any state whose output `.obf`
   exists, so a camera-data refresh needs the old outputs moved aside first, then the new
   set published with `deploy.sh` (the host's manifest timer does the rest). There is no

@@ -51,6 +51,41 @@ def sh(cmd, **kw):
     return subprocess.run(cmd, shell=True, check=True, **kw)
 
 
+def download(url, dest, attempts=5):
+    """Fetch url to dest whole or not at all.
+
+    The extract is written to dest.part and renamed only once every byte the server
+    announced has arrived: a run that resumes reuses any extract already on disk, so a
+    partial one under the real name would be built as if it were the state. Each read
+    times out, because Geofabrik sometimes accepts a connection and never answers
+    (2026-10-18), and a download without a timeout then waits for ever.
+    """
+    part = dest + ".part"
+    for attempt in range(1, attempts + 1):
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "TRAMES map build"})
+            with urllib.request.urlopen(req, timeout=60) as resp, open(part, "wb") as out:
+                expected = int(resp.headers.get("Content-Length") or -1)
+                got = 0
+                while True:
+                    chunk = resp.read(1 << 20)
+                    if not chunk:
+                        break
+                    out.write(chunk)
+                    got += len(chunk)
+            if expected >= 0 and got != expected:
+                raise IOError(f"got {got} of {expected} bytes")
+            os.replace(part, dest)
+            return
+        except Exception as e:                      # noqa: BLE001
+            print(f"  download attempt {attempt} failed: {e}", flush=True)
+            if os.path.exists(part):
+                os.remove(part)
+            if attempt == attempts:
+                raise
+            time.sleep(30 * attempt)
+
+
 def ensure_cones(cameras, cones_path):
     if os.path.exists(cones_path):
         print(f"cones: {cones_path} exists, reusing")
@@ -95,7 +130,7 @@ def build_state(slug, mc, cones, work, out, roads_only):
         pbf = os.path.join(work, f"{slug}.osm.pbf")
         if not os.path.exists(pbf):
             print(f"[{slug}] downloading extract ...")
-            urllib.request.urlretrieve(GEOFABRIK.format(slug=slug), pbf)
+            download(GEOFABRIK.format(slug=slug), pbf)
         print(f"[{slug}] tagging ...")
         sh(f'python3 "{HERE}/tag_ways.py" --cones "{cones}" --in "{pbf}" --out "{tagged}"')
         print(f"[{slug}] building obf ...")

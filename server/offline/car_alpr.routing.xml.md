@@ -33,10 +33,10 @@ five levels as the online engine. Place among the other car `<parameter>` entrie
     description="A balanced trade — dodge most cameras for a modest cost"/>
 <parameter group="alpr_avoidance" id="alpr_strong"
     name="Camera avoidance: Strong"
-    description="Avoid readers wherever a reasonable alternative exists (default)"/>
+    description="Avoid readers wherever a reasonable alternative exists (the default until v1.2.7)"/>
 <parameter group="alpr_avoidance" id="alpr_max"
     name="Camera avoidance: Maximum"
-    description="Avoid every reader it can find a way around"/>
+    description="Avoid every reader it can find a way around (default since v1.2.7)"/>
 ```
 
 ## 2. The penalty — inside `<way attribute="priority">`
